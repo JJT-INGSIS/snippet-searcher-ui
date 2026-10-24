@@ -14,7 +14,8 @@
     "cypress": "cypress open",
     "test": "vitest run",
     "test:contracts": "cypress run",
-    "test:backend": "vitest run --config vitest.backend.config.ts"
+    "test:backend": "vitest run --config vitest.backend.config.ts",
+    "test:browser:backend": "cypress run --config specPattern=cypress/e2e/backend/**/*.cy.ts"
   },
   "dependencies": {
     "@auth0/auth0-react": "^2.2.4",

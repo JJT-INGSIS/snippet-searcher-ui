@@ -1,4 +1,4 @@
-# Snippet Searcher UI — SNI-34
+# Snippet Searcher UI
 
 UI de la cátedra basada en React, MUI, Vite y React Query 3, integrada mediante Axios con la API pública de Snippets.
 
@@ -9,22 +9,37 @@ Origen: [austral-ingsis/printscript-ui](https://github.com/austral-ingsis/prints
 Se conserva su historial y el remoto `upstream`. `origin` apunta al fork.
 
 `dev` es la rama predeterminada del equipo; `main` queda para promoción posterior.
-La implementación inicial está preparada en `feat/sni-34-http-ui`.
+La integración inicial SNI-34 está integrada en `dev`. SNI-35 mejora su presentación y usabilidad en `feat/sni-35-ui-usability`.
 Al abrir una PR desde este fork, elegir **base repository JJT-INGSIS/snippet-searcher-ui, base dev**.
-Las ramas remotas iniciales conservan la revisión de la cátedra hasta integrar el cambio.
 
-## Instalar y ejecutar
+## Abrir la UI — uso diario del equipo
+
+Con el backend local levantado y la configuración inicial preparada, abrir una terminal **en el repo `snippet-searcher-ui`**:
+
+```powershell
+cd C:\dev\ingsis\snippet-searcher\snippet-searcher-ui
+npm run dev -- --host 127.0.0.1 --port 5173 --strictPort
+```
+
+Abrir **http://127.0.0.1:5173/** en el navegador de esa misma computadora.
+Dejar la terminal abierta. **Ctrl+C en esa terminal detiene la UI**; cerrar la pestaña no la detiene.
+La UI y el backend son procesos separados. No hace falta encender las VMs de Azure.
+
+**[Paso a paso completo para el equipo: preparación, backend, UI, pruebas y apagado](docs/local-development.md).**
+
+## Preparación inicial de la UI
 
 Usar Node 24 LTS (probado con 24.19.0) y npm. No requiere credenciales de paquetes. Los scripts de instalación permitidos en package.json están fijados a las versiones del lockfile de Cypress y esbuild; no se cambia la configuración global de npm.
 
 ```powershell
 cd C:\dev\ingsis\snippet-searcher\snippet-searcher-ui
 npm ci
-Copy-Item .env.example .env.local
-npm run dev
+if (-not (Test-Path .env.local)) { Copy-Item .env.example .env.local }
+npm run dev -- --host 127.0.0.1 --port 5173 --strictPort
 ```
 
-Abrir http://localhost:5173. El servidor queda limitado a loopback.
+Revisar antes `UI_DEV_ACTOR` y `API_PROXY_TARGET` en `.env.local`, según la guía. Abrir http://127.0.0.1:5173/.
+El servidor queda limitado a loopback.
 `npm run build` genera `dist/`; `npm run preview` sirve ese build sin el proxy de desarrollo.
 
 ## API, proxy y configuración pública
@@ -86,7 +101,7 @@ Descripción null y string vacío se conservan como valores distintos; el códig
 Subir archivos usa su texto y el mismo POST JSON, sin multipart ni un segundo endpoint.
 No se hace GET dentro de una mutación para fabricar un detalle completo.
 
-`GET /languages` es una **dependencia explícita pendiente del backend**. No hay catálogo ni versiones de fallback.
+`GET /languages` está implementado en el backend por SNI-54. No hay catálogo ni versiones de fallback.
 Si falta, falla o responde fuera de contrato, se informa y no se habilita una creación sin lenguaje/versión válidos.
 Elegir la versión es obligatorio. No se deduce de la extensión ni se escoge automáticamente.
 
@@ -131,6 +146,8 @@ npm run test:contracts
 
 Cypress prueba los componentes de la cátedra y los hooks HTTP: creación y reintento, upload, diagnóstico,
 catálogo no disponible, solo lectura, guardado con refresco fallido y sharing con fallo/reintento.
+SNI-35 agrega búsqueda, cancelación/respuestas tardías, paginación y recuperación por cambios del total,
+errores y reintento, borradores durante refrescos, editor persistente, mobile, foco y mensajes temporales.
 Intercepta contratos pendientes. **No demuestra que esos endpoints existan en el backend**.
 Se reemplazaron las pruebas upstream que suponían respuestas POST completas y login no implementado.
 
@@ -140,11 +157,17 @@ Con el Compose local de infra levantado, Snippets en puerto 8080 y Vite iniciado
 
 ```powershell
 npm run test:backend
+npm run test:browser:backend
 ```
 
-Solo verifica rutas implementadas: POST 201, reintento 200 con mismo UUID, conflicto 409, PUT 200 y parser inválido 422 con diagnósticos,
+El primer comando verifica rutas implementadas: POST 201, reintento 200 con mismo UUID, conflicto 409, PUT 200 y parser inválido 422 con diagnósticos,
 usando el adaptador y el proxy `/api`. Deja un snippet local con nombre `SNI-34 adapter smoke ...`; no llama VMs.
 No se ejecuta automáticamente en CI ni necesita credenciales para probar las imágenes locales ya disponibles.
+
+El segundo recorre el navegador contra respuestas reales, sin stubs: catálogo, upload `.PRS`, versión explícita,
+alta, listado, búsqueda y resultado vacío. Deja un snippet `SNI-35-browser-...` y capturas ignoradas por Git en
+`cypress/screenshots/`. Ambas pruebas requieren identidad `dev-juanfran`; no ejecutarlas contra producción.
+Si Snippets se ejecuta fuera de Compose en otro puerto, definir `API_PROXY_TARGET` antes de iniciar Vite.
 
 | Flujo | Evidencia de SNI-34 |
 | --- | --- |
@@ -156,10 +179,26 @@ No se ejecuta automáticamente en CI ni necesita credenciales para probar las im
 
 Ver [evidencia y límites](docs/sni-34-validation.md). No declarar US5–7 completas ni marcar la aceptación real por el resultado de Cypress.
 
-## Próximas extensiones fuera de SNI-34
+## Diseño y usabilidad — SNI-35
 
-- SNI-35 conserva la corrección general de búsqueda/paginación, incluido count=0 y restablecer la página al cambiar filtros.
-- SNI-54 (Juan Francisco): implementar y verificar el catálogo GET /languages antes de aceptar el flujo completo.
-- SNI-36 verifica los endpoints pendientes con Permissions y storage reales.
+- Tema claro: fondo gris suave, superficies blancas, acento azul de Sportmatch y azul oscuro para acciones con texto blanco.
+- Geist Sans para la interfaz y Geist Mono en el editor oscuro. Fuentes locales, licencia SIL OFL en `public/fonts/LICENSE.txt`;
+  origen y revisión documentados en [validación SNI-35](docs/sni-35-validation.md).
+- MUI sigue resolviendo botones, diálogos, foco y estilos. No se incorporaron Tailwind, Base UI ni otro sistema de componentes.
+- `Home` compone el listado; `useSnippetList` controla filtros/paginación. El contador se deriva del `count` del servidor,
+  incluido cero. Nombre con debounce de 350 ms; las lecturas cancelables usan `AbortSignal` y claves por contexto.
+- `useSnippetCreation` y `useSnippetEditor` coordinan los formularios; componentes compartidos presentan errores,
+  estados vacíos, diálogos y código. Se mantiene el snapshot de idempotencia y el bloqueo inmediato de envíos repetidos.
+- La tabla puede desplazarse horizontalmente dentro de su contenedor en móvil; los filtros y formularios se apilan.
+  Tab sale del editor, los controles tienen etiquetas y los diálogos devuelven el foco al cerrarse.
+- Los mensajes visibles están en español. Un error no se presenta como lista vacía y un refresco fallido no niega un guardado confirmado.
+
+Ver [cambios, comandos, evidencia real y límites](docs/sni-35-validation.md).
+
+## Próximas extensiones
+
+- SNI-54 ya verifica el catálogo GET /languages; SNI-35 lo consume sin datos inventados.
+- Listado, destinatarios, detalle y edición ya fueron verificados localmente con Permissions. Sharing público sigue pendiente de aceptación real.
+- SNI-36 completa la aceptación con los endpoints pendientes y storage oficial; el éxito de los contratos no sustituye esa prueba.
 - Auth0, lint, tests y ejecución se incorporan en sus tickets; no agregar fake success para avanzar.
 - Revisar las dependencias heredadas del upstream antes del despliegue de la UI. Este cambio no hace una migración general de framework ni un audit fix forzado.

@@ -11,9 +11,9 @@ export const snippetKeys = {
   detail: (actor: string, id: string) => ['snippet', actor, id],
   users: (actor: string, name: string, page: number, size: number) => ['users', actor, name, page, size],
 };
-export function useGetSnippets(page = 0, size = 10, filters: SnippetFilters = {}) {
+export function useGetSnippets(page = 0, size = 10, filters: SnippetFilters = {}, enabled = true) {
   const {actor, operations} = useApi();
-  return useQuery(snippetKeys.list(actor, page, size, filters), () => operations.listSnippetDescriptors(page, size, filters), {retry: false});
+  return useQuery(snippetKeys.list(actor, page, size, filters), ({signal}) => operations.listSnippetDescriptors(page, size, filters, signal), {retry: false, enabled});
 }
 export function useGetSnippetById(id: string) {
   const {actor, operations} = useApi();
@@ -40,7 +40,7 @@ export function useUpdateSnippetById() {
 }
 export function useGetUsers(name = '', page = 0, size = 10, enabled = true) {
   const {actor, operations} = useApi();
-  return useQuery(snippetKeys.users(actor, name, page, size), () => operations.getUserFriends(name, page, size), {enabled, retry: false});
+  return useQuery(snippetKeys.users(actor, name, page, size), ({signal}) => operations.getUserFriends(name, page, size, signal), {enabled, retry: false});
 }
 export function useShareSnippet() {
   const {actor, operations} = useApi();

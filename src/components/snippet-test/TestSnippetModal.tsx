@@ -25,7 +25,7 @@ export const TestSnippetModal = ({open, onClose}: TestSnippetModalProps) => {
     };
 
     return (
-        <ModalWrapper open={open} onClose={onClose}>
+        <ModalWrapper open={open} onClose={onClose} title="Tests del snippet">
             <Typography variant={"h5"}>Test snippet</Typography>
             <Divider/>
             <Box mt={2} display="flex">

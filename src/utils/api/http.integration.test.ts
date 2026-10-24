@@ -27,6 +27,13 @@ beforeAll(async () => {
 afterAll(async () => {server.closeAllConnections(); await new Promise<void>(resolve => server.close(() => resolve()));});
 beforeEach(() => {requests = []; respond = (_, res) => res.end(JSON.stringify(metadata));});
 describe('HTTP adapter against a contract server (not the real backend)', () => {
+  it('cancels superseded reads without translating cancellation into an API failure', async () => {
+    const controller = new AbortController();
+    controller.abort();
+    await expect(api.listSnippetDescriptors(0, 10, {}, controller.signal)).rejects.toMatchObject({code: 'ERR_CANCELED'});
+    await expect(api.getUserFriends('', 0, 5, controller.signal)).rejects.toMatchObject({code: 'ERR_CANCELED'});
+    expect(requests).toHaveLength(0);
+  });
   it('sends POST with UUID and actor; repeats exact data/key after a lost acknowledgment, without a hidden GET', async () => {
     const intent = createCreationIntent(input, 'dev-juan', () => '72c53308-1139-4ac8-9985-1f94b101a70e');
     respond = (_, res) => res.destroy();
