@@ -1,4 +1,1 @@
-export type FileType = {
-    language: string;
-    extension: string;
-}
+export type FileType = {language: string; extension: string; versions: string[]};

@@ -1,17 +1,20 @@
 {
-  "name": "printscript-ui",
+  "name": "snippet-searcher-ui",
   "private": true,
   "version": "0.0.0",
   "type": "module",
   "engines": {
-    "node": ">=20.0.0"
+    "node": ">=22.12.0"
   },
   "scripts": {
-    "dev": "vite --host",
+    "dev": "vite",
     "build": "tsc && vite build",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",
-    "cypress": "cypress open"
+    "cypress": "cypress open",
+    "test": "vitest run",
+    "test:contracts": "cypress run",
+    "test:backend": "vitest run --config vitest.backend.config.ts"
   },
   "dependencies": {
     "@auth0/auth0-react": "^2.2.4",
@@ -44,6 +47,11 @@
     "eslint-plugin-react-hooks": "^4.6.0",
     "eslint-plugin-react-refresh": "^0.4.5",
     "typescript": "^5.2.2",
-    "vite": "^5.1.4"
+    "vite": "^5.1.4",
+    "vitest": "3.2.6"
+  },
+  "allowScripts": {
+    "cypress@13.8.1": true,
+    "esbuild@0.19.12": true
   }
 }

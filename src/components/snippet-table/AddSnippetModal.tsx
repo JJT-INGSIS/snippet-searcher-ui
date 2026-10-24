@@ -1,131 +1,85 @@
-import {
-    Box,
-    Button,
-    capitalize,
-    CircularProgress,
-    Input,
-    InputLabel,
-    MenuItem,
-    Select,
-    SelectChangeEvent,
-    Typography
-} from "@mui/material";
-import {highlight, languages} from "prismjs";
-import {useEffect, useState} from "react";
-import Editor from "react-simple-code-editor";
-
-import "prismjs/components/prism-clike";
-import "prismjs/components/prism-javascript";
-import "prismjs/themes/prism-okaidia.css";
-import {Save} from "@mui/icons-material";
-import {CreateSnippet, CreateSnippetWithLang} from "../../utils/snippet.ts";
-import {ModalWrapper} from "../common/ModalWrapper.tsx";
-import {useCreateSnippet, useGetFileTypes} from "../../utils/queries.tsx";
-import {queryClient} from "../../App.tsx";
-
+import {Alert, Box, Button, CircularProgress, Input, InputLabel, MenuItem, Select, Typography} from '@mui/material';
+import {highlight, languages} from 'prismjs';
+import {useEffect, useRef, useState} from 'react';
+import Editor from 'react-simple-code-editor';
+import 'prismjs/components/prism-clike';
+import 'prismjs/components/prism-javascript';
+import 'prismjs/themes/prism-okaidia.css';
+import {Save} from '@mui/icons-material';
+import {SnippetDraft} from '../../utils/snippet';
+import {ModalWrapper} from '../common/ModalWrapper';
+import {useCreateSnippet, useGetFileTypes} from '../../utils/queries';
+import {CreationIntent, createCreationIntent} from '../../utils/api/creationIntent';
+import {ApiError} from '../../utils/api/errors';
+import {ApiErrorAlert} from '../common/ApiErrorAlert';
+import {useApi} from '../../contexts/apiContext';
 export const AddSnippetModal = ({open, onClose, defaultSnippet}: {
-    open: boolean,
-    onClose: () => void,
-    defaultSnippet?: CreateSnippetWithLang
+  open: boolean; onClose: () => void; defaultSnippet?: SnippetDraft;
 }) => {
-    const [language, setLanguage] = useState(defaultSnippet?.language ?? "printscript");
-    const [code, setCode] = useState(defaultSnippet?.content ?? "");
-    const [snippetName, setSnippetName] = useState(defaultSnippet?.name ?? "")
-    const {mutateAsync: createSnippet, isLoading: loadingSnippet} = useCreateSnippet({
-        onSuccess: () => queryClient.invalidateQueries('listSnippets')
-    })
-    const {data: fileTypes} = useGetFileTypes();
-
-    const handleCreateSnippet = async () => {
-        const newSnippet: CreateSnippet = {
-            name: snippetName,
-            content: code,
-            language: language,
-            extension: fileTypes?.find((f) => f.language === language)?.extension ?? "prs"
-        }
-        await createSnippet(newSnippet);
-        onClose();
+  const [language, setLanguage] = useState('');
+  const [version, setVersion] = useState('');
+  const [code, setCode] = useState('');
+  const [name, setName] = useState('');
+  const [description, setDescription] = useState<string | null>(null);
+  const [error, setError] = useState<Error | null>(null);
+  const intent = useRef<CreationIntent>();
+  const submitting = useRef(false);
+  const {actor} = useApi();
+  const {mutateAsync, isLoading} = useCreateSnippet();
+  const {data: types, error: catalogError, refetch} = useGetFileTypes();
+  const uncertain = error instanceof ApiError && error.uncertain;
+  const locked = isLoading || uncertain;
+  useEffect(() => {
+    if (open && !intent.current) {
+      setName(defaultSnippet?.name ?? ''); setCode(defaultSnippet?.content ?? '');
+      setLanguage(defaultSnippet?.language ?? ''); setVersion(''); setDescription(null); setError(null);
     }
-
-    useEffect(() => {
-        if (defaultSnippet) {
-            setCode(defaultSnippet?.content)
-            setLanguage(defaultSnippet?.language)
-            setSnippetName(defaultSnippet?.name)
-        }
-    }, [defaultSnippet]);
-
-    return (
-        <ModalWrapper open={open} onClose={onClose}>
-            {
-                <Box sx={{display: 'flex', flexDirection: "row", justifyContent: "space-between"}}>
-                    <Typography id="modal-modal-title" variant="h5" component="h2"
-                                sx={{display: 'flex', alignItems: 'center'}}>
-                        Add Snippet
-                    </Typography>
-                    <Button disabled={!snippetName || !code || !language || loadingSnippet} variant="contained"
-                            disableRipple
-                            sx={{boxShadow: 0}} onClick={handleCreateSnippet}>
-                        <Box pr={1} display={"flex"} alignItems={"center"} justifyContent={"center"}>
-                            {loadingSnippet ? <CircularProgress size={24}/> : <Save/>}
-                        </Box>
-                        Save Snippet
-                    </Button>
-                </Box>
-            }
-            <Box sx={{
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '16px'
-            }}>
-                <InputLabel htmlFor="name">Name</InputLabel>
-                <Input onChange={e => setSnippetName(e.target.value)} value={snippetName} id="name"
-                       sx={{width: '50%'}}/>
-            </Box>
-            <Box sx={{
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '16px'
-            }}>
-                <InputLabel htmlFor="name">Language</InputLabel>
-                <Select
-                    labelId="demo-simple-select-label"
-                    id="demo-simple-select"
-                    value={language}
-                    label="Age"
-                    onChange={(e: SelectChangeEvent<string>) => setLanguage(e.target.value)}
-                    sx={{width: '50%'}}
-                >
-                    {
-                        fileTypes?.map(x => (
-                            <MenuItem data-testid={`menu-option-${x.language}`} key={x.language}
-                                      value={x.language}>{capitalize((x.language))}</MenuItem>
-                        ))
-                    }
-                </Select>
-            </Box>
-            <InputLabel>Code Snippet</InputLabel>
-            <Box width={"100%"} sx={{
-                backgroundColor: 'black', color: 'white', borderRadius: "8px",
-            }}>
-                <Editor
-                    value={code}
-                    padding={10}
-                    data-testid={"add-snippet-code-editor"}
-                    onValueChange={(code) => setCode(code)}
-                    highlight={(code) => highlight(code, languages.js, 'javascript')}
-                    style={{
-                        borderRadius: "8px",
-                        overflow: "auto",
-                        minHeight: "300px",
-                        maxHeight: "600px",
-                        width: "100%",
-                        fontFamily: "monospace",
-                        fontSize: 17,
-                    }}
-                />
-            </Box>
-        </ModalWrapper>
-    )
-}
-
+  }, [open, defaultSnippet]);
+  async function save() {
+    if (submitting.current) return;
+    submitting.current = true;
+    if (!intent.current) intent.current = createCreationIntent({name, description, language, version, content: code}, actor);
+    try {
+      await mutateAsync(intent.current);
+      intent.current = undefined;
+      setError(null);
+      onClose();
+    } catch (cause) {
+      const failure = cause instanceof ApiError ? cause : new ApiError('Could not confirm the save.', undefined, true);
+      setError(failure);
+      if (failure instanceof ApiError && !failure.uncertain) intent.current = undefined;
+    } finally {submitting.current = false;}
+  }
+  const versions = types?.find(type => type.language === language)?.versions ?? [];
+  return <ModalWrapper open={open} onClose={() => {if (!isLoading) onClose();}}>
+    <Box display="flex" justifyContent="space-between">
+      <Typography variant="h5">Add Snippet</Typography>
+      <Button data-testid="save-snippet" variant="contained" onClick={save}
+        disabled={isLoading || (!uncertain && (!name.trim() || !language || !versions.includes(version)))}>
+        {isLoading ? <CircularProgress size={24}/> : <Save/>}{uncertain ? 'Retry same creation' : 'Save Snippet'}
+      </Button>
+    </Box>
+    <ApiErrorAlert error={error}/>
+    {!!catalogError && <><Alert severity="warning">Language catalog unavailable. GET /languages is required; there is no default language/version.</Alert>
+      <Button onClick={() => refetch()}>Retry catalog</Button></>}
+    {uncertain && <Alert severity="warning">This creation is kept while this page remains open. Its identity, key and data will be reused. Reloading loses that retry information.</Alert>}
+    <InputLabel htmlFor="name">Name</InputLabel>
+    <Input id="name" value={name} disabled={locked} onChange={e => setName(e.target.value)}/>
+    <InputLabel htmlFor="description">Description (optional)</InputLabel>
+    <Input id="description" value={description ?? ''} disabled={locked} onChange={e => setDescription(e.target.value)}/>
+    <InputLabel id="language-label">Language</InputLabel>
+    <Select labelId="language-label" value={language} disabled={locked} onChange={e => {setLanguage(e.target.value); setVersion('');}}>
+      {types?.map(type => <MenuItem key={type.language} value={type.language}>{type.language}</MenuItem>)}
+    </Select>
+    <InputLabel id="version-label">Version</InputLabel>
+    <Select labelId="version-label" value={version} disabled={locked} onChange={e => setVersion(e.target.value)}>
+      {versions.map(value => <MenuItem key={value} value={value}>{value}</MenuItem>)}
+    </Select>
+    <InputLabel htmlFor="create-code">Code Snippet</InputLabel>
+    <Box bgcolor="black" color="white" borderRadius="8px">
+      <Editor textareaId="create-code" value={code} padding={10} readOnly={locked} onValueChange={setCode}
+        highlight={value => highlight(value, languages.js, 'javascript')}
+        style={{minHeight: 200, maxHeight: 400, overflow: 'auto', fontFamily: 'monospace', fontSize: 17}}/>
+    </Box>
+  </ModalWrapper>;
+};

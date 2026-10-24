@@ -1,157 +1,76 @@
-import {useEffect, useState} from "react";
-import Editor from "react-simple-code-editor";
-import {highlight, languages} from "prismjs";
-import "prismjs/components/prism-clike";
-import "prismjs/components/prism-javascript";
-import "prismjs/themes/prism-okaidia.css";
-import {Alert, Box, CircularProgress, IconButton, Tooltip, Typography} from "@mui/material";
-import CloseIcon from '@mui/icons-material/Close';
-import {
-  useUpdateSnippetById
-} from "../utils/queries.tsx";
-import {useFormatSnippet, useGetSnippetById, useShareSnippet} from "../utils/queries.tsx";
-import {Bòx} from "../components/snippet-table/SnippetBox.tsx";
-import {BugReport, Delete, Download, Save, Share} from "@mui/icons-material";
-import {ShareSnippetModal} from "../components/snippet-detail/ShareSnippetModal.tsx";
-import {TestSnippetModal} from "../components/snippet-test/TestSnippetModal.tsx";
-import {Snippet} from "../utils/snippet.ts";
-import {SnippetExecution} from "./SnippetExecution.tsx";
-import ReadMoreIcon from '@mui/icons-material/ReadMore';
-import {queryClient} from "../App.tsx";
-import {DeleteConfirmationModal} from "../components/snippet-detail/DeleteConfirmationModal.tsx";
-
-type SnippetDetailProps = {
-  id: string;
-  handleCloseModal: () => void;
-}
-
-const DownloadButton = ({snippet}: { snippet?: Snippet }) => {
-  if (!snippet) return null;
-  const file = new Blob([snippet.content], {type: 'text/plain'});
-
-  return (
-    <Tooltip title={"Download"}>
-      <IconButton sx={{
-        cursor: "pointer"
-      }}>
-        <a download={`${snippet.name}.${snippet.extension}`} target="_blank"
-           rel="noreferrer" href={URL.createObjectURL(file)} style={{
-          textDecoration: "none",
-          color: "inherit",
-          display: 'flex',
-          alignItems: 'center',
-        }}>
-          <Download/>
-        </a>
-      </IconButton>
-    </Tooltip>
-  )
-}
-
-export const SnippetDetail = (props: SnippetDetailProps) => {
-  const {id, handleCloseModal} = props;
-  const [code, setCode] = useState(
-      ""
-  );
-  const [shareModalOppened, setShareModalOppened] = useState(false)
-  const [deleteConfirmationModalOpen, setDeleteConfirmationModalOpen] = useState(false)
-  const [testModalOpened, setTestModalOpened] = useState(false);
-
-  const {data: snippet, isLoading} = useGetSnippetById(id);
-  const {mutate: shareSnippet, isLoading: loadingShare} = useShareSnippet()
-  const {mutate: formatSnippet, isLoading: isFormatLoading, data: formatSnippetData} = useFormatSnippet()
-  const {mutate: updateSnippet, isLoading: isUpdateSnippetLoading} = useUpdateSnippetById({onSuccess: () => queryClient.invalidateQueries(['snippet', id])})
-
+import {useEffect, useRef, useState} from 'react';
+import Editor from 'react-simple-code-editor';
+import {highlight, languages} from 'prismjs';
+import 'prismjs/components/prism-clike';
+import 'prismjs/components/prism-javascript';
+import 'prismjs/themes/prism-okaidia.css';
+import {Alert, Box, Button, CircularProgress, IconButton, Input, InputLabel, Typography} from '@mui/material';
+import {Close, Download, Save, Share} from '@mui/icons-material';
+import {useGetSnippetById, useShareSnippet, useUpdateSnippetById} from '../utils/queries';
+import {Bòx} from '../components/snippet-table/SnippetBox';
+import {ShareSnippetModal} from '../components/snippet-detail/ShareSnippetModal';
+import {Snippet} from '../utils/snippet';
+import {ApiErrorAlert} from '../components/common/ApiErrorAlert';
+const DownloadButton = ({snippet}: {snippet: Snippet}) => {
+  const [url, setUrl] = useState<string>();
   useEffect(() => {
-    if (snippet) {
-      setCode(snippet.content);
+    const objectUrl = URL.createObjectURL(new Blob([snippet.content], {type: 'text/plain'}));
+    setUrl(objectUrl);
+    return () => URL.revokeObjectURL(objectUrl);
+  }, [snippet.content]);
+  return <Button component="a" href={url} download={snippet.name + '.' + snippet.extension} startIcon={<Download/>}>Download original</Button>;
+};
+export const SnippetDetail = ({id, handleCloseModal}: {id: string; handleCloseModal: () => void}) => {
+  const {data: snippet, isLoading, error, refetch} = useGetSnippetById(id);
+  const [code, setCode] = useState('');
+  const [name, setName] = useState('');
+  const [description, setDescription] = useState<string | null>(null);
+  const [shareOpen, setShareOpen] = useState(false);
+  const hydrated = useRef(false);
+  const update = useUpdateSnippetById();
+  const share = useShareSnippet();
+  useEffect(() => {
+    // Background refreshes must not erase an unsaved draft.
+    if (snippet && !hydrated.current) {
+      setCode(snippet.content); setName(snippet.name); setDescription(snippet.description); hydrated.current = true;
     }
   }, [snippet]);
-
-  useEffect(() => {
-    if (formatSnippetData) {
-      setCode(formatSnippetData)
-    }
-  }, [formatSnippetData])
-
-
-  async function handleShareSnippet(userId: string) {
-    shareSnippet({snippetId: id, userId})
+  const readonly = !snippet?.capabilities.modify;
+  async function save() {
+    if (!snippet) return;
+    try {
+      await update.mutateAsync({id, updateSnippet: {name, description, language: snippet.language, version: snippet.version, content: code}});
+    } catch { /* Mutation error is rendered below; keep the draft. */ }
   }
-
-  return (
-      <Box p={4} minWidth={'60vw'}>
-        <Box width={'100%'} p={2} display={'flex'} justifyContent={'flex-end'}>
-          <CloseIcon style={{cursor: "pointer"}} onClick={handleCloseModal}/>
-        </Box>
-        {
-          isLoading ? (<>
-            <Typography fontWeight={"bold"} mb={2} variant="h4">Loading...</Typography>
-            <CircularProgress/>
-          </>) : <>
-            <Typography variant="h4" fontWeight={"bold"}>{snippet?.name ?? "Snippet"}</Typography>
-            <Box display="flex" flexDirection="row" gap="8px" padding="8px">
-              <Tooltip title={"Share"}>
-                <IconButton onClick={() => setShareModalOppened(true)}>
-                  <Share/>
-                </IconButton>
-              </Tooltip>
-              <Tooltip title={"Test"}>
-                <IconButton onClick={() => setTestModalOpened(true)}>
-                  <BugReport/>
-                </IconButton>
-              </Tooltip>
-              <DownloadButton snippet={snippet}/>
-              {/*<Tooltip title={runSnippet ? "Stop run" : "Run"}>*/}
-              {/*  <IconButton onClick={() => setRunSnippet(!runSnippet)}>*/}
-              {/*    {runSnippet ? <StopRounded/> : <PlayArrow/>}*/}
-              {/*  </IconButton>*/}
-              {/*</Tooltip>*/}
-              {/* TODO: we can implement a live mode*/}
-              <Tooltip title={"Format"}>
-                <IconButton onClick={() => formatSnippet(code)} disabled={isFormatLoading}>
-                  <ReadMoreIcon />
-                </IconButton>
-              </Tooltip>
-              <Tooltip title={"Save changes"}>
-                <IconButton color={"primary"} onClick={() => updateSnippet({id: id, updateSnippet: {content: code}})} disabled={isUpdateSnippetLoading || snippet?.content === code} >
-                  <Save />
-                </IconButton>
-              </Tooltip>
-              <Tooltip title={"Delete"}>
-                <IconButton onClick={() => setDeleteConfirmationModalOpen(true)} >
-                  <Delete color={"error"} />
-                </IconButton>
-              </Tooltip>
-            </Box>
-            <Box display={"flex"} gap={2}>
-              <Bòx flex={1} height={"fit-content"} overflow={"none"} minHeight={"500px"} bgcolor={'black'} color={'white'} code={code}>
-                <Editor
-                    value={code}
-                    padding={10}
-                    onValueChange={(code) => setCode(code)}
-                    highlight={(code) => highlight(code, languages.js, "javascript")}
-                    maxLength={1000}
-                    style={{
-                      minHeight: "500px",
-                      fontFamily: "monospace",
-                      fontSize: 17,
-                    }}
-                />
-              </Bòx>
-            </Box>
-            <Box pt={1} flex={1} marginTop={2}>
-              <Alert severity="info">Output</Alert>
-              <SnippetExecution />
-            </Box>
-          </>
-        }
-        <ShareSnippetModal loading={loadingShare || isLoading} open={shareModalOppened}
-                           onClose={() => setShareModalOppened(false)}
-                           onShare={handleShareSnippet}/>
-        <TestSnippetModal open={testModalOpened} onClose={() => setTestModalOpened(false)}/>
-        <DeleteConfirmationModal open={deleteConfirmationModalOpen} onClose={() => setDeleteConfirmationModalOpen(false)} id={snippet?.id ?? ""} setCloseDetails={handleCloseModal} />
+  return <Box p={4} minWidth="60vw">
+    <Box display="flex" justifyContent="flex-end"><IconButton aria-label="Close detail" onClick={handleCloseModal}><Close/></IconButton></Box>
+    {isLoading && <CircularProgress/>}
+    <ApiErrorAlert error={error instanceof Error ? error : null}/>
+    {!!error && <Button onClick={() => refetch()}>Retry detail</Button>}
+    {snippet && <>
+      <Typography variant="h4">{snippet.name}</Typography>
+      <Typography>{snippet.language} {snippet.version} · {snippet.author} · {snippet.relation}</Typography>
+      <Typography>Lint: {snippet.compliance}</Typography>
+      {readonly && <Alert severity="info">Read only</Alert>}
+      <InputLabel htmlFor="detail-name">Name</InputLabel>
+      <Input id="detail-name" value={name} disabled={readonly || update.isLoading} onChange={e => setName(e.target.value)}/>
+      <InputLabel htmlFor="detail-description">Description</InputLabel>
+      <Input id="detail-description" value={description ?? ''} disabled={readonly || update.isLoading} onChange={e => setDescription(e.target.value)}/>
+      <Box display="flex" gap={1} my={2}>
+        <Button startIcon={<Share/>} disabled={!snippet.capabilities.share || share.isLoading} onClick={() => setShareOpen(true)}>Share</Button>
+        <Button data-testid="save-changes" startIcon={<Save/>} disabled={readonly || update.isLoading || !name.trim()} onClick={save}>Save changes</Button>
+        <DownloadButton snippet={snippet}/><Button disabled>Test</Button><Button disabled>Format</Button><Button disabled>Delete</Button>
       </Box>
-  );
-}
-
+      <ApiErrorAlert error={update.error instanceof Error ? update.error : null}/>
+      {update.isSuccess && <Alert severity="success">Changes saved. List and detail refresh independently.</Alert>}
+      <Bòx flex={1} height="fit-content" minHeight="500px" bgcolor="black" color="white" code={code}>
+        <Editor textareaId="detail-code" value={code} padding={10} readOnly={readonly || update.isLoading} onValueChange={setCode}
+          highlight={value => highlight(value, languages.js, 'javascript')}
+          style={{minHeight: 500, fontFamily: 'monospace', fontSize: 17}}/>
+      </Bòx>
+      <Alert severity="info">Execution and tests are not available yet.</Alert>
+    </>}
+    <ShareSnippetModal open={shareOpen} loading={share.isLoading} onClose={() => setShareOpen(false)}
+      onShare={async userId => {await share.mutateAsync({snippetId: id, userId});}}/>
+  </Box>;
+};
