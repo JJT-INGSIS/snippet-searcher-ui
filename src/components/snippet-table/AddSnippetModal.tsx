@@ -1,85 +1,42 @@
-import {Alert, Box, Button, CircularProgress, Input, InputLabel, MenuItem, Select, Typography} from '@mui/material';
-import {highlight, languages} from 'prismjs';
-import {useEffect, useRef, useState} from 'react';
-import Editor from 'react-simple-code-editor';
-import 'prismjs/components/prism-clike';
-import 'prismjs/components/prism-javascript';
-import 'prismjs/themes/prism-okaidia.css';
-import {Save} from '@mui/icons-material';
+import {Alert, Button, CircularProgress, MenuItem, Stack, TextField} from '@mui/material';
+import {SaveRounded} from '@mui/icons-material';
 import {SnippetDraft} from '../../utils/snippet';
 import {ModalWrapper} from '../common/ModalWrapper';
-import {useCreateSnippet, useGetFileTypes} from '../../utils/queries';
-import {CreationIntent, createCreationIntent} from '../../utils/api/creationIntent';
-import {ApiError} from '../../utils/api/errors';
+import {useGetFileTypes} from '../../utils/queries';
 import {ApiErrorAlert} from '../common/ApiErrorAlert';
-import {useApi} from '../../contexts/apiContext';
-export const AddSnippetModal = ({open, onClose, defaultSnippet}: {
-  open: boolean; onClose: () => void; defaultSnippet?: SnippetDraft;
-}) => {
-  const [language, setLanguage] = useState('');
-  const [version, setVersion] = useState('');
-  const [code, setCode] = useState('');
-  const [name, setName] = useState('');
-  const [description, setDescription] = useState<string | null>(null);
-  const [error, setError] = useState<Error | null>(null);
-  const intent = useRef<CreationIntent>();
-  const submitting = useRef(false);
-  const {actor} = useApi();
-  const {mutateAsync, isLoading} = useCreateSnippet();
-  const {data: types, error: catalogError, refetch} = useGetFileTypes();
-  const uncertain = error instanceof ApiError && error.uncertain;
-  const locked = isLoading || uncertain;
-  useEffect(() => {
-    if (open && !intent.current) {
-      setName(defaultSnippet?.name ?? ''); setCode(defaultSnippet?.content ?? '');
-      setLanguage(defaultSnippet?.language ?? ''); setVersion(''); setDescription(null); setError(null);
-    }
-  }, [open, defaultSnippet]);
-  async function save() {
-    if (submitting.current) return;
-    submitting.current = true;
-    if (!intent.current) intent.current = createCreationIntent({name, description, language, version, content: code}, actor);
-    try {
-      await mutateAsync(intent.current);
-      intent.current = undefined;
-      setError(null);
-      onClose();
-    } catch (cause) {
-      const failure = cause instanceof ApiError ? cause : new ApiError('Could not confirm the save.', undefined, true);
-      setError(failure);
-      if (failure instanceof ApiError && !failure.uncertain) intent.current = undefined;
-    } finally {submitting.current = false;}
-  }
-  const versions = types?.find(type => type.language === language)?.versions ?? [];
-  return <ModalWrapper open={open} onClose={() => {if (!isLoading) onClose();}}>
-    <Box display="flex" justifyContent="space-between">
-      <Typography variant="h5">Add Snippet</Typography>
-      <Button data-testid="save-snippet" variant="contained" onClick={save}
-        disabled={isLoading || (!uncertain && (!name.trim() || !language || !versions.includes(version)))}>
-        {isLoading ? <CircularProgress size={24}/> : <Save/>}{uncertain ? 'Retry same creation' : 'Save Snippet'}
+import {CodeEditor} from '../common/CodeEditor';
+import {useSnippetCreation} from '../../hooks/useSnippetCreation';
+
+export function AddSnippetModal({open, onClose, defaultSnippet}: {open: boolean; onClose: () => void; defaultSnippet?: SnippetDraft}) {
+  const form = useSnippetCreation(open, defaultSnippet, onClose);
+  const {data: types, error, refetch} = useGetFileTypes();
+  const versions = types?.find(type => type.language === form.draft.language)?.versions ?? [];
+  return <ModalWrapper open={open} onClose={onClose} title="Nuevo snippet" pending={form.saving}
+    description="Escribí tu código o revisá el archivo subido. Elegí el lenguaje y su versión antes de guardar."
+    actions={<>
+      <Button disabled={form.saving} onClick={onClose}>Cerrar</Button>
+      <Button data-testid="save-snippet" variant="contained" startIcon={form.saving ? <CircularProgress size={18} color="inherit"/> : <SaveRounded/>}
+        onClick={form.save} disabled={form.saving || (!form.uncertain && (!form.draft.name.trim() || !versions.includes(form.draft.version)))}>
+        {form.saving ? 'Guardando…' : form.uncertain ? 'Reintentar misma creación' : 'Guardar snippet'}
       </Button>
-    </Box>
-    <ApiErrorAlert error={error}/>
-    {!!catalogError && <><Alert severity="warning">Language catalog unavailable. GET /languages is required; there is no default language/version.</Alert>
-      <Button onClick={() => refetch()}>Retry catalog</Button></>}
-    {uncertain && <Alert severity="warning">This creation is kept while this page remains open. Its identity, key and data will be reused. Reloading loses that retry information.</Alert>}
-    <InputLabel htmlFor="name">Name</InputLabel>
-    <Input id="name" value={name} disabled={locked} onChange={e => setName(e.target.value)}/>
-    <InputLabel htmlFor="description">Description (optional)</InputLabel>
-    <Input id="description" value={description ?? ''} disabled={locked} onChange={e => setDescription(e.target.value)}/>
-    <InputLabel id="language-label">Language</InputLabel>
-    <Select labelId="language-label" value={language} disabled={locked} onChange={e => {setLanguage(e.target.value); setVersion('');}}>
-      {types?.map(type => <MenuItem key={type.language} value={type.language}>{type.language}</MenuItem>)}
-    </Select>
-    <InputLabel id="version-label">Version</InputLabel>
-    <Select labelId="version-label" value={version} disabled={locked} onChange={e => setVersion(e.target.value)}>
-      {versions.map(value => <MenuItem key={value} value={value}>{value}</MenuItem>)}
-    </Select>
-    <InputLabel htmlFor="create-code">Code Snippet</InputLabel>
-    <Box bgcolor="black" color="white" borderRadius="8px">
-      <Editor textareaId="create-code" value={code} padding={10} readOnly={locked} onValueChange={setCode}
-        highlight={value => highlight(value, languages.js, 'javascript')}
-        style={{minHeight: 200, maxHeight: 400, overflow: 'auto', fontFamily: 'monospace', fontSize: 17}}/>
-    </Box>
+    </>}>
+    <ApiErrorAlert error={form.error} creation focusOnError/>
+    {!!error && <Alert severity="warning" action={<Button onClick={() => refetch()}>Reintentar</Button>}>No se pudo cargar el catálogo de lenguajes. No se elegirá una versión por defecto.</Alert>}
+    {form.uncertain && <Alert severity="warning">Conservamos los datos de esta creación mientras esta página siga abierta. Reintentá la misma solicitud. Recargar la página pierde esta información.</Alert>}
+    <TextField id="name" label="Nombre" name="snippetName" value={form.draft.name} disabled={form.locked}
+      autoComplete="off" required onChange={event => form.change({name: event.target.value})}/>
+    <TextField id="description" label="Descripción (opcional)" name="description" multiline minRows={2} value={form.draft.description ?? ''}
+      disabled={form.locked} onChange={event => form.change({description: event.target.value})}/>
+    <Stack direction={{xs: 'column', sm: 'row'}} gap={2} sx={{'& > *': {flex: 1, minWidth: 0}}}>
+      <TextField select id="language" label="Lenguaje" SelectProps={{labelId: 'language-label'}} value={form.draft.language} disabled={form.locked || !types?.length}
+        onChange={event => form.change({language: event.target.value, version: ''})}>
+        {types?.map(type => <MenuItem key={type.language} value={type.language}>{type.language}</MenuItem>)}
+      </TextField>
+      <TextField select id="version" label="Versión" SelectProps={{labelId: 'version-label'}} value={form.draft.version} disabled={form.locked || !versions.length}
+        onChange={event => form.change({version: event.target.value})}>
+        {versions.map(version => <MenuItem key={version} value={version}>{version}</MenuItem>)}
+      </TextField>
+    </Stack>
+    <CodeEditor id="create-code" value={form.draft.content} readOnly={form.locked} onChange={content => form.change({content})}/>
   </ModalWrapper>;
-};
+}

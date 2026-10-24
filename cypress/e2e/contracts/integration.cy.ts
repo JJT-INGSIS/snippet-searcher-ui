@@ -16,11 +16,11 @@ function setup(readonly = false) {
   cy.visit('/'); cy.wait('@list');
 }
 function openCreate() {
-  cy.contains('button', 'Add Snippet').click();
-  cy.contains('li', 'Create snippet').click();
+  cy.contains('button', 'Nuevo snippet').click();
+  cy.contains('li', 'Crear snippet').click();
   cy.get('#name').type('New snippet');
-  cy.get('[aria-labelledby="language-label"]').click(); cy.get('[role="option"]').contains('printscript').click();
-  cy.get('[aria-labelledby="version-label"]').click(); cy.get('[role="option"]').contains('1.0').click();
+  cy.get('#language').click(); cy.get('[role="option"]').contains('printscript').click();
+  cy.get('#version').click(); cy.get('[role="option"]').contains('1.0').click();
   cy.get('#create-code').type('println(1);');
 }
 describe('SNI-34 UI / pending backend contracts', () => {
@@ -44,10 +44,10 @@ describe('SNI-34 UI / pending backend contracts', () => {
       }
     }).as('create');
     cy.get('[data-testid="save-snippet"]').click(); cy.wait('@create');
-    cy.contains('Retry same creation').should('be.visible');
+    cy.contains('Reintentar misma creación').should('be.visible');
     cy.get('#name').should('be.disabled');
     cy.get('[data-testid="save-snippet"]').click(); cy.wait('@create'); cy.wait('@list');
-    cy.contains('h5', 'Add Snippet').should('not.exist');
+    cy.contains('[role=dialog] h2', 'Nuevo snippet').should('not.exist');
   });
   it('shows parser diagnostics and preserves the draft', () => {
     setup(); openCreate();
@@ -64,8 +64,8 @@ describe('SNI-34 UI / pending backend contracts', () => {
     setup();
     cy.intercept('GET', '/api/languages', {statusCode: 404, body: {type: 'about:blank'}});
     cy.reload(); cy.wait('@list');
-    cy.contains('button', 'Add Snippet').click(); cy.contains('li', 'Create snippet').click();
-    cy.contains('Language catalog unavailable').should('be.visible');
+    cy.contains('button', 'Nuevo snippet').click(); cy.contains('li', 'Crear snippet').click();
+    cy.contains('No se pudo cargar el catálogo').should('be.visible');
     cy.get('[data-testid="save-snippet"]').should('be.disabled');
   });
   it('uploads text through the same JSON creation contract', () => {
@@ -73,7 +73,7 @@ describe('SNI-34 UI / pending backend contracts', () => {
     cy.get('[data-testid="upload-file-input"]').selectFile({contents: Cypress.Buffer.from('println(2);\r\n'), fileName: 'uploaded.prs'}, {force: true});
     cy.get('#name').should('have.value', 'uploaded');
     cy.get('#create-code').should('have.value', 'println(2);\n');
-    cy.get('[aria-labelledby="version-label"]').click(); cy.get('[role="option"]').contains('1.1').click();
+    cy.get('#version').click(); cy.get('[role="option"]').contains('1.1').click();
     cy.intercept('POST', '/api/snippets', req => {
       // Textareas normalize line endings; the adapter itself does not trim/normalize source.
       expect(req.body.code).to.eq('println(2);\r\n');
@@ -84,17 +84,17 @@ describe('SNI-34 UI / pending backend contracts', () => {
     cy.get('[data-testid="save-snippet"]').click(); cy.wait('@upload');
   });
   it('honors read-only capabilities and disables unavailable actions', () => {
-    setup(true); cy.get('[data-testid="snippet-row"]').click(); cy.wait('@detail');
+    setup(true); cy.get('[data-testid="snippet-row"] button').click(); cy.wait('@detail');
     cy.get('#detail-code').should('have.attr', 'readonly');
     cy.get('[data-testid="save-changes"]').should('be.disabled');
-    cy.contains('button', 'Share').should('be.disabled');
-    cy.contains('button', 'Test').should('be.disabled');
-    cy.contains('button', 'Format').should('be.disabled');
-    cy.contains('button', 'Delete').should('be.disabled');
-    cy.contains('not-implemented').should('be.visible');
+    cy.contains('button', 'Compartir').should('be.disabled');
+    cy.contains('button', 'Ejecutar tests').should('be.disabled');
+    cy.contains('button', 'Formatear').should('be.disabled');
+    cy.contains('button', 'Eliminar').should('be.disabled');
+    cy.contains('Sin evaluación').should('be.visible');
   });
   it('keeps a confirmed save successful even if the independent detail refresh fails', () => {
-    setup(); cy.get('[data-testid="snippet-row"]').click(); cy.wait('@detail');
+    setup(); cy.get('[data-testid="snippet-row"] button').click(); cy.wait('@detail');
     cy.get('#detail-code').clear().type('println(2);');
     cy.intercept('PUT', '/api/snippets/' + id, req => {
       expect(req.body).to.deep.eq({name: 'Hello', description: null, language: 'printscript', version: '1.0', code: 'println(2);'});
@@ -103,13 +103,13 @@ describe('SNI-34 UI / pending backend contracts', () => {
     // No extra request in the adapter; the hook independently invalidates cached queries.
     cy.intercept('GET', '/api/snippets/' + id, {statusCode: 503, body: {type: 'urn:snippets:problem:storage-unavailable'}});
     cy.get('[data-testid="save-changes"]').click(); cy.wait('@save');
-    cy.contains('Changes saved.').scrollIntoView().should('be.visible');
-    cy.contains('storage-unavailable').scrollIntoView().should('be.visible');
+    cy.contains('Cambios guardados.').scrollIntoView().should('be.visible');
+    cy.contains('No pudimos acceder al contenido').scrollIntoView().should('be.visible');
     cy.get('#detail-code').should('have.value', 'println(2);');
   });
   it('only closes sharing after a confirmed response; a failure remains retryable', () => {
-    setup(); cy.get('[data-testid="snippet-row"]').click(); cy.wait('@detail');
-    cy.contains('button', 'Share').click(); cy.wait('@users');
+    setup(); cy.get('[data-testid="snippet-row"] button').click(); cy.wait('@detail');
+    cy.contains('button', 'Compartir').click(); cy.wait('@users');
     cy.get('input[role="combobox"]').click(); cy.get('[role="option"]').contains('Ana').click();
     let calls = 0;
     cy.intercept('PUT', '/api/snippets/' + id + '/shares/dev-ana', req => {
@@ -117,9 +117,9 @@ describe('SNI-34 UI / pending backend contracts', () => {
       else req.reply(201, {snippetId: id, userId: 'dev-ana'});
     }).as('share');
     cy.get('[data-testid="confirm-share"]').click(); cy.wait('@share');
-    cy.contains('Share your snippet').should('be.visible');
-    cy.contains('dependency-failure').should('be.visible');
+    cy.contains('Compartir snippet').should('be.visible');
+    cy.contains('No pudimos comunicarnos').should('be.visible');
     cy.get('[data-testid="confirm-share"]').click(); cy.wait('@share');
-    cy.contains('Share your snippet').should('not.exist');
+    cy.contains('Compartir snippet').should('not.exist');
   });
 });

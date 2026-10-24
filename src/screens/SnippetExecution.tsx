@@ -1,7 +1,6 @@
-import {OutlinedInput} from "@mui/material";
+import {Box, OutlinedInput} from "@mui/material";
 import {highlight, languages} from "prismjs";
 import Editor from "react-simple-code-editor";
-import {Bòx} from "../components/snippet-table/SnippetBox.tsx";
 import {useState} from "react";
 
 export const SnippetExecution = () => {
@@ -22,7 +21,7 @@ export const SnippetExecution = () => {
 
     return (
       <>
-        <Bòx flex={1} overflow={"none"} minHeight={200} bgcolor={'black'} color={'white'} code={code}>
+        <Box flex={1} minHeight={200} bgcolor={'black'} color={'white'}>
             <Editor
               value={code}
               padding={10}
@@ -34,7 +33,7 @@ export const SnippetExecution = () => {
                   fontSize: 17,
               }}
             />
-        </Bòx>
+        </Box>
         <OutlinedInput onKeyDown={handleEnter} value={input} onChange={e => setInput(e.target.value)} placeholder="Type here" fullWidth/>
       </>
     )

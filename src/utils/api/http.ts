@@ -13,13 +13,13 @@ export function createApiClient(config: RuntimeConfig): AxiosInstance {
     if (request.url !== '/languages' && validated.identity.mode === 'dev') request.headers.set('X-Dev-Actor-Id', validated.identity.actorId);
     return request;
   });
-  client.interceptors.response.use(response => response, (error: unknown) => Promise.reject(toApiError(error)));
+  client.interceptors.response.use(response => response, (error: unknown) => Promise.reject(axios.isCancel(error) ? error : toApiError(error)));
   return client;
 }
 export function createHttpSnippetOperations(client: AxiosInstance, actorId: string): SnippetOperations {
   return {
-    async listSnippetDescriptors(page, pageSize, filters = {}) {
-      return fromPageDto((await client.get<SnippetPageDto>('/snippets', {params: {page, page_size: pageSize, ...filters}})).data);
+    async listSnippetDescriptors(page, pageSize, filters = {}, signal) {
+      return fromPageDto((await client.get<SnippetPageDto>('/snippets', {params: {page, page_size: pageSize, ...filters}, signal})).data);
     },
     async createSnippet(intent) {
       if (intent.actorId !== actorId) throw new ApiError('The creation belongs to another identity.');
@@ -35,8 +35,8 @@ export function createHttpSnippetOperations(client: AxiosInstance, actorId: stri
       if (response.status !== 200 || response.data?.id !== id) throw invalidResponse();
       return fromMetadataDto(response.data);
     },
-    async getUserFriends(name = '', page = 0, pageSize = 10) {
-      return fromUsersDto((await client.get<PaginatedUsers>('/users', {params: {name, page, page_size: pageSize}})).data);
+    async getUserFriends(name = '', page = 0, pageSize = 10, signal) {
+      return fromUsersDto((await client.get<PaginatedUsers>('/users', {params: {name, page, page_size: pageSize}, signal})).data);
     },
     async shareSnippet(id, userId) {
       const {data, status} = await client.put<Share>('/snippets/' + encodeURIComponent(id) + '/shares/' + encodeURIComponent(userId));
