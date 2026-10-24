@@ -26,3 +26,7 @@ dist-ssr
 .env*
 next-env.d.ts
 .next
+cypress/screenshots/
+cypress/videos/
+*.tsbuildinfo
+!.env.example

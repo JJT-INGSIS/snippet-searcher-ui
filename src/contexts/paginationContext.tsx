@@ -15,7 +15,7 @@ export const defaultPagination = {
   count: 10
 }
 
-// @ts-expect-error
+// @ts-expect-error -- Context is always mounted by its provider
 export const PaginationContext = createContext<PaginationContextType>(null)
 
 export const usePaginationContext = (): PaginationContextType => useContext(PaginationContext)

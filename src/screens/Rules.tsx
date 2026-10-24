@@ -1,19 +1,4 @@
-import {withNavbar} from "../components/navbar/withNavbar.tsx";
-import {Box, Typography} from "@mui/material";
-import LintingRulesList from "../components/linting-rules/LintingRulesList.tsx";
-import FormattingRulesList from "../components/formatting-rules/FormattingRulesList.tsx";
-
-const RulesScreen = () => {
-    return (
-        <Box display={"flex"} flexDirection={"column"}>
-            <Typography variant={"h3"}>
-                Rules
-            </Typography>
-          <LintingRulesList />
-          <FormattingRulesList/>
-
-        </Box>
-    )
-}
-
+import {withNavbar} from '../components/navbar/withNavbar';
+import {Alert} from '@mui/material';
+const RulesScreen = () => <Alert severity="info">Lint and formatting rules are not available yet.</Alert>;
 export default withNavbar(RulesScreen);
