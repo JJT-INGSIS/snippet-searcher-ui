@@ -1,0 +1,40 @@
+name: Run UI Checks
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+    branches: [dev, main]
+  push:
+    branches: [dev, main]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  verify:
+    uses: JJT-INGSIS/github-workflows/.github/workflows/frontend-ci.yml@6f520b81c7774a844c4c522cc96eb93c60ccfec9
+  build:
+    # Preserve the existing required check while CI executes in the central.
+    needs: verify
+    if: always() && github.event_name == 'pull_request'
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Confirm frontend CI
+        env:
+          CI_RESULT: ${{ needs.verify.result }}
+        run: test "$CI_RESULT" = success
+  cd:
+    needs: verify
+    if: >-
+      (github.event_name == 'push' || github.event_name == 'workflow_dispatch') &&
+      (github.ref == 'refs/heads/dev' || github.ref == 'refs/heads/main')
+    permissions:
+      contents: read
+      actions: read
+      pull-requests: read
+      packages: write
+      deployments: write
+    uses: JJT-INGSIS/github-workflows/.github/workflows/cd.yml@6f520b81c7774a844c4c522cc96eb93c60ccfec9
+    with:
+      image-name: ghcr.io/jjt-ingsis/snippet-searcher-ui
+      publish: ${{ github.ref == 'refs/heads/dev' }}
+      deploy: ${{ vars.CD_ENABLED == 'true' && (github.ref == 'refs/heads/dev' || vars.PROD_DEPLOY_ENABLED == 'true') }}
+    secrets: inherit

@@ -48,8 +48,8 @@ El navegador llama únicamente a **`/api` bajo su mismo origen**. No llama direc
 Vite reenvía `/api/snippets` a `http://127.0.0.1:8080/snippets`, eliminando `/api`.
 `API_PROXY_TARGET` cambia solo el destino del proxy local; no se incorpora al bundle.
 
-El despliegue futuro usa NGINX con la misma regla (SNI-38). CORS de Spring corresponde a SNI-41;
-el Dockerfile, imagen y CD de la UI corresponden a SNI-42. Aquí no se implementan.
+El despliegue usa NGINX de entrada con la misma regla (SNI-38). CORS de Spring corresponde a SNI-41.
+[Imagen, configuración runtime y despliegue independiente — SNI-42](docs/sni-42-deployment.md).
 
 Al iniciar, la UI carga **`/app-config.json` con `cache: no-store`**.
 Ese archivo contiene configuración pública, nunca secretos, y puede reemplazarse al desplegar el mismo bundle en cada ambiente.

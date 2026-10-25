@@ -13,6 +13,7 @@
     "preview": "vite preview",
     "cypress": "cypress open",
     "test": "vitest run",
+    "test:container": "node scripts/verify-container.mjs",
     "test:contracts": "cypress run",
     "test:backend": "vitest run --config vitest.backend.config.ts",
     "test:browser:backend": "cypress run --config specPattern=cypress/e2e/backend/**/*.cy.ts"
