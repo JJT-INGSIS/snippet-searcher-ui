@@ -79,16 +79,34 @@ completado con éxito. CI omitido/cancelado/fallido no sirve como evidencia.
 
 ## Primera instalación y habilitación
 
-1. Seguir la [integración v0.6.0](https://github.com/JJT-INGSIS/github-workflows/blob/main/docs/sni-43-integration.md).
+SNI-40 ya entregó NGINX con TLS en dev y prod. Sus promociones de infraestructura
+y backends no instalan la UI: ésta conserva su propio servicio, pipeline y
+evidencia. Usar los callers `frontend-ci.yml@v0.6.1` y `cd.yml@v0.6.1`, ambos
+de la misma revisión central. Las herramientas v0.6.0 no entienden el registro
+TLS nuevo. La incorporación manual debe usar una revisión fija de infra que
+incluya también el fix de verificación posterior a la convergencia (PR #24).
+
+1. Revisar la [integración central](https://github.com/JJT-INGSIS/github-workflows/blob/main/docs/sni-43-integration.md)
+   y la [entrega TLS](https://github.com/JJT-INGSIS/snippet-searcher-infra/blob/dev/docs/sni-40-tls.md).
+   Confirmar acceso SSH, HTTPS y, en dev, la IP del equipo autorizada en Azure.
+   Comprobar Swarm saludable, release.json consistente y ausencia de pending.json.
 2. Mantener CD_ENABLED=false en UI hasta instalarla. Dev puede publicar la primera
-   imagen sin intentar actualizar un servicio inexistente.
-3. Con los callers nuevos y la VM preparada, incorporar ese digest usando plan
-   de infra --ui-image; configurar actor únicamente para dev. Revisar/aplicar
-   mediante --infrastructure bajo el lock compartido, sin alterar otras imágenes.
+   imagen sin intentar actualizar un servicio inexistente. Elegir el digest del
+   run exitoso correspondiente a la revisión definitiva de dev, no una referencia
+   histórica copiada de un ejemplo.
+3. Generar el candidato desde el registro vigente con plan --ui-image y,
+   únicamente en dev, --ui-dev-actor con el actor acordado. Al agregar sólo UI,
+   omitir --nginx-host: así se conservan las configs y el estado TLS existentes.
+   Revisar que tls siga en true y que los demás digests, proveedor de storage y
+   configuración del proxy no cambien. Respaldar el registro y aplicar mediante
+   --infrastructure bajo el lock compartido. No reinstalar NGINX ni certificados.
 4. Configurar Environment dev: SSH_HOST/USER/PORT y secrets SSH_PRIVATE_KEY,
    SSH_KNOWN_HOSTS; usar el mismo contrato SSH estricto que los backends.
 5. Habilitar CD_ENABLED y ejecutar el pipeline dev para comprobar actualización
    independiente/evidencia. El despliegue inicial no equivale a esa evidencia.
+   Verificar HTML, recursos, SPA, app-config.json sin caché y llamadas /api por
+   HTTPS desde el navegador; recuperar una versión sana ante un fallo controlado
+   sólo en dev. Confirmar que backends, bases y NGINX conservaron sus referencias.
 6. Para prod, proteger main y exigir PR dev→main; configurar Environment prod,
    manteniendo PROD_DEPLOY_ENABLED=false hasta la primera instalación. Ésta exige
    el árbol aprobado en main y el digest comprobado en dev.
@@ -98,6 +116,22 @@ PROD_DEPLOY_ENABLED y ejecutar su pipeline de main. Dev puede seguir habilitado
 durante esta preparación: el caller usa ambos controles para producción.
 No introducir un camino de publicación desde main ni fabricar evidencia para
 superar la primera instalación. Mantener la VM del ambiente encendida durante CD.
+
+La imagen promovida tiene que coincidir por digest y árbol Git con evidencia dev
+válida. No modificar documentación ni otros archivos durante la promoción sin
+volver a verificar ese contenido en dev. Las referencias de rollback deben ser
+versiones realmente verificadas; no se prueban imágenes defectuosas en prod.
+
+Dominios de SNI-39/40:
+
+* dev: https://jjt-snippets-dev.duckdns.org (443 restringido al equipo).
+* prod: https://jjt-snippets-prod.duckdns.org.
+
+Que la UI cargue en prod no acredita autenticación: sin Auth0, la identidad runtime
+queda deshabilitada y las operaciones protegidas no se presentan como funcionales.
+Registrar runs, árbol, digest, configuración pública y comprobaciones de cada
+ambiente. La aceptación integral de red/CORS y la regresión de interrupción SSH
+del stack ampliado siguen en SNI-44; no se repiten como implementación aquí.
 
 Recuperación/manuales: [infra SNI-43](https://github.com/JJT-INGSIS/snippet-searcher-infra/blob/dev/docs/sni-43-cd.md).
 Las funcionalidades frontend pendientes no bloquean publicar el mecanismo común;
