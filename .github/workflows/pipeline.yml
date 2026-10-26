@@ -10,7 +10,7 @@ permissions:
   contents: read
 jobs:
   verify:
-    uses: JJT-INGSIS/github-workflows/.github/workflows/frontend-ci.yml@v0.6.0
+    uses: JJT-INGSIS/github-workflows/.github/workflows/frontend-ci.yml@v0.6.1
   build:
     # Preserve the existing required check while CI executes in the central.
     needs: verify
@@ -32,7 +32,7 @@ jobs:
       pull-requests: read
       packages: write
       deployments: write
-    uses: JJT-INGSIS/github-workflows/.github/workflows/cd.yml@v0.6.0
+    uses: JJT-INGSIS/github-workflows/.github/workflows/cd.yml@v0.6.1
     with:
       image-name: ghcr.io/jjt-ingsis/snippet-searcher-ui
       publish: ${{ github.ref == 'refs/heads/dev' }}
