@@ -8,6 +8,8 @@ import {ApiErrorAlert} from '../components/common/ApiErrorAlert';
 import {CodeEditor} from '../components/common/CodeEditor';
 import {lintLabels} from '../utils/presentation';
 import {useSnippetEditor} from '../hooks/useSnippetEditor';
+import {TestSnippetModal} from '../components/snippet-test/TestSnippetModal';
+import {useApi} from '../contexts/apiContext';
 
 function DownloadButton({snippet}: {snippet: Snippet}) {
   const [url, setUrl] = useState<string>();
@@ -22,6 +24,8 @@ export function SnippetDetail({id, handleCloseModal}: {id: string; handleCloseMo
   const {data: snippet, isLoading, error, refetch} = useGetSnippetById(id);
   const editor = useSnippetEditor(id, snippet);
   const [shareOpen, setShareOpen] = useState(false);
+  const [testsOpen, setTestsOpen] = useState(false);
+  const {actor} = useApi();
   const share = useShareSnippet();
   const readonly = !snippet?.capabilities.modify;
   return <Box role="region" aria-label="Detalle del snippet" sx={{p: {xs: 2, sm: 4}, minWidth: 0}}>
@@ -54,10 +58,15 @@ export function SnippetDetail({id, handleCloseModal}: {id: string; handleCloseMo
         <Button startIcon={<ShareRounded/>} disabled={!snippet.capabilities.share || share.isLoading} onClick={() => setShareOpen(true)}>Compartir</Button>
         <DownloadButton snippet={snippet}/>
       </Stack>
-      <Stack direction="row" flexWrap="wrap" gap={1}><Button disabled>Ejecutar tests</Button><Button disabled>Formatear</Button><Button disabled>Eliminar</Button></Stack>
-      <Typography variant="body2" color="text.secondary">Tests, formato, ejecución y eliminación todavía no están disponibles.</Typography>
+      <Stack direction="row" flexWrap="wrap" gap={1}>
+        <Button onClick={() => setTestsOpen(true)} disabled={!!error}>Ver tests</Button>
+        <Button disabled>Ejecutar tests</Button><Button disabled>Formatear</Button><Button disabled>Eliminar</Button>
+      </Stack>
+      <Typography variant="body2" color="text.secondary">La ejecución de tests, formato y eliminación todavía no están disponibles.</Typography>
     </Stack>}
     <ShareSnippetModal open={shareOpen} loading={share.isLoading} onClose={() => setShareOpen(false)}
       onShare={async userId => {await share.mutateAsync({snippetId: id, userId});}}/>
+    {testsOpen && snippet && !error && <TestSnippetModal key={actor + ':' + id} snippetId={id}
+      canCreate={snippet.relation === 'owned' && snippet.capabilities.modify} onClose={() => setTestsOpen(false)}/>}
   </Box>;
 }

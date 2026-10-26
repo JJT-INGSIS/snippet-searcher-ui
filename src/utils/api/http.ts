@@ -6,6 +6,7 @@ import {DetailDto, MetadataDto, SnippetPageDto, fromDetailDto, fromMetadataDto, 
 import {PaginatedUsers} from '../users';
 import {Share} from '../snippet';
 import {FileType} from '../../types/FileType';
+import {fromTestDefinition, fromTestDefinitions, toTestDefinitionDraft} from './testDefinitions';
 export function createApiClient(config: RuntimeConfig): AxiosInstance {
   const validated = parseRuntimeConfig(config);
   const client = axios.create({baseURL: '/api', timeout: 15000});
@@ -44,8 +45,22 @@ export function createHttpSnippetOperations(client: AxiosInstance, actorId: stri
       return {snippetId: data.snippetId, userId: data.userId};
     },
     async getFileTypes() {return fromLanguagesDto((await client.get<FileType[]>('/languages')).data);},
-    getFormatRules: unsupported, getLintingRules: unsupported, getTestCases: unsupported,
-    formatSnippet: unsupported, postTestCase: unsupported, removeTestCase: unsupported,
+    async listTestDefinitions(snippetId, signal) {
+      const response = await client.get('/snippets/' + encodeURIComponent(snippetId) + '/tests', {signal});
+      if (response.status !== 200 || !/^application\/json(?:;|$)/i.test(response.headers['content-type'] ?? '')) throw invalidResponse();
+      return fromTestDefinitions(response.data, snippetId);
+    },
+    async createTestDefinition(snippetId, input) {
+      const draft = toTestDefinitionDraft(input);
+      const response = await client.post('/snippets/' + encodeURIComponent(snippetId) + '/tests', draft);
+      if (response.status !== 201 || !/^application\/json(?:;|$)/i.test(response.headers['content-type'] ?? '')) throw invalidResponse();
+      const saved = fromTestDefinition(response.data, snippetId);
+      if (JSON.stringify(saved.inputs) !== JSON.stringify(draft.inputs) ||
+          JSON.stringify(saved.expectedOutputs) !== JSON.stringify(draft.expectedOutputs)) throw invalidResponse();
+      return saved;
+    },
+    getFormatRules: unsupported, getLintingRules: unsupported,
+    formatSnippet: unsupported, removeTestCase: unsupported,
     deleteSnippet: unsupported, testSnippet: unsupported, modifyFormatRule: unsupported, modifyLintingRule: unsupported,
   };
 }

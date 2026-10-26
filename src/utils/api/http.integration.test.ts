@@ -88,7 +88,7 @@ describe('HTTP adapter against a contract server (not the real backend)', () => 
   it('disables unavailable operations without a request', async () => {
     await expect(api.deleteSnippet('id')).rejects.toThrow('not available');
     await expect(api.formatSnippet('code')).rejects.toThrow('not available');
-    await expect(api.getTestCases()).rejects.toThrow('not available'); expect(requests).toHaveLength(0);
+    await expect(api.removeTestCase('id')).rejects.toThrow('not available'); expect(requests).toHaveLength(0);
   });
   it('does not inject a dev identity in prod', async () => {
     const prod = createApiClient({environment: 'prod', identity: {mode: 'disabled'}});

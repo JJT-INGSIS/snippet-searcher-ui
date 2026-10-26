@@ -4,6 +4,7 @@ import {TestCase} from '../types/TestCase';
 import {FileType} from '../types/FileType';
 import {Rule} from '../types/Rule';
 import {CreationIntent} from './api/creationIntent';
+import {TestDefinition, TestDefinitionDraft} from '../types/TestDefinition';
 // Boundary retained from the supplied UI. Unsupported operations reject explicitly.
 export interface SnippetOperations {
   listSnippetDescriptors(page: number, pageSize: number, filters?: SnippetFilters, signal?: AbortSignal): Promise<PaginatedSnippets>;
@@ -15,9 +16,9 @@ export interface SnippetOperations {
   getFileTypes(): Promise<FileType[]>;
   getFormatRules(): Promise<Rule[]>;
   getLintingRules(): Promise<Rule[]>;
-  getTestCases(): Promise<TestCase[]>;
+  listTestDefinitions(snippetId: string, signal?: AbortSignal): Promise<TestDefinition[]>;
   formatSnippet(snippet: string): Promise<string>;
-  postTestCase(testCase: Partial<TestCase>): Promise<TestCase>;
+  createTestDefinition(snippetId: string, testCase: TestDefinitionDraft): Promise<TestDefinition>;
   removeTestCase(id: string): Promise<string>;
   deleteSnippet(id: string): Promise<string>;
   testSnippet(testCase: Partial<TestCase>): Promise<'success' | 'fail'>;
