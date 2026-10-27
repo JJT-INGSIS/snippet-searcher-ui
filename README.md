@@ -123,7 +123,10 @@ Elegir la versión es obligatorio. No se deduce de la extensión ni se escoge au
 - Un refresco de detalle no pisa el borrador que se está editando. Cerrar y reabrir carga el detalle nuevamente.
 - El backend sigue autorizando cada operación. La UI utiliza capabilities para bloquear edición/sharing de solo lectura.
 
-Tests, ejecución, reglas, formateo y borrado permanecen deshabilitados; el adaptador rechaza explícitamente esas operaciones.
+SNI-50 conecta creación/listado de definiciones de tests por snippet mediante HTTP.
+Ver [contrato, decisiones y verificación](docs/sni-50-test-definitions.md).
+Ejecución, edición/borrado de tests, reglas, formateo y borrado de snippets permanecen
+deshabilitados; no se fabrican resultados ni éxitos.
 El Fake fue retirado. Se conservan los componentes provistos para esas historias futuras, pero no se montan sus flujos simulados.
 La descarga original existente utiliza el código leído; no implementa descarga de código formateado ni US13.
 
@@ -200,5 +203,7 @@ Ver [cambios, comandos, evidencia real y límites](docs/sni-35-validation.md).
 - SNI-54 ya verifica el catálogo GET /languages; SNI-35 lo consume sin datos inventados.
 - Listado, destinatarios, detalle y edición ya fueron verificados localmente con Permissions. Sharing público sigue pendiente de aceptación real.
 - SNI-36 completa la aceptación con los endpoints pendientes y storage oficial; el éxito de los contratos no sustituye esa prueba.
-- Auth0, lint, tests y ejecución se incorporan en sus tickets; no agregar fake success para avanzar.
+- Auth0, lint y ejecución se incorporan en sus tickets; no agregar fake success para avanzar.
+  Las definiciones de tests de SNI-50 requieren los endpoints reales de SNI-46;
+  las pruebas de contrato de UI no acreditan esa integración backend.
 - Revisar las dependencias heredadas del upstream antes del despliegue de la UI. Este cambio no hace una migración general de framework ni un audit fix forzado.
