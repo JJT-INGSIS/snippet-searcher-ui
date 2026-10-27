@@ -1,60 +1,21 @@
-import {alpha, Skeleton, styled, TableRow, TableRowProps} from "@mui/material";
-import {StyledTableCell} from "./SnippetTable.tsx";
-import {Snippet} from "../../utils/snippet.ts";
+import {Button, Chip, Skeleton, Stack, TableCell, TableRow} from '@mui/material';
+import {SnippetDescriptor} from '../../utils/snippet';
+import {lintLabels} from '../../utils/presentation';
 
-const StyledTableRow = styled(TableRow)(({theme}) => ({
-  backgroundColor: 'white',
-  border: 0,
-  height: '75px',
-  cursor: 'pointer',
-  '& td': {
-    borderTop: '2px solid transparent',
-    borderBottom: '2px solid transparent',
-  },
-  '& td:first-of-type': {
-    borderLeft: '2px solid transparent',
-    borderTopLeftRadius: theme.shape.borderRadius,
-    borderBottomLeftRadius: theme.shape.borderRadius,
-  },
-  '& td:last-of-type': {
-    borderRight: '2px solid transparent',
-    borderTopRightRadius: theme.shape.borderRadius,
-    borderBottomRightRadius: theme.shape.borderRadius,
-  },
-  '&:hover > td': {
-    borderTop: `2px ${theme.palette.primary.light} solid`,
-    borderBottom: `2px ${theme.palette.primary.light} solid`,
-    backgroundColor: alpha(theme.palette.primary.light, 0.2)
-  },
-  '&:hover > td:first-of-type': {
-    borderLeft: `2px ${theme.palette.primary.light} solid`,
-  },
-  '&:hover > td:last-of-type': {
-    borderRight: `2px ${theme.palette.primary.light} solid`
-  },
-}));
-
-
-export const SnippetRow = ({snippet, onClick, ...props}: { snippet: Snippet, onClick: () => void } & TableRowProps) => {
-  return (
-      <StyledTableRow onClick={onClick} sx={{backgroundColor: 'white', border: 0, height: '75px'}} {...props}>
-        <StyledTableCell>{snippet.name}</StyledTableCell>
-        <StyledTableCell>{snippet.language}</StyledTableCell>
-        <StyledTableCell>{snippet.author}</StyledTableCell>
-        <StyledTableCell>{snippet.compliance}</StyledTableCell>
-      </StyledTableRow>
-  )
+export function SnippetRow({snippet, onClick}: {snippet: SnippetDescriptor; onClick: () => void}) {
+  return <TableRow data-testid="snippet-row" hover>
+    <TableCell sx={{maxWidth: 360}}>
+      <Button onClick={onClick} sx={{fontWeight: 600, textAlign: 'left', justifyContent: 'flex-start', overflowWrap: 'anywhere', minWidth: 0, px: 0}}>
+        {snippet.name}
+      </Button>
+      {snippet.description && <Stack component="span" sx={{color: 'text.secondary', fontSize: 13, overflowWrap: 'anywhere'}}>{snippet.description}</Stack>}
+    </TableCell>
+    <TableCell><Chip size="small" label={snippet.language} variant="outlined"/><span> {snippet.version}</span></TableCell>
+    <TableCell sx={{maxWidth: 220, overflowWrap: 'anywhere'}}>{snippet.author}</TableCell>
+    <TableCell><Chip size="small" label={snippet.relation === 'owned' ? 'Propio' : 'Compartido'} color={snippet.relation === 'owned' ? 'primary' : 'default'} variant="outlined"/></TableCell>
+    <TableCell sx={{whiteSpace: 'nowrap', color: 'text.secondary'}}>{lintLabels[snippet.compliance]}</TableCell>
+  </TableRow>;
 }
-
-export const LoadingSnippetRow = () => {
-  return (
-      <TableRow sx={{height: '75px', padding: 0}}>
-        <StyledTableCell colSpan={4} sx={{
-          padding: 0
-        }}>
-          <Skeleton height={"75px"} width={"100%"} variant={"rectangular"}/>
-        </StyledTableCell>
-      </TableRow>
-  )
+export function LoadingSnippetRow() {
+  return <TableRow><TableCell colSpan={5}><Skeleton variant="rounded" height={48}/></TableCell></TableRow>;
 }
-

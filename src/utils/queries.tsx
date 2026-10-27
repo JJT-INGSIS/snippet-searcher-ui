@@ -1,173 +1,101 @@
-import {useMutation, UseMutationResult, useQuery} from 'react-query';
-import {CreateSnippet, PaginatedSnippets, Snippet, UpdateSnippet} from './snippet.ts';
-import {SnippetOperations} from "./snippetOperations.ts";
-import {PaginatedUsers} from "./users.ts";
-import {FakeSnippetOperations} from "./mock/fakeSnippetOperations.ts";
-import {TestCase} from "../types/TestCase.ts";
-import {FileType} from "../types/FileType.ts";
-import {Rule} from "../types/Rule.ts";
-// import {useAuth0} from "@auth0/auth0-react";
-// import {useEffect} from "react";
-
-
-export const useSnippetsOperations = () => {
-  // const {getAccessTokenSilently} = useAuth0()
-  //
-  // useEffect(() => {
-  //     getAccessTokenSilently()
-  //         .then(token => {
-  //             console.log(token)
-  //         })
-  //         .catch(error => console.error(error));
-  // });
-
-  const snippetOperations: SnippetOperations = new FakeSnippetOperations(/* getAccessTokenSilently */); // TODO: Replace with your implementation
-
-  return snippetOperations
-}
-
-export const useGetSnippets = (page: number = 0, pageSize: number = 10, snippetName?: string) => {
-  const snippetOperations = useSnippetsOperations()
-
-  return useQuery<PaginatedSnippets, Error>(['listSnippets', page,pageSize,snippetName], () => snippetOperations.listSnippetDescriptors(page, pageSize,snippetName));
+import {useMutation, useQuery, useQueryClient} from 'react-query';
+import {SnippetFilters, UpdateSnippet} from './snippet';
+import {useApi} from '../contexts/apiContext';
+import {CreationIntent} from './api/creationIntent';
+import {TestCase} from '../types/TestCase';
+import {Rule} from '../types/Rule';
+export const useSnippetsOperations = () => useApi().operations;
+export const snippetKeys = {
+  lists: (actor: string) => ['listSnippets', actor],
+  list: (actor: string, page: number, size: number, filters: SnippetFilters) => ['listSnippets', actor, page, size, filters],
+  detail: (actor: string, id: string) => ['snippet', actor, id],
+  users: (actor: string, name: string, page: number, size: number) => ['users', actor, name, page, size],
 };
-
-export const useGetSnippetById = (id: string) => {
-  const snippetOperations = useSnippetsOperations()
-
-  return useQuery<Snippet | undefined, Error>(['snippet', id], () => snippetOperations.getSnippetById(id), {
-    enabled: !!id, // This query will not execute until the id is provided
+export function useGetSnippets(page = 0, size = 10, filters: SnippetFilters = {}, enabled = true) {
+  const {actor, operations} = useApi();
+  return useQuery(snippetKeys.list(actor, page, size, filters), ({signal}) => operations.listSnippetDescriptors(page, size, filters, signal), {retry: false, enabled});
+}
+export function useGetSnippetById(id: string) {
+  const {actor, operations} = useApi();
+  return useQuery(snippetKeys.detail(actor, id), () => operations.getSnippetById(id), {enabled: !!id, retry: false});
+}
+export function useCreateSnippet() {
+  const {actor, operations} = useApi();
+  const cache = useQueryClient();
+  return useMutation((intent: CreationIntent) => operations.createSnippet(intent), {
+    retry: false,
+    onSuccess: () => {void cache.invalidateQueries(snippetKeys.lists(actor));},
   });
-};
-
-export const useCreateSnippet = ({onSuccess}: {onSuccess: () => void}): UseMutationResult<Snippet, Error, CreateSnippet> => {
-  const snippetOperations = useSnippetsOperations()
-
-  return useMutation<Snippet, Error, CreateSnippet>(createSnippet => snippetOperations.createSnippet(createSnippet), {onSuccess});
-};
-
-export const useUpdateSnippetById = ({onSuccess}: {onSuccess: () => void}): UseMutationResult<Snippet, Error, {
-  id: string;
-  updateSnippet: UpdateSnippet
-}> => {
-  const snippetOperations = useSnippetsOperations()
-
-  return useMutation<Snippet, Error, { id: string; updateSnippet: UpdateSnippet }>(
-      ({id, updateSnippet}) => snippetOperations.updateSnippetById(id, updateSnippet),{
-        onSuccess,
-    }
-  );
-};
-
-export const useGetUsers = (name: string = "", page: number = 0, pageSize: number = 10) => {
-  const snippetOperations = useSnippetsOperations()
-
-  return useQuery<PaginatedUsers, Error>(['users',name,page,pageSize], () => snippetOperations.getUserFriends(name,page, pageSize));
-};
-
-export const useShareSnippet = () => {
-  const snippetOperations = useSnippetsOperations()
-
-  return useMutation<Snippet, Error, { snippetId: string; userId: string }>(
-      ({snippetId, userId}) => snippetOperations.shareSnippet(snippetId, userId)
-  );
-};
-
-
+}
+export function useUpdateSnippetById() {
+  const {actor, operations} = useApi();
+  const cache = useQueryClient();
+  return useMutation(({id, updateSnippet}: {id: string; updateSnippet: UpdateSnippet}) => operations.updateSnippetById(id, updateSnippet), {
+    retry: false,
+    onSuccess: (_, {id}) => {
+      void cache.invalidateQueries(snippetKeys.lists(actor));
+      void cache.invalidateQueries(snippetKeys.detail(actor, id));
+    },
+  });
+}
+export function useGetUsers(name = '', page = 0, size = 10, enabled = true) {
+  const {actor, operations} = useApi();
+  return useQuery(snippetKeys.users(actor, name, page, size), ({signal}) => operations.getUserFriends(name, page, size, signal), {enabled, retry: false});
+}
+export function useShareSnippet() {
+  const {actor, operations} = useApi();
+  const cache = useQueryClient();
+  return useMutation(({snippetId, userId}: {snippetId: string; userId: string}) => operations.shareSnippet(snippetId, userId), {
+    retry: false,
+    onSuccess: (_, {snippetId}) => {
+      void cache.invalidateQueries(snippetKeys.lists(actor));
+      void cache.invalidateQueries(snippetKeys.detail(actor, snippetId));
+    },
+  });
+}
+export function useGetFileTypes() {
+  const operations = useSnippetsOperations();
+  return useQuery(['languages'], () => operations.getFileTypes(), {retry: false});
+}
+// Supplied components are retained for later stories, but never query a Fake or run unavailable operations.
 export const useGetTestCases = () => {
-  const snippetOperations = useSnippetsOperations()
-
-  return useQuery<TestCase[] | undefined, Error>(['testCases'], () => snippetOperations.getTestCases(), {});
+  const op = useSnippetsOperations();
+  return useQuery(['unavailable', 'testCases'], () => op.getTestCases(), {enabled: false});
 };
-
-
-export const usePostTestCase = () => {
-  const snippetOperations = useSnippetsOperations()
-
-  return useMutation<TestCase, Error, Partial<TestCase>>(
-      (tc) => snippetOperations.postTestCase(tc)
-  );
-};
-
-
-export const useRemoveTestCase = ({onSuccess}: {onSuccess: () => void}) => {
-  const snippetOperations = useSnippetsOperations()
-
-  return useMutation<string, Error, string>(
-      ['removeTestCase'],
-      (id) => snippetOperations.removeTestCase(id),
-      {
-        onSuccess,
-      }
-  );
-};
-
-export type TestCaseResult = "success" | "fail"
-
-export const useTestSnippet = () => {
-  const snippetOperations = useSnippetsOperations()
-
-  return useMutation<TestCaseResult, Error, Partial<TestCase>>(
-      (tc) => snippetOperations.testSnippet(tc)
-  )
-}
-
-
-
 export const useGetFormatRules = () => {
-  const snippetOperations = useSnippetsOperations()
-
-  return useQuery<Rule[], Error>('formatRules', () => snippetOperations.getFormatRules());
-}
-
-export const useModifyFormatRules = ({onSuccess}: {onSuccess: () => void}) => {
-  const snippetOperations = useSnippetsOperations()
-
-  return useMutation<Rule[], Error, Rule[]>(
-      rule => snippetOperations.modifyFormatRule(rule),
-      {onSuccess}
-  );
-}
-
-
+  const op = useSnippetsOperations();
+  return useQuery(['unavailable', 'formatRules'], () => op.getFormatRules(), {enabled: false});
+};
 export const useGetLintingRules = () => {
-  const snippetOperations = useSnippetsOperations()
-
-  return useQuery<Rule[], Error>('lintingRules', () => snippetOperations.getLintingRules());
-}
-
-
+  const op = useSnippetsOperations();
+  return useQuery(['unavailable', 'lintingRules'], () => op.getLintingRules(), {enabled: false});
+};
+export const usePostTestCase = () => {
+  const op = useSnippetsOperations();
+  return useMutation((tc: Partial<TestCase>) => op.postTestCase(tc), {retry: false});
+};
+export const useRemoveTestCase = ({onSuccess}: {onSuccess: () => void}) => {
+  const op = useSnippetsOperations();
+  return useMutation((id: string) => op.removeTestCase(id), {onSuccess, retry: false});
+};
+export type TestCaseResult = 'success' | 'fail';
+export const useTestSnippet = () => {
+  const op = useSnippetsOperations();
+  return useMutation((tc: Partial<TestCase>) => op.testSnippet(tc), {retry: false});
+};
+export const useModifyFormatRules = ({onSuccess}: {onSuccess: () => void}) => {
+  const op = useSnippetsOperations();
+  return useMutation((rules: Rule[]) => op.modifyFormatRule(rules), {onSuccess, retry: false});
+};
 export const useModifyLintingRules = ({onSuccess}: {onSuccess: () => void}) => {
-  const snippetOperations = useSnippetsOperations()
-
-  return useMutation<Rule[], Error, Rule[]>(
-      rule => snippetOperations.modifyLintingRule(rule),
-      {onSuccess}
-  );
-}
-
+  const op = useSnippetsOperations();
+  return useMutation((rules: Rule[]) => op.modifyLintingRule(rules), {onSuccess, retry: false});
+};
 export const useFormatSnippet = () => {
-  const snippetOperations = useSnippetsOperations()
-
-  return useMutation<string, Error, string>(
-      snippetContent => snippetOperations.formatSnippet(snippetContent)
-  );
-}
-
+  const op = useSnippetsOperations();
+  return useMutation((content: string) => op.formatSnippet(content), {retry: false});
+};
 export const useDeleteSnippet = ({onSuccess}: {onSuccess: () => void}) => {
-  const snippetOperations = useSnippetsOperations()
-
-  return useMutation<string, Error, string>(
-      id => snippetOperations.deleteSnippet(id),
-      {
-        onSuccess,
-      }
-  );
-}
-
-
-export const useGetFileTypes = () => {
-  const snippetOperations = useSnippetsOperations()
-
-  return useQuery<FileType[], Error>('fileTypes', () => snippetOperations.getFileTypes());
-}
+  const op = useSnippetsOperations();
+  return useMutation((id: string) => op.deleteSnippet(id), {onSuccess, retry: false});
+};

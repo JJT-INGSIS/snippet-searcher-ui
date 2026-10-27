@@ -21,7 +21,7 @@ export const DeleteConfirmationModal = (props: DeleteConfirmationModalProps) => 
   })
 
   return (
-      <ModalWrapper open={open} onClose={onClose}>
+      <ModalWrapper open={open} onClose={onClose} title="Eliminar snippet">
         <Typography variant={"h6"}>Are you sure you want to delete this snippet?</Typography>
           <Box display={"flex"} justifyContent={"center"}>
             <Button onClick={onClose} variant={"outlined"}>Cancel</Button>

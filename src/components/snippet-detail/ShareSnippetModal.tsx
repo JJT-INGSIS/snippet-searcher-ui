@@ -1,55 +1,43 @@
-import {Autocomplete, Box, Button, Divider, TextField, Typography} from "@mui/material";
-import {ModalWrapper} from "../common/ModalWrapper.tsx";
-import {useGetUsers} from "../../utils/queries.tsx";
-import {useEffect, useState} from "react";
-import {User} from "../../utils/users.ts";
+import {Autocomplete, Button, CircularProgress, TextField} from '@mui/material';
+import {ModalWrapper} from '../common/ModalWrapper';
+import {useGetUsers} from '../../utils/queries';
+import {useEffect, useRef, useState} from 'react';
+import {User} from '../../utils/users';
+import {ApiErrorAlert} from '../common/ApiErrorAlert';
+import useDebounce from '../../hooks/useDebounce';
 
-type ShareSnippetModalProps = {
-  open: boolean
-  onClose: () => void
-  onShare: (userId: string) => void
-  loading: boolean
-}
-export const ShareSnippetModal = (props: ShareSnippetModalProps) => {
-  const {open, onClose, onShare, loading} = props
-  const [name, setName] = useState("")
-  const [debouncedName, setDebouncedName] = useState("")
-  const {data, isLoading} = useGetUsers(debouncedName, 1, 5)
-  const [selectedUser, setSelectedUser] = useState<User | undefined>()
-
-  useEffect(() => {
-    const getData = setTimeout(() => {
-      setDebouncedName(name)
-    }, 3000)
-    return () => clearTimeout(getData)
-  }, [name])
-
-  function handleSelectUser(newValue: User | null) {
-    newValue && setSelectedUser(newValue)
+type Props = {open: boolean; onClose: () => void; onShare: (userId: string) => Promise<void>; loading: boolean};
+export function ShareSnippetModal({open, onClose, onShare, loading}: Props) {
+  const [name, setName] = useState('');
+  const search = useDebounce(name);
+  const [selected, setSelected] = useState<User | null>(null);
+  const [failure, setFailure] = useState<Error | null>(null);
+  const submitting = useRef(false);
+  const waiting = name !== search;
+  const {data, isLoading, error, refetch} = useGetUsers(search, 0, 5, open && !waiting);
+  useEffect(() => {if (!open) {setSelected(null); setFailure(null); setName('');}}, [open]);
+  async function share() {
+    if (!selected || loading || submitting.current || waiting) return;
+    submitting.current = true;
+    try {await onShare(selected.id); onClose();}
+    catch (cause) {setFailure(cause instanceof Error ? cause : new Error('Share not confirmed'));}
+    finally {submitting.current = false;}
   }
-
-  return (
-      <ModalWrapper open={open} onClose={onClose}>
-        <Typography variant={"h5"}>Share your snippet</Typography>
-        <Divider/>
-        <Box mt={2}>
-          <Autocomplete
-              renderInput={(params) => <TextField {...params} label="Type the user's name"/>}
-              options={data?.users ?? []}
-              isOptionEqualToValue={(option, value) =>
-                  option.id === value.id
-              }
-              getOptionLabel={(option) => option.name}
-              loading={isLoading}
-              value={selectedUser}
-              onInputChange={(_: unknown, newValue: string | null) => newValue && setName(newValue)}
-              onChange={(_: unknown, newValue: User | null) => handleSelectUser(newValue)}
-          />
-          <Box mt={4} display={"flex"} width={"100%"} justifyContent={"flex-end"}>
-            <Button onClick={onClose} variant={"outlined"}>Cancel</Button>
-            <Button disabled={!selectedUser || loading} onClick={() => selectedUser && onShare(selectedUser?.id)} sx={{marginLeft: 2}} variant={"contained"}>Share</Button>
-          </Box>
-        </Box>
-      </ModalWrapper>
-  )
+  return <ModalWrapper open={open} onClose={onClose} title="Compartir snippet" pending={loading}
+    description="Elegí un destinatario. Podrá leer el snippet; no podrá editarlo ni volver a compartirlo."
+    actions={<>
+      <Button disabled={loading} onClick={onClose}>Cancelar</Button>
+      <Button data-testid="confirm-share" variant="contained" disabled={!selected || loading || waiting} onClick={share}
+        startIcon={loading ? <CircularProgress size={18} color="inherit"/> : undefined}>{loading ? 'Compartiendo…' : 'Compartir'}</Button>
+    </>}>
+    <ApiErrorAlert error={failure || (!waiting && error instanceof Error ? error : null)} focusOnError={!!failure}/>
+    {!!error && !waiting && <Button onClick={() => refetch()}>Reintentar destinatarios</Button>}
+    <Autocomplete options={waiting || error ? [] : data?.users ?? []} value={selected} filterOptions={options => options}
+      getOptionLabel={option => option.name} isOptionEqualToValue={(left, right) => left.id === right.id}
+      loading={waiting || isLoading} loadingText="Buscando destinatarios…" noOptionsText={error ? 'Destinatarios no disponibles' : 'No hay coincidencias'}
+      disabled={loading} inputValue={name}
+      onInputChange={(_, value, reason) => {setName(value); if (reason === 'input' || reason === 'clear') setSelected(null);}}
+      onChange={(_, value) => setSelected(value)}
+      renderInput={params => <TextField {...params} label="Buscar destinatario" autoComplete="off"/>}/>
+  </ModalWrapper>;
 }

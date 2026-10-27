@@ -1,131 +1,42 @@
-import {
-    Box,
-    Button,
-    capitalize,
-    CircularProgress,
-    Input,
-    InputLabel,
-    MenuItem,
-    Select,
-    SelectChangeEvent,
-    Typography
-} from "@mui/material";
-import {highlight, languages} from "prismjs";
-import {useEffect, useState} from "react";
-import Editor from "react-simple-code-editor";
+import {Alert, Button, CircularProgress, MenuItem, Stack, TextField} from '@mui/material';
+import {SaveRounded} from '@mui/icons-material';
+import {SnippetDraft} from '../../utils/snippet';
+import {ModalWrapper} from '../common/ModalWrapper';
+import {useGetFileTypes} from '../../utils/queries';
+import {ApiErrorAlert} from '../common/ApiErrorAlert';
+import {CodeEditor} from '../common/CodeEditor';
+import {useSnippetCreation} from '../../hooks/useSnippetCreation';
 
-import "prismjs/components/prism-clike";
-import "prismjs/components/prism-javascript";
-import "prismjs/themes/prism-okaidia.css";
-import {Save} from "@mui/icons-material";
-import {CreateSnippet, CreateSnippetWithLang} from "../../utils/snippet.ts";
-import {ModalWrapper} from "../common/ModalWrapper.tsx";
-import {useCreateSnippet, useGetFileTypes} from "../../utils/queries.tsx";
-import {queryClient} from "../../App.tsx";
-
-export const AddSnippetModal = ({open, onClose, defaultSnippet}: {
-    open: boolean,
-    onClose: () => void,
-    defaultSnippet?: CreateSnippetWithLang
-}) => {
-    const [language, setLanguage] = useState(defaultSnippet?.language ?? "printscript");
-    const [code, setCode] = useState(defaultSnippet?.content ?? "");
-    const [snippetName, setSnippetName] = useState(defaultSnippet?.name ?? "")
-    const {mutateAsync: createSnippet, isLoading: loadingSnippet} = useCreateSnippet({
-        onSuccess: () => queryClient.invalidateQueries('listSnippets')
-    })
-    const {data: fileTypes} = useGetFileTypes();
-
-    const handleCreateSnippet = async () => {
-        const newSnippet: CreateSnippet = {
-            name: snippetName,
-            content: code,
-            language: language,
-            extension: fileTypes?.find((f) => f.language === language)?.extension ?? "prs"
-        }
-        await createSnippet(newSnippet);
-        onClose();
-    }
-
-    useEffect(() => {
-        if (defaultSnippet) {
-            setCode(defaultSnippet?.content)
-            setLanguage(defaultSnippet?.language)
-            setSnippetName(defaultSnippet?.name)
-        }
-    }, [defaultSnippet]);
-
-    return (
-        <ModalWrapper open={open} onClose={onClose}>
-            {
-                <Box sx={{display: 'flex', flexDirection: "row", justifyContent: "space-between"}}>
-                    <Typography id="modal-modal-title" variant="h5" component="h2"
-                                sx={{display: 'flex', alignItems: 'center'}}>
-                        Add Snippet
-                    </Typography>
-                    <Button disabled={!snippetName || !code || !language || loadingSnippet} variant="contained"
-                            disableRipple
-                            sx={{boxShadow: 0}} onClick={handleCreateSnippet}>
-                        <Box pr={1} display={"flex"} alignItems={"center"} justifyContent={"center"}>
-                            {loadingSnippet ? <CircularProgress size={24}/> : <Save/>}
-                        </Box>
-                        Save Snippet
-                    </Button>
-                </Box>
-            }
-            <Box sx={{
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '16px'
-            }}>
-                <InputLabel htmlFor="name">Name</InputLabel>
-                <Input onChange={e => setSnippetName(e.target.value)} value={snippetName} id="name"
-                       sx={{width: '50%'}}/>
-            </Box>
-            <Box sx={{
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '16px'
-            }}>
-                <InputLabel htmlFor="name">Language</InputLabel>
-                <Select
-                    labelId="demo-simple-select-label"
-                    id="demo-simple-select"
-                    value={language}
-                    label="Age"
-                    onChange={(e: SelectChangeEvent<string>) => setLanguage(e.target.value)}
-                    sx={{width: '50%'}}
-                >
-                    {
-                        fileTypes?.map(x => (
-                            <MenuItem data-testid={`menu-option-${x.language}`} key={x.language}
-                                      value={x.language}>{capitalize((x.language))}</MenuItem>
-                        ))
-                    }
-                </Select>
-            </Box>
-            <InputLabel>Code Snippet</InputLabel>
-            <Box width={"100%"} sx={{
-                backgroundColor: 'black', color: 'white', borderRadius: "8px",
-            }}>
-                <Editor
-                    value={code}
-                    padding={10}
-                    data-testid={"add-snippet-code-editor"}
-                    onValueChange={(code) => setCode(code)}
-                    highlight={(code) => highlight(code, languages.js, 'javascript')}
-                    style={{
-                        borderRadius: "8px",
-                        overflow: "auto",
-                        minHeight: "300px",
-                        maxHeight: "600px",
-                        width: "100%",
-                        fontFamily: "monospace",
-                        fontSize: 17,
-                    }}
-                />
-            </Box>
-        </ModalWrapper>
-    )
+export function AddSnippetModal({open, onClose, defaultSnippet}: {open: boolean; onClose: () => void; defaultSnippet?: SnippetDraft}) {
+  const form = useSnippetCreation(open, defaultSnippet, onClose);
+  const {data: types, error, refetch} = useGetFileTypes();
+  const versions = types?.find(type => type.language === form.draft.language)?.versions ?? [];
+  return <ModalWrapper open={open} onClose={onClose} title="Nuevo snippet" pending={form.saving}
+    description="Escribí tu código o revisá el archivo subido. Elegí el lenguaje y su versión antes de guardar."
+    actions={<>
+      <Button disabled={form.saving} onClick={onClose}>Cerrar</Button>
+      <Button data-testid="save-snippet" variant="contained" startIcon={form.saving ? <CircularProgress size={18} color="inherit"/> : <SaveRounded/>}
+        onClick={form.save} disabled={form.saving || (!form.uncertain && (!form.draft.name.trim() || !versions.includes(form.draft.version)))}>
+        {form.saving ? 'Guardando…' : form.uncertain ? 'Reintentar misma creación' : 'Guardar snippet'}
+      </Button>
+    </>}>
+    <ApiErrorAlert error={form.error} creation focusOnError/>
+    {!!error && <Alert severity="warning" action={<Button onClick={() => refetch()}>Reintentar</Button>}>No se pudo cargar el catálogo de lenguajes. No se elegirá una versión por defecto.</Alert>}
+    {form.uncertain && <Alert severity="warning">Conservamos los datos de esta creación mientras esta página siga abierta. Reintentá la misma solicitud. Recargar la página pierde esta información.</Alert>}
+    <TextField id="name" label="Nombre" name="snippetName" value={form.draft.name} disabled={form.locked}
+      autoComplete="off" required onChange={event => form.change({name: event.target.value})}/>
+    <TextField id="description" label="Descripción (opcional)" name="description" multiline minRows={2} value={form.draft.description ?? ''}
+      disabled={form.locked} onChange={event => form.change({description: event.target.value})}/>
+    <Stack direction={{xs: 'column', sm: 'row'}} gap={2} sx={{'& > *': {flex: 1, minWidth: 0}}}>
+      <TextField select id="language" label="Lenguaje" SelectProps={{labelId: 'language-label'}} value={form.draft.language} disabled={form.locked || !types?.length}
+        onChange={event => form.change({language: event.target.value, version: ''})}>
+        {types?.map(type => <MenuItem key={type.language} value={type.language}>{type.language}</MenuItem>)}
+      </TextField>
+      <TextField select id="version" label="Versión" SelectProps={{labelId: 'version-label'}} value={form.draft.version} disabled={form.locked || !versions.length}
+        onChange={event => form.change({version: event.target.value})}>
+        {versions.map(version => <MenuItem key={version} value={version}>{version}</MenuItem>)}
+      </TextField>
+    </Stack>
+    <CodeEditor id="create-code" value={form.draft.content} readOnly={form.locked} onChange={content => form.change({content})}/>
+  </ModalWrapper>;
 }
-
