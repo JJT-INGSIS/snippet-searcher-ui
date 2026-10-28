@@ -53,7 +53,7 @@ describe('SNI-50 scoped test definitions', () => {
     input('Input 1').should('have.value', ''); input('Input 2').should('have.value', 'ñ');
     cy.screenshot('sni50-saved-definition', {capture: 'viewport'});
   });
-  it('lists shared tests read-only without offering creation, edit, deletion or execution', () => {
+  it('lists shared tests read-only and allows execution without granting writes', () => {
     setup(true, 'dev-ana');
     cy.intercept('GET', '/api/snippets/' + first + '/tests', req => {
       expect(req.headers['x-dev-actor-id']).to.eq('dev-ana'); req.reply({items: [definition]});
@@ -63,7 +63,8 @@ describe('SNI-50 scoped test definitions', () => {
     cy.contains('[role="tab"]', 'Nuevo test').should('not.exist');
     cy.get('[data-testid="save-test"]').should('not.exist');
     input('Input 1').should('have.attr', 'readonly');
-    for (const action of ['Ejecutar test', 'Editar test', 'Eliminar test']) cy.contains('button', new RegExp('^' + action + '$')).should('be.disabled');
+    cy.contains('button', /^Ejecutar test$/).should('be.enabled');
+    for (const action of ['Editar test', 'Eliminar test']) cy.contains('button', new RegExp('^' + action + '$')).should('be.disabled');
   });
   it('distinguishes a failed list from an empty list and retries explicitly', () => {
     setup(); let attempts = 0;
