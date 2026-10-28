@@ -27,6 +27,8 @@ La UI y el backend son procesos separados. No hace falta encender las VMs de Azu
 
 **[Paso a paso completo para el equipo: preparación, backend, UI, pruebas y apagado](docs/local-development.md).**
 
+[Aceptación US5–7 con UI, Permissions y Asset reales — SNI-36](docs/sni-36-real-backend.md): pruebas opt-in con tres actores, fallos reales y recreación conservando datos.
+
 ## Preparación inicial de la UI
 
 Usar Node 24 LTS (probado con 24.19.0) y npm. No requiere credenciales de paquetes. Los scripts de instalación permitidos en package.json están fijados a las versiones del lockfile de Cypress y esbuild; no se cambia la configuración global de npm.
