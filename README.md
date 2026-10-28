@@ -202,3 +202,7 @@ Ver [cambios, comandos, evidencia real y límites](docs/sni-35-validation.md).
 - SNI-36 completa la aceptación con los endpoints pendientes y storage oficial; el éxito de los contratos no sustituye esa prueba.
 - Auth0, lint, tests y ejecución se incorporan en sus tickets; no agregar fake success para avanzar.
 - Revisar las dependencias heredadas del upstream antes del despliegue de la UI. Este cambio no hace una migración general de framework ni un audit fix forzado.
+
+## Herramientas de CD — SNI-44
+
+El caller usa workflows centrales `v0.6.2`, con la revisión fija de infra que corrige el doble escape de healthchecks. Este mantenimiento cambia sólo herramientas y documentación: no promueve funcionalidades nuevas de dev ni cambia la imagen en producción. Antes de reaplicar infraestructura, actualizar los cuatro callers del ambiente y esperar ejecuciones activas; no reejecutar herramientas antiguas sobre el stack ampliado.
