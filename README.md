@@ -200,6 +200,12 @@ Ver [cambios, comandos, evidencia real y límites](docs/sni-35-validation.md).
 
 ## Próximas extensiones
 
+El CI frontend y el CD usan los workflows centrales `v0.6.2`. La versión fija
+las herramientas corregidas de infra para recuperación/reapply (SNI-44), sin
+cambiar el build frontend ni el despliegue independiente por digest. Actualizar
+todos los callers del ambiente y esperar ejecuciones activas antes de reaplicar
+infraestructura; no reejecutar herramientas antiguas sobre el stack ampliado.
+
 - SNI-54 ya verifica el catálogo GET /languages; SNI-35 lo consume sin datos inventados.
 - Listado, destinatarios, detalle y edición ya fueron verificados localmente con Permissions. Sharing público sigue pendiente de aceptación real.
 - SNI-36 completa la aceptación con los endpoints pendientes y storage oficial; el éxito de los contratos no sustituye esa prueba.
