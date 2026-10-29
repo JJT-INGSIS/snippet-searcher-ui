@@ -213,3 +213,5 @@ infraestructura; no reejecutar herramientas antiguas sobre el stack ampliado.
   Las definiciones de tests de SNI-50 requieren los endpoints reales de SNI-46;
   las pruebas de contrato de UI no acreditan esa integración backend.
 - Revisar las dependencias heredadas del upstream antes del despliegue de la UI. Este cambio no hace una migración general de framework ni un audit fix forzado.
+
+Validación de código vacío: [SNI-55](docs/empty-code.md).

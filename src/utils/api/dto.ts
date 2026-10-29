@@ -2,6 +2,7 @@ import {ComplianceEnum, CreateSnippet, PaginatedSnippets, Snippet, SnippetDescri
 import {ApiError} from './errors';
 import {PaginatedUsers} from '../users';
 import {FileType} from '../../types/FileType';
+import {snippetCodeError} from '../codeValidation';
 export type WriteSnippetDto = Omit<CreateSnippet, 'content'> & {code: string};
 export type MetadataDto = Omit<WriteSnippetDto, 'code'> & {id: string};
 export type DescriptorDto = MetadataDto & {
@@ -11,9 +12,11 @@ export type DetailDto = DescriptorDto & {code: string; capabilities: Snippet['ca
 export type SnippetPageDto = {page: number; page_size: number; count: number; snippets: DescriptorDto[]};
 export const invalidResponse = () => new ApiError('Unexpected API response. The operation was not confirmed.', undefined, true);
 const nonblank = (value: unknown) => typeof value === 'string' && value.trim().length > 0;
-export const toWriteDto = (input: CreateSnippet): WriteSnippetDto => ({
-  name: input.name, description: input.description, language: input.language, version: input.version, code: input.content,
-});
+export function toWriteDto(input: CreateSnippet): WriteSnippetDto {
+  const error = snippetCodeError(input.content);
+  if (error) throw new ApiError(error, {type: 'urn:snippets:problem:invalid-request', status: 400, field: 'code'});
+  return {name: input.name, description: input.description, language: input.language, version: input.version, code: input.content};
+}
 export function fromMetadataDto(dto: MetadataDto): SnippetMetadata {
   if (!dto || ![dto.id, dto.name, dto.language, dto.version].every(nonblank) ||
       !(dto.description === null || typeof dto.description === 'string')) throw invalidResponse();
