@@ -1,5 +1,6 @@
 import {ComplianceEnum} from './snippet';
 import {ApiError} from './api/errors';
+import {emptyCodeMessage} from './codeValidation';
 
 export const lintLabels: Record<ComplianceEnum, string> = {
   'not-implemented': 'Sin evaluación', pending: 'Pendiente', failed: 'No se pudo evaluar',
@@ -25,6 +26,7 @@ const problemMessages: Record<string, string> = {
 export function errorMessage(error: Error): string {
   if (!(error instanceof ApiError)) return 'No pudimos completar la operación. Volvé a intentarlo.';
   const category = error.problem?.type.replace('urn:snippets:problem:', '');
+  if (category === 'invalid-request' && error.problem?.field === 'code') return emptyCodeMessage;
   if (category && problemMessages[category]) return problemMessages[category];
   if (error.uncertain) return 'No recibimos confirmación del servidor. Revisá tu conexión y volvé a intentarlo.';
   return 'No pudimos completar la operación. Revisá los datos e intentá nuevamente.';

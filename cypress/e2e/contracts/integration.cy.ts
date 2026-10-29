@@ -49,6 +49,42 @@ describe('SNI-34 UI / pending backend contracts', () => {
     cy.get('[data-testid="save-snippet"]').click(); cy.wait('@create'); cy.wait('@list');
     cy.contains('[role=dialog] h2', 'Nuevo snippet').should('not.exist');
   });
+  it('rejects an empty editor locally and permits correction without locking the creation', () => {
+    setup(); openCreate();
+    cy.intercept('POST', '/api/snippets', req => {
+      expect(req.body.code).to.eq('println(2);');
+      req.reply(201, {...metadata, name: 'New snippet'});
+    }).as('nonempty-create');
+    cy.get('#create-code').clear();
+    cy.get('[data-testid="save-snippet"]').should('be.enabled').click();
+    cy.contains('El código no puede estar vacío.').should('be.visible');
+    cy.contains('Campo: code').should('be.visible');
+    cy.get('@nonempty-create.all').should('have.length', 0);
+    cy.get('#create-code').should('not.have.attr', 'readonly');
+    cy.get('#create-code').type('println(2);');
+    cy.get('[data-testid="save-snippet"]').click(); cy.wait('@nonempty-create');
+    cy.get('[role="dialog"]').should('not.exist');
+  });
+  it('keeps an empty replacement draft visible and sends no PUT', () => {
+    setup();
+    cy.intercept('PUT', '/api/snippets/' + id, {statusCode: 500}).as('empty-update');
+    cy.get('[data-testid="snippet-row"] button').click(); cy.wait('@detail');
+    cy.get('#detail-code').clear().type('   '); cy.get('[data-testid="save-changes"]').click();
+    cy.contains('El código no puede estar vacío.').scrollIntoView().should('be.visible');
+    cy.get('#detail-code').should('have.value', '   ').and('not.have.attr', 'readonly');
+    cy.get('@empty-update.all').should('have.length', 0);
+    cy.contains('Cambios guardados.').should('not.exist');
+  });
+  it('rejects an empty upload and permits choosing the same filename again', () => {
+    setup(); cy.wait('@catalog');
+    cy.intercept('POST', '/api/snippets', {statusCode: 500}).as('empty-upload');
+    cy.get('[data-testid="upload-file-input"]').selectFile({contents: Cypress.Buffer.from(' \t\r\n'), fileName: 'empty.prs'}, {force: true});
+    cy.contains('El código no puede estar vacío.').should('be.visible');
+    cy.get('[role="dialog"]').should('not.exist');
+    cy.get('@empty-upload.all').should('have.length', 0);
+    cy.get('[data-testid="upload-file-input"]').selectFile({contents: Cypress.Buffer.from('println(1);'), fileName: 'empty.prs'}, {force: true});
+    cy.get('#create-code').should('have.value', 'println(1);');
+  });
   it('shows parser diagnostics and preserves the draft', () => {
     setup(); openCreate();
     cy.intercept('POST', '/api/snippets', {statusCode: 422, body: {
