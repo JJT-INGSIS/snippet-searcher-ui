@@ -6,6 +6,7 @@ import {useCreateSnippetTest, useSnippetTests} from '../../utils/queries';
 import {TestDefinitionDraft} from '../../types/TestDefinition';
 import {ApiError} from '../../utils/api/errors';
 import {TabPanel} from './TabPanel';
+import {SnippetExecution} from '../../screens/SnippetExecution';
 
 export function TestSnippetModal({snippetId, canCreate, onClose}: {
   snippetId: string; canCreate: boolean; onClose: () => void;
@@ -66,8 +67,10 @@ export function TestSnippetModal({snippetId, canCreate, onClose}: {
         disabled={creation.isLoading || !tests.isSuccess || tests.isFetching} onClick={save}>
         {creation.isLoading ? 'Guardando…' : uncertain ? 'Volver a enviar (puede duplicar)' : 'Guardar test'}
       </Button>}
-      <Button disabled>Ejecutar test</Button><Button disabled>Editar test</Button><Button disabled>Eliminar test</Button>
+      <Button disabled>Editar test</Button><Button disabled>Eliminar test</Button>
     </Stack>
-    <Typography variant="body2" color="text.secondary">La ejecución, edición y eliminación de tests no están disponibles en esta entrega.</Typography>
+    {tests.isSuccess && selected && selected !== 'new' && <SnippetExecution key={snippetId + ':' + selected}
+      snippetId={snippetId} testId={selected} disabled={tests.isFetching || creation.isLoading}/>}
+    <Typography variant="body2" color="text.secondary">La edición y eliminación de tests no están disponibles en esta entrega.</Typography>
   </ModalWrapper>;
 }

@@ -10,6 +10,7 @@ import {lintLabels} from '../utils/presentation';
 import {useSnippetEditor} from '../hooks/useSnippetEditor';
 import {TestSnippetModal} from '../components/snippet-test/TestSnippetModal';
 import {useApi} from '../contexts/apiContext';
+import {SnippetExecution} from './SnippetExecution';
 
 function DownloadButton({snippet}: {snippet: Snippet}) {
   const [url, setUrl] = useState<string>();
@@ -60,9 +61,10 @@ export function SnippetDetail({id, handleCloseModal}: {id: string; handleCloseMo
       </Stack>
       <Stack direction="row" flexWrap="wrap" gap={1}>
         <Button onClick={() => setTestsOpen(true)} disabled={!!error}>Ver tests</Button>
-        <Button disabled>Ejecutar tests</Button><Button disabled>Formatear</Button><Button disabled>Eliminar</Button>
+        <Button disabled>Formatear</Button><Button disabled>Eliminar</Button>
       </Stack>
-      <Typography variant="body2" color="text.secondary">La ejecución de tests, formato y eliminación todavía no están disponibles.</Typography>
+      {!error && <SnippetExecution key={actor + ':' + id} snippetId={id}/>}
+      <Typography variant="body2" color="text.secondary">El formato y la eliminación todavía no están disponibles.</Typography>
     </Stack>}
     <ShareSnippetModal open={shareOpen} loading={share.isLoading} onClose={() => setShareOpen(false)}
       onShare={async userId => {await share.mutateAsync({snippetId: id, userId});}}/>

@@ -1,5 +1,7 @@
 import axios, {AxiosInstance} from 'axios';
-import {RuntimeConfig, actorScope, parseRuntimeConfig} from './config';
+import {RuntimeConfig, actorScope, identityHeaders} from './config';
+import {createExecutionHttp} from './executionHttp';
+import {ExecutionSession} from '../executionSession';
 import {ApiError, toApiError, unsupported} from './errors';
 import {SnippetOperations} from '../snippetOperations';
 import {DetailDto, MetadataDto, SnippetPageDto, fromDetailDto, fromMetadataDto, fromPageDto, toWriteDto, fromLanguagesDto, fromUsersDto, invalidResponse} from './dto';
@@ -8,10 +10,10 @@ import {Share} from '../snippet';
 import {FileType} from '../../types/FileType';
 import {fromTestDefinition, fromTestDefinitions, toTestDefinitionDraft} from './testDefinitions';
 export function createApiClient(config: RuntimeConfig): AxiosInstance {
-  const validated = parseRuntimeConfig(config);
+  const headers = identityHeaders(config);
   const client = axios.create({baseURL: '/api', timeout: 15000});
   client.interceptors.request.use(request => {
-    if (request.url !== '/languages' && validated.identity.mode === 'dev') request.headers.set('X-Dev-Actor-Id', validated.identity.actorId);
+    if (request.url !== '/languages') Object.entries(headers).forEach(([name, value]) => request.headers.set(name, value));
     return request;
   });
   client.interceptors.response.use(response => response, (error: unknown) => Promise.reject(axios.isCancel(error) ? error : toApiError(error)));
@@ -66,5 +68,5 @@ export function createHttpSnippetOperations(client: AxiosInstance, actorId: stri
 }
 export function configuredApi(config: RuntimeConfig) {
   const actor = actorScope(config);
-  return {actor, operations: createHttpSnippetOperations(createApiClient(config), actor)};
+  return {actor, operations: createHttpSnippetOperations(createApiClient(config), actor), execution: new ExecutionSession(createExecutionHttp(config))};
 }
