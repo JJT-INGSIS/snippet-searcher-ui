@@ -1,3 +1,4 @@
+import {AutomaticTests} from './api/automaticTests';
 import {PaginatedSnippets, Share, Snippet, SnippetFilters, SnippetMetadata, UpdateSnippet} from './snippet';
 import {PaginatedUsers} from './users';
 import {TestCase} from '../types/TestCase';
@@ -16,6 +17,7 @@ export interface SnippetOperations {
   getFileTypes(): Promise<FileType[]>;
   getFormatRules(): Promise<Rule[]>;
   getLintingRules(): Promise<Rule[]>;
+  getAutomaticTests(snippetId: string, signal?: AbortSignal): Promise<AutomaticTests>;
   listTestDefinitions(snippetId: string, signal?: AbortSignal): Promise<TestDefinition[]>;
   formatSnippet(snippet: string): Promise<string>;
   createTestDefinition(snippetId: string, testCase: TestDefinitionDraft): Promise<TestDefinition>;
