@@ -19,3 +19,8 @@ export async function loadRuntimeConfig(): Promise<RuntimeConfig> {
   return parseRuntimeConfig(await response.json());
 }
 export const actorScope = (config: RuntimeConfig) => config.identity.mode === 'dev' ? config.identity.actorId : 'identity-disabled';
+
+export function identityHeaders(config: RuntimeConfig): Record<string, string> {
+  const validated = parseRuntimeConfig(config);
+  return validated.identity.mode === 'dev' ? {'X-Dev-Actor-Id': validated.identity.actorId} : {};
+}

@@ -1,6 +1,6 @@
 # Snippet Searcher UI
 
-UI de la cátedra basada en React, MUI, Vite y React Query 3, integrada mediante Axios con la API pública de Snippets.
+UI de la cátedra basada en React, MUI, Vite y React Query 3, integrada mediante Axios y fetch streaming con la API pública de Snippets.
 
 ## Origen y ramas
 
@@ -125,7 +125,9 @@ Elegir la versión es obligatorio. No se deduce de la extensión ni se escoge au
 
 SNI-50 conecta creación/listado de definiciones de tests por snippet mediante HTTP.
 Ver [contrato, decisiones y verificación](docs/sni-50-test-definitions.md).
-Ejecución, edición/borrado de tests, reglas, formateo y borrado de snippets permanecen
+SNI-51 conecta la ejecución incremental de un test guardado y la ejecución interactiva
+en los paneles existentes. Ver [comportamiento, decisiones y pruebas](docs/sni-51-execution.md).
+Edición/borrado de tests, reglas, formateo y borrado de snippets permanecen
 deshabilitados; no se fabrican resultados ni éxitos.
 El Fake fue retirado. Se conservan los componentes provistos para esas historias futuras, pero no se montan sus flujos simulados.
 La descarga original existente utiliza el código leído; no implementa descarga de código formateado ni US13.
