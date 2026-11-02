@@ -28,7 +28,9 @@ describe('SNI-36 / real providers and sharing', () => {
     cy.wait('@create').then(({response}) => {expect(response?.statusCode).to.eq(201); snippetId = response?.body.id;});
     cy.get('input[placeholder="Nombre del snippet…"]').type(name);
     cy.contains('[data-testid="snippet-row"] button', name).click();
-    cy.get('#detail-code').should('have.value', code).clear().type(updated, {parseSpecialCharSequences: false});
+    cy.get('#detail-code').should('have.value', code);
+    cy.get('#detail-code').clear();
+    cy.get('#detail-code').type(updated, {parseSpecialCharSequences: false});
     cy.intercept('PUT', '/api/snippets/*').as('update');
     cy.get('[data-testid="save-changes"]').click(); cy.wait('@update').its('response.statusCode').should('eq', 200);
     cy.contains('Cambios guardados.').should('be.visible');

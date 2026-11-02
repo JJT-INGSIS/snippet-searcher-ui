@@ -208,3 +208,41 @@ Cypress conserva avisos previos de utilitarios macOS de otra arquitectura y Vite
 su aviso de tamaño del bundle; las ejecuciones indicadas concluyeron con código 0.
 No se cambiaron dependencias, contratos ni implementación de producción.
 
+
+## Revalidación contra dev — 02/11/2026
+
+UI con dev `3ce356d` integrado en esta rama. Se reconstruyeron los servicios desde
+sus Dockerfiles, con secretos BuildKit existentes y sin construir ni desplegar en
+Azure. Las revisiones exactas fueron:
+
+- snippets-service: `c0b711dca8b5a9aad329d46823d1b1b6e624f189`.
+- permissions-service: `46e7af36864c36b824376ff06dfd7a0a69726b75`.
+- printscript-service: `f758bbf62c422fe2ec5bf6f8f54afee5011a148a`.
+
+Imágenes locales resultantes:
+
+- snippets-service: `sha256:f3f0fc89e984c942788d244436cd1c753a548bff43d516b49e6d2d9af465337c`.
+- permissions-service: `sha256:1ecef13645a5e51ebfd818ef68f557802bafa52cd47dd8d9e8f00c5bf82a45f0`.
+- printscript-service: `sha256:968706ac7b51055997859b2be26e5d6f7305f3baf4f4bd5d4f55840ee1c4f978`.
+
+Las cinco fases de API pasaron: healthy, permissions-down, storage-down,
+metadata-write-failure y after-recreate. Los tres casos de navegador reales
+pasaron en sus fases respectivas: owner/lector/tercero, caída de Permissions y
+caída de Asset con creación no confirmada. Cada invocación selecciona su fase;
+los skips de las demás fases no representan criterios omitidos.
+
+También pasaron 73 tests unitarios, lint/build y 28 casos Cypress de contratos.
+El test de upload espera el atributo accept que acredita que React ya aplicó el
+catálogo; esperar sólo el HTTP no alcanzaba. El test real separa verificar el
+contenido de borrarlo/escribirlo para que Cypress no reintente una precondición
+que la propia edición acaba de cambiar. No se agregaron pausas fijas.
+
+Después de recrear servicios se espera además GET /snippets con la identidad dev
+del owner y respuesta 200: el health de Permissions por sí solo no acredita que
+Snippets haya recuperado su conexión/DNS al contenedor recreado. No se relajaron
+las aserciones de fallas técnicas para ocultar ese intervalo.
+
+Los fallos se indujeron sólo en el proyecto Compose aislado
+`sni36-20261102-04e4b91a`; se retiró la restricción PostgreSQL y se restauraron los
+proveedores. Las bases/blobs de la prueba se conservan en sus volúmenes. Esta
+prueba no acredita OAuth, lint ni HTTPS.

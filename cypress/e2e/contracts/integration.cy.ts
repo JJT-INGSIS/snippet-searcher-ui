@@ -70,6 +70,7 @@ describe('SNI-34 UI / pending backend contracts', () => {
   });
   it('uploads text through the same JSON creation contract', () => {
     setup(); cy.wait('@catalog');
+    cy.get('[data-testid="upload-file-input"]').should('have.attr', 'accept', '.prs');
     cy.get('[data-testid="upload-file-input"]').selectFile({contents: Cypress.Buffer.from('println(2);\r\n'), fileName: 'uploaded.prs'}, {force: true});
     cy.get('#name').should('have.value', 'uploaded');
     cy.get('#create-code').should('have.value', 'println(2);\n');
