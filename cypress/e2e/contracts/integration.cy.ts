@@ -88,7 +88,7 @@ describe('SNI-34 UI / pending backend contracts', () => {
     cy.get('#detail-code').should('have.attr', 'readonly');
     cy.get('[data-testid="save-changes"]').should('be.disabled');
     cy.contains('button', 'Compartir').should('be.disabled');
-    cy.contains('button', 'Ejecutar tests').should('be.disabled');
+    cy.contains('button', 'Ejecutar snippet').should('be.enabled');
     cy.contains('button', 'Formatear').should('be.disabled');
     cy.contains('button', 'Eliminar').should('be.disabled');
     cy.contains('Sin evaluación').should('be.visible');
