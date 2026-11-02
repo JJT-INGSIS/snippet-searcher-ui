@@ -65,10 +65,6 @@ export const useSnippetTests = (snippetId: string, enabled = true) => {
   });
 };
 // Supplied rule components stay unavailable until their own stories are implemented.
-export const useGetFormatRules = () => {
-  const op = useSnippetsOperations();
-  return useQuery(['unavailable', 'formatRules'], () => op.getFormatRules(), {enabled: false});
-};
 export const useGetLintingRules = () => {
   const op = useSnippetsOperations();
   return useQuery(['unavailable', 'lintingRules'], () => op.getLintingRules(), {enabled: false});
@@ -80,10 +76,6 @@ export const useCreateSnippetTest = (snippetId: string) => {
     retry: false,
     onSuccess: () => {void cache.invalidateQueries(snippetKeys.tests(actor, snippetId));},
   });
-};
-export const useModifyFormatRules = ({onSuccess}: {onSuccess: () => void}) => {
-  const op = useSnippetsOperations();
-  return useMutation((rules: Rule[]) => op.modifyFormatRule(rules), {onSuccess, retry: false});
 };
 export const useModifyLintingRules = ({onSuccess}: {onSuccess: () => void}) => {
   const op = useSnippetsOperations();
