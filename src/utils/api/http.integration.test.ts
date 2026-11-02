@@ -48,6 +48,11 @@ describe('HTTP adapter against a contract server (not the real backend)', () => 
     expect(requests[0].headers['x-dev-actor-id']).toBe('dev-juan');
     expect(requests[0].method).toBe('POST');
   });
+  it('does not send a create or replacement with empty code', async () => {
+    await expect(api.createSnippet(createCreationIntent({...input, content: ''}, 'dev-juan'))).rejects.toMatchObject({problem: {field: 'code'}, uncertain: false});
+    await expect(api.updateSnippetById(metadata.id, {...input, content: ''})).rejects.toMatchObject({problem: {field: 'code'}, uncertain: false});
+    expect(requests).toHaveLength(0);
+  });
   it('returns only metadata for a new 201 creation', async () => {
     respond = (_, res) => {res.statusCode = 201; res.end(JSON.stringify(metadata));};
     expect(await api.createSnippet(createCreationIntent(input, 'dev-juan'))).not.toHaveProperty('content');

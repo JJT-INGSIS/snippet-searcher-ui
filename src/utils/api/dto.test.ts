@@ -3,11 +3,19 @@ import {fromDetailDto, fromMetadataDto, fromPageDto, toWriteDto} from './dto';
 const metadata = {id: 'id', name: 'Name', description: null, language: 'printscript', version: '1.1'};
 const descriptor = {...metadata, extension: 'prs', ownerId: 'dev-ana', relation: 'shared' as const, lint: {status: 'not-implemented' as const}};
 describe('SNI-26 mappings', () => {
-  it('sends only permitted fields, preserves whitespace, empty code and description semantics', () => {
-    const input = {...metadata, content: '', author: 'not-an-owner', extension: 'ps'};
-    expect(toWriteDto(input)).toEqual({name: 'Name', description: null, language: 'printscript', version: '1.1', code: ''});
+  it('sends only permitted fields, preserves exact nonempty code and description semantics', () => {
+    const input = {...metadata, content: 'println(1);', author: 'not-an-owner', extension: 'ps'};
+    expect(toWriteDto(input)).toEqual({name: 'Name', description: null, language: 'printscript', version: '1.1', code: 'println(1);'});
     expect(toWriteDto({...input, description: '', content: '  println(1);\r\n'}).code).toBe('  println(1);\r\n');
     expect(toWriteDto({...input, description: ''}).description).toBe('');
+  });
+  it('rejects empty write code with a known field error before transport', () => {
+    expect(() => toWriteDto({...metadata, content: ''})).toThrow('vacío');
+    try {toWriteDto({...metadata, content: ''});}
+    catch (error) {expect(error).toMatchObject({uncertain: false, problem: {status: 400, field: 'code'}});}
+  });
+  it('keeps legacy empty content readable without allowing it as a new write', () => {
+    expect(fromDetailDto({...descriptor, code: '', capabilities: {modify: false, share: false}}).content).toBe('');
   });
   it('does not fabricate content, capabilities or owner on a write acknowledgment', () => {
     expect(fromMetadataDto(metadata)).toEqual(metadata);
