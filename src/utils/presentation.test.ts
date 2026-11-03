@@ -5,5 +5,6 @@ it('translates known problems and handles unknown failures without reporting suc
   expect(errorMessage(new ApiError('raw', {type: 'urn:snippets:problem:dependency-failure', status: 502}))).toContain('servicio');
   expect(errorMessage(new ApiError('unknown secret detail', undefined, true))).toContain('confirmación');
   expect(errorMessage(new Error('internal detail'))).not.toContain('internal detail');
+  expect(errorMessage(new ApiError('raw', {type: 'urn:snippets:problem:invalid-formatting-rules', status: 422}))).toContain('marcadas');
   expect(lintLabels['not-implemented']).toBe('Sin evaluación');
 });
