@@ -4,7 +4,7 @@ El detalle del snippet ya tiene **Descargar original**, que arma el archivo con 
 código guardado. Este ticket agrega **Descargar formateado**, que pide al backend la
 variante formateada vigente y la descarga con la extensión real del lenguaje.
 
-Estado: **en desarrollo.**
+Estado: **implementado y verificado (03/11/2026).**
 
 ## Contrato que consume
 
@@ -61,4 +61,13 @@ borrador) y V7 (owner y lector reciben lo mismo).
 
 ## Verificación
 
-Pendiente.
+| Qué | Resultado |
+| --- | --- |
+| Vitest | 144 pruebas: parseo estricto (9 respuestas inválidas rechazadas), nombre del archivo, guardado en UTF-8 byte a byte con liberación de la URL Blob aunque el navegador falle, mensajes nuevos y un servidor HTTP de contrato (un solo GET con identidad, id codificado, diagnósticos del 422, 409 sin reintento, variante de otro snippet rechazada) |
+| Cypress (contratos) | 5 casos nuevos en `formatted-download.cy.ts`: pedido solo al tocar, "Preparando…", archivo `Saludo-formateado.prs` con Unicode exacto y URL liberada; lectora; 409 sin reintento con la descarga original intacta; diagnósticos del 422; aviso de cambios sin guardar. La suite completa da 40/40 |
+| Lint y build | Verdes |
+| Navegador contra el backend real | Stack aislado de Compose con `dev` de snippets-service (con el #67), permissions-service, printscript-service, Redis y worker. Owner `dev-thiago` y lectora `dev-ana` descargan `saludo vivo ñ-formateado.prs` desde el detalle; el archivo coincide byte a byte con el `code` de la API (`let saludo: string = "¡Hola, señor! 🚀";`), la URL Blob se libera y **Descargar original** sigue bajando el código sin formatear |
+
+Límites: el `409 formatting-stale` y el 422 se probaron con contratos, porque el
+backend ya no acepta guardar código con errores léxicos. La descarga en Firefox y
+Safari no se probó; Cypress usa Electron (Chromium).
