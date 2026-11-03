@@ -6,6 +6,8 @@ import {FileType} from '../types/FileType';
 import {Rule} from '../types/Rule';
 import {CreationIntent} from './api/creationIntent';
 import {TestDefinition, TestDefinitionDraft} from '../types/TestDefinition';
+import {FormattingRules, RuleValue} from './api/formattingRules';
+import {JobProgress} from './jobs/jobProgress';
 // Boundary retained from the supplied UI. Unsupported operations reject explicitly.
 export interface SnippetOperations {
   listSnippetDescriptors(page: number, pageSize: number, filters?: SnippetFilters, signal?: AbortSignal): Promise<PaginatedSnippets>;
@@ -15,7 +17,9 @@ export interface SnippetOperations {
   getUserFriends(name?: string, page?: number, pageSize?: number, signal?: AbortSignal): Promise<PaginatedUsers>;
   shareSnippet(snippetId: string, userId: string): Promise<Share>;
   getFileTypes(): Promise<FileType[]>;
-  getFormatRules(): Promise<Rule[]>;
+  getFormattingRules(language: string, version: string, signal?: AbortSignal): Promise<FormattingRules>;
+  saveFormattingRules(language: string, version: string, draft: Record<string, RuleValue>): Promise<FormattingRules>;
+  getJobProgress(jobId: string, signal?: AbortSignal): Promise<JobProgress>;
   getLintingRules(): Promise<Rule[]>;
   getAutomaticTests(snippetId: string, signal?: AbortSignal): Promise<AutomaticTests>;
   listTestDefinitions(snippetId: string, signal?: AbortSignal): Promise<TestDefinition[]>;
@@ -24,6 +28,5 @@ export interface SnippetOperations {
   removeTestCase(id: string): Promise<string>;
   deleteSnippet(id: string): Promise<string>;
   testSnippet(testCase: Partial<TestCase>): Promise<'success' | 'fail'>;
-  modifyFormatRule(rules: Rule[]): Promise<Rule[]>;
   modifyLintingRule(rules: Rule[]): Promise<Rule[]>;
 }

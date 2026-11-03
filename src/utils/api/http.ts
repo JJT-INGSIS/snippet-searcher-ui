@@ -10,6 +10,10 @@ import {PaginatedUsers} from '../users';
 import {Share} from '../snippet';
 import {FileType} from '../../types/FileType';
 import {fromTestDefinition, fromTestDefinitions, toTestDefinitionDraft} from './testDefinitions';
+import {fromFormattingRulesDto, toFormattingRulesBody} from './formattingRules';
+import {fromJobProgressDto} from '../jobs/jobProgress';
+const rulesPath = (language: string, version: string) =>
+  '/formatting-rules/' + encodeURIComponent(language) + '/' + encodeURIComponent(version);
 export function createApiClient(config: RuntimeConfig): AxiosInstance {
   const headers = identityHeaders(config);
   const client = axios.create({baseURL: '/api', timeout: 15000});
@@ -67,9 +71,20 @@ export function createHttpSnippetOperations(client: AxiosInstance, actorId: stri
           JSON.stringify(saved.expectedOutputs) !== JSON.stringify(draft.expectedOutputs)) throw invalidResponse();
       return saved;
     },
-    getFormatRules: unsupported, getLintingRules: unsupported,
+    async getFormattingRules(language, version, signal) {
+      return fromFormattingRulesDto((await client.get(rulesPath(language, version), {signal})).data, language, version);
+    },
+    async saveFormattingRules(language, version, draft) {
+      const response = await client.put(rulesPath(language, version), toFormattingRulesBody(draft));
+      if (response.status !== 200) throw invalidResponse();
+      return fromFormattingRulesDto(response.data, language, version);
+    },
+    async getJobProgress(jobId, signal) {
+      return fromJobProgressDto((await client.get('/jobs/' + encodeURIComponent(jobId), {signal})).data, jobId);
+    },
+    getLintingRules: unsupported,
     formatSnippet: unsupported, removeTestCase: unsupported,
-    deleteSnippet: unsupported, testSnippet: unsupported, modifyFormatRule: unsupported, modifyLintingRule: unsupported,
+    deleteSnippet: unsupported, testSnippet: unsupported, modifyLintingRule: unsupported,
   };
 }
 export function configuredApi(config: RuntimeConfig) {

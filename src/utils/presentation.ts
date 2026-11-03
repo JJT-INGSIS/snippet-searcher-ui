@@ -21,6 +21,7 @@ const problemMessages: Record<string, string> = {
   'dependency-failure': 'No pudimos comunicarnos con un servicio necesario. Volvé a intentarlo.',
   'metadata-unavailable': 'No pudimos acceder a los metadatos. Volvé a intentarlo.',
   'storage-unavailable': 'No pudimos acceder al contenido. Volvé a intentarlo.',
+  'invalid-formatting-rules': 'Algunas reglas no se pudieron guardar. Revisá las marcadas y volvé a intentarlo.',
   'technical-failure': 'Ocurrió un problema al procesar la solicitud. Volvé a intentarlo.',
 };
 export function errorMessage(error: Error): string {
