@@ -22,6 +22,9 @@ const problemMessages: Record<string, string> = {
   'metadata-unavailable': 'No pudimos acceder a los metadatos. Volvé a intentarlo.',
   'storage-unavailable': 'No pudimos acceder al contenido. Volvé a intentarlo.',
   'invalid-formatting-rules': 'Algunas reglas no se pudieron guardar. Revisá las marcadas y volvé a intentarlo.',
+  'formatting-stale': 'El snippet cambió mientras se preparaba la versión formateada. Volvé a intentarlo.',
+  'unformattable-code': 'El código tiene errores que impiden formatearlo. Revisá los diagnósticos.',
+  'formatting-limit-exceeded': 'El código o su versión formateada superan el tamaño permitido.',
   'technical-failure': 'Ocurrió un problema al procesar la solicitud. Volvé a intentarlo.',
 };
 export function errorMessage(error: Error): string {

@@ -6,5 +6,8 @@ it('translates known problems and handles unknown failures without reporting suc
   expect(errorMessage(new ApiError('unknown secret detail', undefined, true))).toContain('confirmación');
   expect(errorMessage(new Error('internal detail'))).not.toContain('internal detail');
   expect(errorMessage(new ApiError('raw', {type: 'urn:snippets:problem:invalid-formatting-rules', status: 422}))).toContain('marcadas');
+  expect(errorMessage(new ApiError('raw', {type: 'urn:snippets:problem:formatting-stale', status: 409}))).toContain('cambió');
+  expect(errorMessage(new ApiError('raw', {type: 'urn:snippets:problem:unformattable-code', status: 422}))).toContain('errores');
+  expect(errorMessage(new ApiError('raw', {type: 'urn:snippets:problem:formatting-limit-exceeded', status: 422}))).toContain('tamaño');
   expect(lintLabels['not-implemented']).toBe('Sin evaluación');
 });

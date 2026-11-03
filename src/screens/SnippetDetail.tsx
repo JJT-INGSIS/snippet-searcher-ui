@@ -11,6 +11,8 @@ import {useSnippetEditor} from '../hooks/useSnippetEditor';
 import {TestSnippetModal} from '../components/snippet-test/TestSnippetModal';
 import {useApi} from '../contexts/apiContext';
 import {SnippetExecution} from './SnippetExecution';
+import {FormattedDownloadButton} from '../components/snippet-detail/FormattedDownloadButton';
+import {useFormattedDownload} from '../hooks/useFormattedDownload';
 
 function DownloadButton({snippet}: {snippet: Snippet}) {
   const [url, setUrl] = useState<string>();
@@ -28,6 +30,7 @@ export function SnippetDetail({id, handleCloseModal}: {id: string; handleCloseMo
   const [testsOpen, setTestsOpen] = useState(false);
   const {actor} = useApi();
   const share = useShareSnippet();
+  const formatted = useFormattedDownload(id);
   const readonly = !snippet?.capabilities.modify;
   return <Box role="region" aria-label="Detalle del snippet" sx={{p: {xs: 2, sm: 4}, minWidth: 0}}>
     <Stack direction="row" alignItems="center" justifyContent="space-between" mb={2}>
@@ -58,7 +61,12 @@ export function SnippetDetail({id, handleCloseModal}: {id: string; handleCloseMo
           disabled={readonly || editor.saving || !editor.draft.name.trim()} onClick={editor.save}>{editor.saving ? 'Guardando…' : 'Guardar cambios'}</Button>
         <Button startIcon={<ShareRounded/>} disabled={!snippet.capabilities.share || share.isLoading} onClick={() => setShareOpen(true)}>Compartir</Button>
         <DownloadButton snippet={snippet}/>
+        <FormattedDownloadButton preparing={formatted.isLoading} onDownload={() => formatted.mutate()}/>
       </Stack>
+      <ApiErrorAlert error={formatted.error}/>
+      {editor.dirty && <Typography variant="body2" color="text.secondary">
+        Las descargas usan la versión guardada: tus cambios sin guardar no se incluyen.
+      </Typography>}
       <Stack direction="row" flexWrap="wrap" gap={1}>
         <Button onClick={() => setTestsOpen(true)} disabled={!!error}>Ver tests</Button>
         <Button disabled>Formatear</Button><Button disabled>Eliminar</Button>

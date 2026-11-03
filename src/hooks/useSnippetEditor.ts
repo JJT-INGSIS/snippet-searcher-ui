@@ -24,8 +24,10 @@ export function useSnippetEditor(id: string, snippet: Snippet | undefined) {
     } catch { /* Keep the draft; the mutation exposes the failure to the view. */ }
     finally {submitting.current = false;}
   }
+  const dirty = hydrated.current && !!snippet && (draft.name !== snippet.name ||
+    draft.description !== snippet.description || draft.content !== snippet.content);
   return {
-    draft, saved, save, saving: mutation.isLoading,
+    draft, saved, save, dirty, saving: mutation.isLoading,
     error: mutation.error instanceof Error ? mutation.error : null,
     change: (change: Partial<Draft>) => {
       if (submitting.current) return;
