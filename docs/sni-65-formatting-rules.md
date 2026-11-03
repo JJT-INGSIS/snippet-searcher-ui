@@ -62,10 +62,10 @@ se puede combinar. Los defaults salen del catálogo; la UI no los inventa.
 | Al abrir | Solo lee; nunca guarda al montar |
 | Editar | Cambia un borrador local por actor + lenguaje + versión; "Guardar" se habilita si difiere de lo guardado |
 | Guardar | Manda la selección completa; sin reintento automático; deshabilitado mientras está pendiente |
-| Éxito con `changed:true` | "Reglas guardadas" y empieza el seguimiento del `jobId` |
-| Éxito con `changed:false` | "No había cambios: no hay nada que reprocesar" |
-| `422` u otro error | El borrador se conserva; se muestran las violaciones o el motivo |
-| Sin respuesta | "No sabemos si se guardó"; botón "Reintentar guardado", seguro porque el `PUT` reemplaza todo y repetirlo no crea otro trabajo |
+| Éxito con `changed:true` | El borrador pasa a ser lo guardado y arriba aparece el progreso del `jobId` |
+| Éxito con `changed:false` | "Las reglas ya tenían esos valores. No hay nada para reformatear." |
+| `422` u otro error | El borrador se conserva; cada regla muestra su violación y la alerta lista "Reglas rechazadas" |
+| Sin respuesta | "No recibimos confirmación del servidor"; botón "Reintentar guardado", seguro porque el `PUT` reemplaza todo y repetirlo no crea otro trabajo |
 | Error al refrescar | Se conservan el borrador y la última configuración confirmada |
 | Cambiar de lenguaje/versión con cambios sin guardar | Pide confirmación antes de descartarlos |
 | Descartar cambios | Vuelve a la configuración guardada |
@@ -79,11 +79,11 @@ reprocesamiento sigue en segundo plano y no bloquea la navegación.
 
 | Estado del trabajo | Mensaje |
 | --- | --- |
-| `PENDING`, `RUNNING`, `RETRY`, `UNKNOWN` | "Reformateando tus snippets: N listos, M pendientes" |
-| `COMPLETED` | "Listo: N snippets reformateados" |
-| `PARTIAL` | "Terminó con fallos: N listos, F no se pudieron formatear" |
-| `FAILED` | "No se pudo completar el reprocesamiento" |
-| `SUPERSEDED` | "Reemplazado por un cambio de reglas más nuevo" |
+| `PENDING`, `RUNNING`, `RETRY`, `UNKNOWN` | "Reformateando tus snippets" — "Listos: N; pendientes: M" (y "todavía buscando snippets" si la selección no terminó) |
+| `COMPLETED` | "Listo" — "Reformateados: N snippets." |
+| `PARTIAL` | "Terminó con fallos" — "Reformateados: N; sin poder formatear: F." |
+| `FAILED` | "No se pudo completar" — "Tus reglas siguen guardadas." |
+| `SUPERSEDED` | "Reemplazado" — "Un cambio de reglas más nuevo continúa el reprocesamiento." |
 
 Polling acotado y cancelable:
 
@@ -92,7 +92,7 @@ Polling acotado y cancelable:
 | Intervalo | 3 s |
 | Corte | Estado terminal, o 10 min desde que empezó; después, botón "Actualizar progreso" |
 | Segundo plano | No consulta con la pestaña del navegador oculta |
-| Error al consultar | Deja de consultar y ofrece reintentar; la configuración sigue guardada |
+| Error al consultar | Deja de consultar y ofrece "Actualizar progreso"; al responder, el polling sigue |
 | Cancelación | Al desmontar o cambiar de actor/ámbito se aborta la consulta en curso |
 
 El `jobId` queda en la caché por actor + lenguaje + versión: navegar por la app y
@@ -105,7 +105,7 @@ devuelve el último trabajo); la configuración guardada no se pierde.
 | --- | --- |
 | `utils/jobs`: tipo `JobProgress` y parseo estricto del DTO | Mismo contrato para `FormattingRulesChanged` y `LintRulesChanged` |
 | Claves `['jobs', actor, jobId]` | Caché separada por identidad |
-| `useJobProgress(jobId)` | Polling acotado y cancelable |
+| `useJobProgress({jobId, startedAt})` y `JobProgressPanel` | Polling acotado y cancelable, con su panel |
 | Política de polling como función pura | Testeable sin React |
 | Presentación de estados | Mismos mensajes para formato y lint |
 | `violations` en `ApiProblem` | Errores por regla para ambas configuraciones |
@@ -129,6 +129,17 @@ Aprobadas por Juan el 02/11/2026 («dale, aprobadas las 8»).
 
 ## Verificación
 
-Pendiente: Vitest (DTOs, borrador, política de polling, `violations`), contratos
-Cypress con intercepts (carga, guardado, violaciones, progreso, separación por actor,
-cancelación al cambiar de ámbito, mobile), lint, build y prueba con el backend real.
+| Qué | Resultado |
+| --- | --- |
+| Vitest | 124 pruebas: DTOs estrictos, borrador, límites, política de polling, presentación de estados, `violations` y un servidor HTTP de contrato (lectura, guardado, 422, guardado incierto, codificación del ámbito, progreso y cancelación) |
+| Cypress (contratos) | 4 casos nuevos en `formatting-rules.cy.ts`; la suite completa da 35/35 |
+| Lint y build | Verdes |
+| Backend real, Compose local | Catálogo real de PrintScript 1.1; un conflicto (`enforce-spacing-around-equals` + `enforce-no-spacing-around-equals`) vuelve como 422 y se marca en ambas reglas; el guardado crea el trabajo y la UI muestra "Reformateando" |
+| Backend real con Redis y workers | Copia aislada de `dev` con el overlay de Redis y `SNIPPETS_OUTBOX_ENABLED`/`SNIPPETS_WORKER_ENABLED`: el trabajo llega a `COMPLETED`, la UI muestra "Reformateados: 1 snippet." y el contenido derivado queda formateado (`let x:number = 1 + 2;`) |
+
+Límites:
+
+- En el Compose por defecto los workers están apagados (SNI-56), así que el trabajo queda en `PENDING` y la UI sigue mostrando "Reformateando" hasta los 10 minutos.
+- En Docker Desktop, `compose.redis.yaml` no levanta por el `tmpfs` con opciones (`/run/redis:rw,noexec,nosuid,size=1m`); para la prueba se reemplazó por `/run/redis`.
+- La separación por actor y la vista mobile no tienen contrato Cypress propio; Vitest cubre que las claves de trabajos se separan por actor y que el pedido lleva `X-Dev-Actor-Id`.
+- El panel de progreso queda arriba de las reglas; con muchas reglas, después de guardar hay que subir para verlo.
