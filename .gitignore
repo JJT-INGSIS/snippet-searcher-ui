@@ -28,5 +28,6 @@ next-env.d.ts
 .next
 cypress/screenshots/
 cypress/videos/
+cypress/downloads/
 *.tsbuildinfo
 !.env.example

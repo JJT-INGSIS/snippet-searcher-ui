@@ -12,6 +12,7 @@ import {FileType} from '../../types/FileType';
 import {fromTestDefinition, fromTestDefinitions, toTestDefinitionDraft} from './testDefinitions';
 import {fromFormattingRulesDto, toFormattingRulesBody} from './formattingRules';
 import {fromJobProgressDto} from '../jobs/jobProgress';
+import {fromFormattedSnippetDto} from './formattedSnippet';
 const rulesPath = (language: string, version: string) =>
   '/formatting-rules/' + encodeURIComponent(language) + '/' + encodeURIComponent(version);
 export function createApiClient(config: RuntimeConfig): AxiosInstance {
@@ -81,6 +82,11 @@ export function createHttpSnippetOperations(client: AxiosInstance, actorId: stri
     },
     async getJobProgress(jobId, signal) {
       return fromJobProgressDto((await client.get('/jobs/' + encodeURIComponent(jobId), {signal})).data, jobId);
+    },
+    async getFormattedSnippet(snippetId) {
+      const response = await client.get('/snippets/' + encodeURIComponent(snippetId) + '/formatted');
+      if (response.status !== 200) throw invalidResponse();
+      return fromFormattedSnippetDto(response.data, snippetId);
     },
     getLintingRules: unsupported,
     formatSnippet: unsupported, removeTestCase: unsupported,
