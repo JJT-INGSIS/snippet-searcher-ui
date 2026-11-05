@@ -58,7 +58,7 @@ def create(owner, name, code, version="1.1"):
 
 
 def progress(job, terminal=True):
-    for _ in range(160):
+    for _ in range(1000):
         result = api("dev-thiago", "GET", "/jobs/" + job)
         if not terminal or result["status"] in (
             "COMPLETED",

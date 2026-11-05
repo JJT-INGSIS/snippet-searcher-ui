@@ -19,6 +19,9 @@ services:
     ports: !override ["127.0.0.1:18081:8080"]
   printscript-service:
     image: sni75-printscript:acceptance
+    environment:
+      PRINTSCRIPT_OPERATIONS_ENABLED: "true"
+      PRINTSCRIPT_OPERATIONS_DEPLOYMENT_MODE: single-stop-first
     ports: !override ["127.0.0.1:18082:8080"]
   asset-service:
     ports: !override ["127.0.0.1:19095:8080"]

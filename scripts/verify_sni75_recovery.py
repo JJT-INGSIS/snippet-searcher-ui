@@ -269,7 +269,9 @@ def failure():
             f"SELECT json_build_object('state',state,'reason',last_error,'attempts',attempts) FROM background_job_items WHERE job_id='{saved['jobId']}' AND item_key='{snippet}'"
         )
     )
-    assert row["state"] == "FAILED" and row["reason"] == "LANGUAGE_UNAVAILABLE", row
+    assert row["state"] == "FAILED" and row["reason"] == "REMOTE_OPERATION_CANCELLED", (
+        row
+    )
     assert api("GET", "/snippets/" + snippet)["code"] == code
     control({})
     formatted = api("GET", "/snippets/" + snippet + "/formatted")

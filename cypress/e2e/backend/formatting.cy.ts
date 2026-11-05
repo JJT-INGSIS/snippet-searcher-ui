@@ -53,7 +53,7 @@ describe('SNI-75 / real formatting, progress and browser downloads', () => {
         expect(response?.body.changed).to.eq(true);
         expect(response?.body.jobId).to.be.a('string');
       });
-      cy.contains('Reformateados:', {timeout: 60000}).should('be.visible');
+      cy.contains('Reformateados:', {timeout: 300000}).should('be.visible');
       cy.screenshot('sni75-rules-completed', {capture: 'viewport'});
       download(evidence, 'dev-thiago');
       download(evidence, 'dev-ana');

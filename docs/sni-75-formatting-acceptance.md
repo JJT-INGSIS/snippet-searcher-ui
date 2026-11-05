@@ -1,8 +1,9 @@
-# SNI-75 — Aceptación local y límite de recuperación
+# SNI-75 — Aceptación local de formato durable
 
-Estado al 04/11/2026: navegador, HTTP, recuperación controlada, reentrega, fallas,
-carreras y sesión interactiva ejecutados con proveedores reales. Sigue abierto
-por la garantía de capacidad ante terminación remota incierta, explicada al final.
+Estado al 05/11/2026: aprobadas e implementadas operaciones durables para lint y
+formato, ID generado por Snippets y retención terminal de siete días. La evidencia
+del 04/11 se conserva como antecedente; la repetición con este protocolo se registra
+en la sección del 05/11. Los merges y la activación real quedan a cargo del equipo.
 El procedimiento inicial del 02/11 quedó preparado antes de integrar proveedores.
 
 ## Preparación segura
@@ -77,7 +78,7 @@ anteriores se conservaron y se incluyeron al contar el alcance (16).
 
 **Estado de esa primera fase:** entonces faltaban interrupción/reentrega, falla
 individual, carreras y convivencia. Los resultados posteriores se detallan abajo;
-el límite final de recuperación sigue abierto.
+el límite de recuperación de esa versión motivó la extensión aprobada el 05/11.
 
 ### Recuperación y fallos ejecutados
 
@@ -139,9 +140,81 @@ explícito durante recuperación. Para repetir una fase aislada, preparar primer
 una selección distinta; el script exige que guardar reglas cree un lote nuevo.
 Detener luego los procesos propios y `docker compose ... stop`, sin `down -v`.
 
-**Límite de cierre:** estos casos pasaron, pero no acreditan que un formato remoto
-haya dejado de consumir CPU tras matar el cliente o vencer HTTP. El reconciliador
-actual de formato libera/reintenta sin evidencia remota de terminación. La decisión
-sobre extender las operaciones durables SNI-78 a formato o conservar UNKNOWN
-está pendiente de Thiago. No se presenta esta parada controlada como prueba de
-esa garantía ni se cierra el ticket ocultando el hallazgo.
+**Hallazgo histórico del 04/11, resuelto por el protocolo del 05/11:** esa parada
+controlada no acreditaba la terminación remota. Ahora el consumidor conserva el
+cupo ante incertidumbre, consulta el mismo ID y exige terminación o un fence
+durable antes de reintentar. El proveedor conserva capacidad hasta el retorno
+real del cálculo. Las pruebas de motor controlado acreditan ese último límite;
+las pruebas reales de abajo acreditan recuperación entre servicios.
+
+
+## Protocolo durable — 2026-11-05
+
+Implementación de proveedor `129c5f1` y consumidor `d224758` (documentación
+posterior `99aece6`). Se reutilizó el proyecto aislado y se conservaron todos los
+fixtures anteriores; por eso aumentó el tamaño del lote. Las imágenes de runtime
+se construyeron desde los JARs del build local aprobado, sin recompilar dentro de
+las VMs. Revisiones, hashes y resultados se registran en
+[sni75-2026-11-05.json](evidence/sni75-2026-11-05.json).
+
+`verify_durable_processing.py` usa proveedores, PostgreSQL y Redis reales. El
+proxy sólo retrasa transporte o inyecta el error declarado; no inventa resultados.
+
+- **Respuesta perdida:** PrintScript aceptó la operación; se retuvo su respuesta y
+  se mató Snippets. Tras reiniciar, recuperó el mismo ID/permiso y publicó el
+  resultado; un solo inicio lógico, con prueba `REMOTE_RESULT_PERSISTED`.
+- **Inicio demorado:** el PUT quedó retenido antes del proveedor; la recuperación
+  creó un tombstone CANCELLED antes de liberar el transporte. El PUT antiguo
+  siguió cancelado y el nuevo intento terminó. Un 404 aislado nunca liberó cupo.
+- **Persistencia:** un resultado COMPLETED conservó el mismo registro tras reiniciar
+  Redis y PrintScript. Se esperó el intervalo AOF configurado: no se afirma
+  durabilidad fsync-always ni ejecución física exactamente una vez.
+- **Lint real:** configuración `{}` dejó ambos fixtures compliant; la regla real de
+  println identificó el caso no conforme, conservó tres evaluaciones por fixture,
+  no cambió el original y permitió filtrar al lector autorizado (count=1). El
+  tercero recibió 404.
+- **Recuperación/reentrega:** worker detenido y Redis reiniciado durante el lote;
+  48/48 finales. Reentrega consumida y ACKeada sin alterar IDs, referencias ni conteos.
+- **Falla aislada:** 48 éxitos/1 fallo, tres intentos del fixture con 503 inyectado;
+  motivo final `REMOTE_OPERATION_CANCELLED` tras fencing y agotamiento de reintentos.
+  Original intacto y descarga real disponible al retirar la falla.
+- **Carrera de código:** edición durante el cálculo antiguo retenido; lote 50/50,
+  original nuevo intacto y derivado vigente sin contenido anterior.
+- **Carrera de reglas:** lote anterior SUPERSEDED, item retenido SUPERSEDED y
+  nuevo lote 51/51. La descarga corresponde a la revisión ganadora.
+- **Convivencia interactiva:** sesión pública mantuvo un permiso manual durante
+  el lote, recibió `Ana`, emitió `Hola, Ana` y terminó COMPLETED; el lote terminó
+  52/52. No se modificó el timeout de input.
+- **Navegador:** Cypress 1/1, 81 s; catálogo y guardado reales, progreso terminal,
+  descarga UTF-8 original/formateada como owner y lector, variante almacenada,
+  liberación de Blob URLs y tercero 404. Sólo se simuló la identidad dev.
+- **HTTP/formato:** 48/48 procesados, sin fallos; guardar tardó 0,0208 s, devolvió
+  progreso PENDING y repetir la misma configuración no creó otro lote. Alcance,
+  UTF-8, originales, derivados almacenados y autorización comprobados.
+
+Para repetir las cuatro pruebas del protocolo, iniciar el proxy y usar el mismo
+archivo de control en un proyecto aislado habilitado con el overlay actualizado:
+
+```sh
+python3 scripts/verify_durable_processing.py \
+  --compose-dir /ruta/al/infra-aislado --project sni75-<identificador-nuevo> \
+  --control /tmp/sni75-control.json --evidence /tmp/sni78-durable.json
+```
+
+El proveedor requiere operaciones habilitadas y modo `single-stop-first`, ya
+expresados en el overlay de aceptación. Producción conserva el feature apagado
+por defecto. Los tests de proveedor usan Redis real y un motor controlado para
+comprobar cancelación mientras CPU sigue viva, pérdida de escritura final y
+retroceso del registro RUNNING a PENDING; no se confunden con las pruebas HTTP
+entre servicios.
+
+Una repetición inicial de HTTP recibió correctamente `changed=false` porque la
+selección ya era la misma; se preparó otra selección antes de repetir. No se
+borraron datos para forzar un resultado. Las esperas del harness se ampliaron a
+300 s para el corpus sintético acumulado; no son un SLA ni cambian los timeouts
+de las aplicaciones.
+
+**Resultado del 05/11:** todas las fases locales documentadas pasaron. Builds de
+proveedor (149 tests), consumidor (658, 18 opt-in omitidos) y UI (144), lint,
+Ruff y navegador aprobados. Pendientes únicamente de integración de estas PRs
+y activación operativa posterior; no se afirma un despliegue en Azure.

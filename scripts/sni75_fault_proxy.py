@@ -1,4 +1,4 @@
-"""Opt-in SNI-75 fault proxy. Forwards real responses; only injects explicit fixture failures/delays."""
+"""Local opt-in fault proxy: successful payloads always come from the actual provider."""
 
 import argparse
 import http.client
@@ -11,12 +11,38 @@ from pathlib import Path
 parser = argparse.ArgumentParser(description=__doc__)
 parser.add_argument("--port", type=int, default=18083)
 parser.add_argument("--provider-port", type=int, default=18082)
-parser.add_argument("--control", type=str, required=True)
+parser.add_argument("--control", required=True)
 args = parser.parse_args()
-
 control = Path(args.control)
 seen = control.with_suffix(".seen.json")
 lock = threading.Lock()
+selected = {}
+
+
+def config():
+    return json.loads(control.read_text()) if control.exists() else {}
+
+
+def hold(stage, token, path, code, settings):
+    with lock:
+        chosen = selected.setdefault((stage, token), path)
+        if settings.get("once") and chosen != path:
+            return
+        temporary = seen.with_suffix(".tmp")
+        temporary.write_text(
+            json.dumps(
+                {
+                    "stage": stage,
+                    "id": path.split("/")[-1],
+                    "code": code,
+                    "at": time.time(),
+                }
+            )
+        )
+        temporary.replace(seen)
+    deadline = time.monotonic() + settings.get("holdSeconds", 4)
+    while config().get(stage) == token and time.monotonic() < deadline:
+        time.sleep(0.02)
 
 
 class Proxy(BaseHTTPRequestHandler):
@@ -32,77 +58,92 @@ class Proxy(BaseHTTPRequestHandler):
     def log_message(self, *args):
         pass
 
+    def body(self):
+        if self.headers.get("Transfer-Encoding", "").lower() != "chunked":
+            return self.rfile.read(int(self.headers.get("Content-Length", 0)))
+        chunks = []
+        while True:
+            size = int(self.rfile.readline().split(b";")[0], 16)
+            if not size:
+                while self.rfile.readline().strip():
+                    pass
+                return b"".join(chunks)
+            chunks.append(self.rfile.read(size))
+            self.rfile.read(2)
+
+    def reject(self):
+        self.send_response(503)
+        self.send_header("Content-Type", "application/problem+json")
+        self.end_headers()
+        self.wfile.write(
+            b'{"status":503,"type":"urn:acceptance:injected-provider-outage"}'
+        )
+
     def forward(self):
-        if self.headers.get("Transfer-Encoding", "").lower() == "chunked":
-            chunks = []
-            while True:
-                size = int(self.rfile.readline().split(b";")[0], 16)
-                if not size:
-                    while self.rfile.readline().strip():
-                        pass
-                    break
-                chunks.append(self.rfile.read(size))
-                self.rfile.read(2)
-            body = b"".join(chunks)
-        else:
-            body = self.rfile.read(int(self.headers.get("Content-Length", 0)))
-        config = json.loads(control.read_text()) if control.exists() else {}
+        body = self.body()
+        settings = config()
+        command = json.loads(body) if body else {}
+        code = command.get("code", "")
+        operation = self.command == "PUT" and self.path.startswith("/operations/")
+        formatting = (self.command == "POST" and self.path == "/formatting") or (
+            operation and command.get("kind") == "FORMAT"
+        )
         if (
             self.command == "POST"
             and self.path == "/linting"
-            and config.get("lintFailure")
+            and settings.get("lintFailure")
+            and settings["lintFailure"] in code
         ):
-            if config["lintFailure"] in json.loads(body).get("code", ""):
-                self.send_response(503)
-                self.send_header("Content-Type", "application/problem+json")
-                self.end_headers()
-                self.wfile.write(
-                    b'{"status":503,"type":"urn:acceptance:injected-lint-outage"}'
-                )
+            self.reject()
+            return
+        if formatting:
+            if settings.get("failure") and settings["failure"] in code:
+                self.reject()
                 return
-        if self.command == "POST" and self.path == "/formatting":
-            code = json.loads(body).get("code", "")
-            if config.get("failure") and config["failure"] in code:
-                self.send_response(503)
-                self.send_header("Content-Type", "application/problem+json")
-                self.end_headers()
-                self.wfile.write(
-                    b'{"status":503,"type":"urn:acceptance:injected-provider-outage"}'
-                )
-                return
-            time.sleep(config.get("delay", 0))
-            if config.get("gate") and config["gate"] in code:
-                with lock:
-                    seen.write_text(json.dumps({"code": code, "at": time.time()}))
-                deadline = time.monotonic() + 4
-                while (
-                    control.exists()
-                    and json.loads(control.read_text()).get("gate") == config["gate"]
-                    and time.monotonic() < deadline
-                ):
-                    time.sleep(0.02)
+            time.sleep(settings.get("delay", 0))
+            if settings.get("gate") and settings["gate"] in code:
+                hold("gate", settings["gate"], self.path, code, settings)
         connection = http.client.HTTPConnection(
             "127.0.0.1", args.provider_port, timeout=150
         )
         try:
             headers = {
-                k: v
-                for k, v in self.headers.items()
-                if k.lower() not in ("host", "connection", "transfer-encoding")
+                key: value
+                for key, value in self.headers.items()
+                if key.lower() not in ("host", "connection", "transfer-encoding")
             }
             connection.request(self.command, self.path, body or None, headers)
             response = connection.getresponse()
+            buffered = None
+            if (
+                operation
+                and settings.get("holdReply")
+                and settings["holdReply"] in code
+            ):
+                buffered = response.read()
+                hold("holdReply", settings["holdReply"], self.path, code, settings)
             self.send_response(response.status)
             for key, value in response.getheaders():
-                if key.lower() not in ("transfer-encoding", "connection"):
+                if key.lower() not in (
+                    "transfer-encoding",
+                    "connection",
+                    "content-length",
+                ):
                     self.send_header(key, value)
+            if buffered is not None:
+                self.send_header("Content-Length", str(len(buffered)))
+            elif response.getheader("Content-Length") is not None:
+                self.send_header("Content-Length", response.getheader("Content-Length"))
             self.end_headers()
-            while True:
-                chunk = response.read1(65536)
-                if not chunk:
-                    break
-                self.wfile.write(chunk)
-                self.wfile.flush()
+            if buffered is not None:
+                self.wfile.write(buffered)
+            else:
+                while True:
+                    chunk = response.read1(65536)
+                    if not chunk:
+                        break
+                    self.wfile.write(chunk)
+                    self.wfile.flush()
         except (BrokenPipeError, ConnectionResetError):
             pass
         finally:
