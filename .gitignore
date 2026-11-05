@@ -31,3 +31,6 @@ cypress/videos/
 cypress/downloads/
 *.tsbuildinfo
 !.env.example
+
+# Local acceptance scripts
+__pycache__/
