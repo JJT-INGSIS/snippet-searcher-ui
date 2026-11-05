@@ -14,8 +14,9 @@ El procedimiento inicial del 02/11 quedó preparado antes de integrar proveedore
 2. Crear un proyecto local aislado, volúmenes propios y namespace Redis exclusivo.
    Usar identidad dev explícita: owner dev-thiago, lector dev-ana, tercero
    dev-bruno. Guardar el ID de cada dato con prefijo `SNI75-<fecha>-<uuid>`.
-3. Ejecutar UI y proveedores reales. No interceptar `/api`, PrintScript,
+3. Ejecutar UI y proveedores reales. No sustituir respuestas de `/api`, PrintScript,
    Permissions ni Asset; sólo se admite configurar identidad de desarrollo.
+   Cypress puede observar solicitudes reales sin responderlas.
 4. Preparar al menos tres snippets del owner con diferencias de formato reales
    aceptadas por el catálogo publicado, y uno de otro owner para probar alcance.
    Compartir uno con el lector. Registrar el original UTF-8 y su SHA-256 antes
