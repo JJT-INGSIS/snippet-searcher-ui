@@ -1,3 +1,4 @@
+import {automaticPending} from './api/automaticTests';
 import {useMutation, useQuery, useQueryClient} from 'react-query';
 import {SnippetFilters, UpdateSnippet} from './snippet';
 import {useApi} from '../contexts/apiContext';
@@ -10,6 +11,7 @@ export const snippetKeys = {
   list: (actor: string, page: number, size: number, filters: SnippetFilters) => ['listSnippets', actor, page, size, filters],
   detail: (actor: string, id: string) => ['snippet', actor, id],
   users: (actor: string, name: string, page: number, size: number) => ['users', actor, name, page, size],
+  automatic: (actor: string, id: string) => ['automaticTests', actor, id],
   tests: (actor: string, snippetId: string) => ['testCases', actor, snippetId],
 };
 export function useGetSnippets(page = 0, size = 10, filters: SnippetFilters = {}, enabled = true) {
@@ -36,6 +38,7 @@ export function useUpdateSnippetById() {
     onSuccess: (_, {id}) => {
       void cache.invalidateQueries(snippetKeys.lists(actor));
       void cache.invalidateQueries(snippetKeys.detail(actor, id));
+      void cache.invalidateQueries(snippetKeys.automatic(actor, id));
     },
   });
 }
@@ -74,7 +77,7 @@ export const useCreateSnippetTest = (snippetId: string) => {
   const cache = useQueryClient();
   return useMutation((input: TestDefinitionDraft) => operations.createTestDefinition(snippetId, input), {
     retry: false,
-    onSuccess: () => {void cache.invalidateQueries(snippetKeys.tests(actor, snippetId));},
+    onSuccess: () => {void cache.invalidateQueries(snippetKeys.tests(actor, snippetId)); void cache.invalidateQueries(snippetKeys.automatic(actor, snippetId));},
   });
 };
 export const useModifyLintingRules = ({onSuccess}: {onSuccess: () => void}) => {
@@ -89,3 +92,12 @@ export const useDeleteSnippet = ({onSuccess}: {onSuccess: () => void}) => {
   const op = useSnippetsOperations();
   return useMutation((id: string) => op.deleteSnippet(id), {onSuccess, retry: false});
 };
+
+// One actor-scoped query shared by observers; inactive tabs and closed details do not poll.
+export function useAutomaticTests(id: string) {
+  const {actor, operations} = useApi();
+  return useQuery(snippetKeys.automatic(actor, id), ({signal}) => operations.getAutomaticTests(id, signal), {
+    enabled: !!id, retry: false, refetchIntervalInBackground: false,
+    refetchInterval: (data, query) => query.state.error ? false : data && automaticPending(data) ? 2000 : false,
+  });
+}
