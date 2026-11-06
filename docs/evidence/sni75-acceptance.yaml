@@ -1,0 +1,29 @@
+services:
+  snippets-service:
+    image: sni75-snippets:acceptance
+    ports: !override ["127.0.0.1:18080:8080"]
+    environment:
+      PRINTSCRIPT_BASE_URL: ${SNI75_PRINTSCRIPT_BASE_URL:-http://printscript-service:8080}
+      SNIPPETS_WORKER_ENABLED: "true"
+      SNIPPETS_OUTBOX_ENABLED: "true"
+      SNIPPETS_WORKER_RECLAIM_IDLE: 100ms
+      SNIPPETS_WORKER_POLL_DELAY: 300ms
+      SNIPPETS_OUTBOX_POLL_DELAY: 300ms
+      SNIPPETS_WORKER_ITEM_BATCH_SIZE: "2"
+      SNIPPETS_WORKER_LEASE: 5s
+      SNIPPETS_WORKER_RETRIES_ATTEMPTS: "3"
+      SNIPPETS_WORKER_RETRIES_INITIAL: 300ms
+      SNIPPETS_WORKER_RETRIES_MAXIMUM: 1s
+  permissions-service:
+    image: sni75-permissions:acceptance
+    ports: !override ["127.0.0.1:18081:8080"]
+  printscript-service:
+    image: sni75-printscript:acceptance
+    environment:
+      PRINTSCRIPT_OPERATIONS_ENABLED: "true"
+      PRINTSCRIPT_OPERATIONS_DEPLOYMENT_MODE: single-stop-first
+    ports: !override ["127.0.0.1:18082:8080"]
+  asset-service:
+    ports: !override ["127.0.0.1:19095:8080"]
+  azurite:
+    ports: !override []

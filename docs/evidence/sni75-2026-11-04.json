@@ -1,0 +1,208 @@
+{
+  "date": "2026-11-04",
+  "project": "sni75-20261104-0d4c2d",
+  "versions": {
+    "snippet-searcher-infra": "f53128784f2af913a7c0c0d1b42b167e2e482e2a",
+    "snippets-service": "b427b79d88da583875f004bf65c007da1199a353",
+    "printscript-service": "6dff7224e609c94decd9e09eefee231680d397f0",
+    "permissions-service": "500331e2a97bbc61c29ae1a215589a1c57ba052d",
+    "snippet-searcher-ui": "42f870e2d0f3de0fe1a968c046b916a1429db250"
+  },
+  "infraTmpfsFix": "27e74a0",
+  "healthy": {
+    "prefix": "SNI75-b1fe3b0d0e",
+    "ids": [
+      "9cbc8d58-6491-414a-a7bf-07008fb9cc62",
+      "0f59f831-b7c2-49bf-9b32-0f592c6c70b4",
+      "182829c6-c848-48d6-8954-9e777faa7dbf",
+      "a67f0009-be91-4f0f-899d-3dbb117b472c",
+      "c5d47f6c-2d93-49a1-aa75-dcd755a11d0f",
+      "a083a36e-7bdd-4f27-8b41-ff7ccb2c1d0a",
+      "044672f6-06b0-4f55-b455-5e23e04ddfd9",
+      "74049044-1d69-4ef6-a236-46239fea62e1"
+    ],
+    "original": "let saludo:string=\"¡Hola, señor! 🚀\";println(saludo);",
+    "name": "SNI75-b1fe3b0d0e-0",
+    "job": "c4438430-493c-487e-b1a5-20859981037d",
+    "rulesRevision": "sha256-v1:3bd65402d9f80e593664439f85f24a98d2d8d0f9348a00cacbf5995643b5ed10",
+    "processorRevision": "sha256-v1:d847c7f83a3f8134f17366063f18f3ee4cbdc83162f7cc80512f99c830312ab9",
+    "formatted": "let saludo :string=\"¡Hola, señor! 🚀\";println(saludo);",
+    "putSeconds": 0.22578029200667515,
+    "firstProgress": {
+      "id": "c4438430-493c-487e-b1a5-20859981037d",
+      "status": "PENDING",
+      "processed": 0,
+      "failed": 0,
+      "pending": 0,
+      "selectionComplete": false
+    },
+    "terminal": {
+      "id": "c4438430-493c-487e-b1a5-20859981037d",
+      "status": "COMPLETED",
+      "processed": 16,
+      "failed": 0,
+      "pending": 0,
+      "selectionComplete": true
+    },
+    "targetCount": 16,
+    "otherVersion": "8f8d2d45-4f1c-4bcd-903b-81d26c7e45af",
+    "otherOwner": "e15e2cf4-f0ba-48c0-b2ed-65a8a55652ad",
+    "phases": [
+      "healthy"
+    ]
+  },
+  "advanced": {
+    "recovery": {
+      "job": "8e446057-bdd9-4b47-94b8-8ae57443fac0",
+      "before": {
+        "id": "8e446057-bdd9-4b47-94b8-8ae57443fac0",
+        "status": "RUNNING",
+        "processed": 1,
+        "failed": 0,
+        "pending": 1,
+        "selectionComplete": false
+      },
+      "stoppedDurable": {
+        "state": "PENDING",
+        "completed": 1
+      },
+      "after": {
+        "id": "8e446057-bdd9-4b47-94b8-8ae57443fac0",
+        "status": "COMPLETED",
+        "processed": 24,
+        "failed": 0,
+        "pending": 0,
+        "selectionComplete": true
+      },
+      "redeliveryRecord": "1793837368304-0",
+      "redeliveryAcknowledged": true,
+      "unchangedLogicalItems": 24
+    },
+    "failure": {
+      "snippet": "1658265c-8c79-42b2-aabc-dc40598124d5",
+      "job": "58e502f9-6a03-4460-be6b-a58289797174",
+      "terminal": {
+        "id": "58e502f9-6a03-4460-be6b-a58289797174",
+        "status": "PARTIAL",
+        "processed": 16,
+        "failed": 1,
+        "pending": 0,
+        "selectionComplete": true
+      },
+      "item": {
+        "state": "FAILED",
+        "reason": "LANGUAGE_UNAVAILABLE",
+        "attempts": 3
+      },
+      "originalIntact": true,
+      "fault": "proxy returns HTTP 503 only for this fixture; other calls go to real provider"
+    },
+    "code_race": {
+      "snippet": "081d02e9-cff7-4968-a335-83b62d5ffd85",
+      "job": "c9897e33-1f4b-4c62-904b-a3307a8ee595",
+      "terminal": {
+        "id": "c9897e33-1f4b-4c62-904b-a3307a8ee595",
+        "status": "COMPLETED",
+        "processed": 22,
+        "failed": 0,
+        "pending": 0,
+        "selectionComplete": true
+      },
+      "formattedRevision": "sha256-v1:f88bfc0e7b092e0b82fc25473e761b665cceecb783631341cbe40e6fd6ed5ce0",
+      "newOriginalIntact": true
+    },
+    "rules_race": {
+      "snippet": "131104b2-9fe6-4396-89ed-e620ac7e55d9",
+      "first": {
+        "id": "f7cd4556-b0ac-4d11-87f2-c004a2f6932d",
+        "status": "SUPERSEDED",
+        "processed": 8,
+        "failed": 0,
+        "pending": 0,
+        "selectionComplete": false
+      },
+      "second": {
+        "id": "32e01b37-49f7-479e-9d98-27e0494eb676",
+        "status": "COMPLETED",
+        "processed": 23,
+        "failed": 0,
+        "pending": 0,
+        "selectionComplete": true
+      },
+      "winningRevision": "sha256-v1:3bd65402d9f80e593664439f85f24a98d2d8d0f9348a00cacbf5995643b5ed10",
+      "oldTargetItem": "SUPERSEDED"
+    },
+    "interactive": {
+      "snippet": "4637daca-6e2b-4f3a-8281-b84a3512407c",
+      "execution": "bd952f79-bafd-40f5-9e7e-791508cbf33f",
+      "job": "e089ba62-b81f-406f-8e29-d8614a681b8f",
+      "terminal": {
+        "id": "e089ba62-b81f-406f-8e29-d8614a681b8f",
+        "status": "COMPLETED",
+        "processed": 24,
+        "failed": 0,
+        "pending": 0,
+        "selectionComplete": true
+      },
+      "manualPermitsDuringBatch": 1,
+      "events": [
+        {
+          "executionId": "bd952f79-bafd-40f5-9e7e-791508cbf33f",
+          "seq": 1,
+          "type": "started",
+          "data": {
+            "mode": "INTERACTIVE"
+          }
+        },
+        {
+          "executionId": "bd952f79-bafd-40f5-9e7e-791508cbf33f",
+          "seq": 2,
+          "type": "input-required",
+          "data": {
+            "requestId": "4597b8de-fd1d-4a31-8513-38680beafb23",
+            "prompt": "Nombre?"
+          }
+        },
+        {
+          "executionId": "bd952f79-bafd-40f5-9e7e-791508cbf33f",
+          "seq": 3,
+          "type": "input-accepted",
+          "data": {
+            "requestId": "4597b8de-fd1d-4a31-8513-38680beafb23"
+          }
+        },
+        {
+          "executionId": "bd952f79-bafd-40f5-9e7e-791508cbf33f",
+          "seq": 4,
+          "type": "output",
+          "data": {
+            "text": "Hola, Ana"
+          }
+        },
+        {
+          "executionId": "bd952f79-bafd-40f5-9e7e-791508cbf33f",
+          "seq": 5,
+          "type": "terminal",
+          "data": {
+            "outcome": "COMPLETED",
+            "reason": "program-completed",
+            "diagnostics": [],
+            "unusedInputs": 0
+          }
+        }
+      ]
+    }
+  },
+  "browser": {
+    "passed": true,
+    "tests": 1,
+    "seconds": 35,
+    "intercepts": "app-config identity only; no API response stubs"
+  },
+  "limits": [
+    "Local only; no Azure/deployment",
+    "Controlled worker stop and Redis restart do not prove remote termination after timeout",
+    "503 only injected for a named synthetic fixture; successful data from actual provider",
+    "No prior data or volumes removed"
+  ]
+}
