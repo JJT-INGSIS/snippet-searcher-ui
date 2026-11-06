@@ -1,3 +1,4 @@
+import {fromAutomaticTests} from './automaticTests';
 import axios, {AxiosInstance} from 'axios';
 import {RuntimeConfig, actorScope, identityHeaders} from './config';
 import {createExecutionHttp} from './executionHttp';
@@ -52,6 +53,11 @@ export function createHttpSnippetOperations(client: AxiosInstance, actorId: stri
       return {snippetId: data.snippetId, userId: data.userId};
     },
     async getFileTypes() {return fromLanguagesDto((await client.get<FileType[]>('/languages')).data);},
+    async getAutomaticTests(snippetId, signal) {
+      const response = await client.get('/snippets/' + encodeURIComponent(snippetId) + '/automatic-tests', {signal});
+      if (response.status !== 200 || !/^application\/json(?:;|$)/i.test(response.headers['content-type'] ?? '')) throw invalidResponse();
+      return fromAutomaticTests(response.data);
+    },
     async listTestDefinitions(snippetId, signal) {
       const response = await client.get('/snippets/' + encodeURIComponent(snippetId) + '/tests', {signal});
       if (response.status !== 200 || !/^application\/json(?:;|$)/i.test(response.headers['content-type'] ?? '')) throw invalidResponse();

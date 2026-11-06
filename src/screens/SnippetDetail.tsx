@@ -1,3 +1,4 @@
+import {AutomaticTestsPanel} from '../components/automatic-tests/AutomaticTestsPanel';
 import {useEffect, useState} from 'react';
 import {Alert, Box, Button, Chip, CircularProgress, IconButton, Skeleton, Stack, TextField, Typography} from '@mui/material';
 import {CloseRounded, DownloadRounded, SaveRounded, ShareRounded} from '@mui/icons-material';
@@ -71,6 +72,7 @@ export function SnippetDetail({id, handleCloseModal}: {id: string; handleCloseMo
         <Button onClick={() => setTestsOpen(true)} disabled={!!error}>Ver tests</Button>
         <Button disabled>Formatear</Button><Button disabled>Eliminar</Button>
       </Stack>
+      {!error && <AutomaticTestsPanel key={actor + ":automatic:" + id} snippetId={id}/>}
       {!error && <SnippetExecution key={actor + ':' + id} snippetId={id}/>}
       <Typography variant="body2" color="text.secondary">El formato y la eliminación todavía no están disponibles.</Typography>
     </Stack>}
