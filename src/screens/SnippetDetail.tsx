@@ -7,7 +7,7 @@ import {ShareSnippetModal} from '../components/snippet-detail/ShareSnippetModal'
 import {Snippet} from '../utils/snippet';
 import {ApiErrorAlert} from '../components/common/ApiErrorAlert';
 import {CodeEditor} from '../components/common/CodeEditor';
-import {lintLabels} from '../utils/presentation';
+import {lintLabel} from '../utils/lintPresentation';
 import {useSnippetEditor} from '../hooks/useSnippetEditor';
 import {TestSnippetModal} from '../components/snippet-test/TestSnippetModal';
 import {useApi} from '../contexts/apiContext';
@@ -47,7 +47,7 @@ export function SnippetDetail({id, handleCloseModal}: {id: string; handleCloseMo
       <Stack direction="row" flexWrap="wrap" gap={1}>
         <Chip size="small" variant="outlined" label={snippet.language + ' ' + snippet.version}/>
         <Chip size="small" label={snippet.relation === 'owned' ? 'Propio' : 'Compartido'}/>
-        <Chip size="small" label={'Lint: ' + lintLabels[snippet.compliance]}/>
+        <Chip size="small" label={'Lint: ' + lintLabel(snippet.lint)}/>
       </Stack>
       {readonly && <Alert severity="info">Solo lectura. El propietario conserva los permisos de edición.</Alert>}
       <TextField id="detail-name" label="Nombre" value={editor.draft.name} disabled={readonly || editor.saving}

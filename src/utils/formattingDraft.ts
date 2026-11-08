@@ -11,15 +11,17 @@ const reasons: Record<string, string> = {
   'conflicting-rules': 'No se puede combinar con otra regla prendida.',
 };
 
-export function draftOf(rules: FormattingRule[]): FormattingDraft {
+type SavedRule<V> = {id: string; value: V};
+
+export function draftOf<V>(rules: SavedRule<V>[]): Record<string, V> {
   return Object.fromEntries(rules.map(rule => [rule.id, rule.value]));
 }
 
-export function isDirty(draft: FormattingDraft, rules: FormattingRule[]): boolean {
+export function isDirty<V>(draft: Record<string, V>, rules: SavedRule<V>[]): boolean {
   return rules.some(rule => draft[rule.id] !== rule.value);
 }
 
-export function withValue(draft: FormattingDraft, id: string, value: RuleValue): FormattingDraft {
+export function withValue<V>(draft: Record<string, V>, id: string, value: V): Record<string, V> {
   return {...draft, [id]: value};
 }
 

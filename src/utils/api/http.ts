@@ -13,8 +13,9 @@ import {fromTestDefinition, fromTestDefinitions, toTestDefinitionDraft} from './
 import {fromFormattingRulesDto, toFormattingRulesBody} from './formattingRules';
 import {fromJobProgressDto} from '../jobs/jobProgress';
 import {fromFormattedSnippetDto} from './formattedSnippet';
-const rulesPath = (language: string, version: string) =>
-  '/formatting-rules/' + encodeURIComponent(language) + '/' + encodeURIComponent(version);
+import {fromLintingRulesDto, toLintingRulesBody} from './lintingRules';
+const rulesPath = (resource: 'formatting-rules' | 'linting-rules', language: string, version: string) =>
+  '/' + resource + '/' + encodeURIComponent(language) + '/' + encodeURIComponent(version);
 export function createApiClient(config: RuntimeConfig): AxiosInstance {
   const headers = identityHeaders(config);
   const client = axios.create({baseURL: '/api', timeout: 15000});
@@ -73,10 +74,10 @@ export function createHttpSnippetOperations(client: AxiosInstance, actorId: stri
       return saved;
     },
     async getFormattingRules(language, version, signal) {
-      return fromFormattingRulesDto((await client.get(rulesPath(language, version), {signal})).data, language, version);
+      return fromFormattingRulesDto((await client.get(rulesPath('formatting-rules', language, version), {signal})).data, language, version);
     },
     async saveFormattingRules(language, version, draft) {
-      const response = await client.put(rulesPath(language, version), toFormattingRulesBody(draft));
+      const response = await client.put(rulesPath('formatting-rules', language, version), toFormattingRulesBody(draft));
       if (response.status !== 200) throw invalidResponse();
       return fromFormattingRulesDto(response.data, language, version);
     },
@@ -88,9 +89,16 @@ export function createHttpSnippetOperations(client: AxiosInstance, actorId: stri
       if (response.status !== 200) throw invalidResponse();
       return fromFormattedSnippetDto(response.data, snippetId);
     },
-    getLintingRules: unsupported,
+    async getLintingRules(language, version, signal) {
+      return fromLintingRulesDto((await client.get(rulesPath('linting-rules', language, version), {signal})).data, language, version);
+    },
+    async saveLintingRules(language, version, draft) {
+      const response = await client.put(rulesPath('linting-rules', language, version), toLintingRulesBody(draft));
+      if (response.status !== 200) throw invalidResponse();
+      return fromLintingRulesDto(response.data, language, version);
+    },
     formatSnippet: unsupported, removeTestCase: unsupported,
-    deleteSnippet: unsupported, testSnippet: unsupported, modifyLintingRule: unsupported,
+    deleteSnippet: unsupported, testSnippet: unsupported,
   };
 }
 export function configuredApi(config: RuntimeConfig) {

@@ -4,7 +4,7 @@ const second = '770e8400-e29b-41d4-a716-446655440001';
 const testId = '880e8400-e29b-41d4-a716-446655440000';
 const descriptor = (id: string, name: string) => ({
   id, name, description: null, language: 'printscript', version: '1.1', extension: 'prs',
-  ownerId: 'dev-thiago', relation: 'owned', lint: {status: 'not-implemented'},
+  ownerId: 'dev-thiago', relation: 'owned', lint: {status: 'pending', reason: 'NOT_EVALUATED', diagnostics: [], codeHash: null, rulesRevision: null, processorRevision: null},
 });
 const definition = {id: testId, snippetId: first, inputs: ['', 'ñ', 'ñ'], expectedOutputs: ['expected', '', 'expected']};
 function setup(readonly = false, actor = 'dev-thiago') {
