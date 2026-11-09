@@ -21,6 +21,8 @@ const problemMessages: Record<string, string> = {
   'unformattable-code': 'El código tiene errores que impiden formatearlo. Revisá los diagnósticos.',
   'formatting-limit-exceeded': 'El código o su versión formateada superan el tamaño permitido.',
   'invalid-linting-rules': 'Algunas reglas no se pudieron guardar. Revisá las marcadas y volvé a intentarlo.',
+  'session-expired': 'Tu sesión venció. Volvé a iniciar sesión para continuar; lo que escribiste sigue acá.',
+  'session-unavailable': 'No pudimos comunicarnos con el servicio de inicio de sesión. Volvé a intentarlo.',
   'technical-failure': 'Ocurrió un problema al procesar la solicitud. Volvé a intentarlo.',
 };
 export function errorMessage(error: Error): string {

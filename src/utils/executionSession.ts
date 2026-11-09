@@ -16,7 +16,14 @@ export class ExecutionSession {
   private readingGeneration?: number;
   private startedAt = 0;
   private readonly submitted = new Map<string, string>();
+  private released = false;
   constructor(private readonly http: ExecutionHttp) {}
+  attach() {this.released = false;}
+  release() {
+    this.released = true;
+    ++this.generation; this.stream?.abort(); this.mutation?.abort(); this.submitted.clear();
+    this.view = idleExecution; this.publish({});
+  }
   getSnapshot = () => this.view;
   subscribe = (listener: () => void) => {this.listeners.add(listener); return () => {this.listeners.delete(listener);};};
   private publish(update: Partial<ExecutionView>) {this.view = {...this.view, ...update}; this.listeners.forEach(listener => listener());}
@@ -27,7 +34,7 @@ export class ExecutionSession {
       ? {outputs: [], prompt: undefined, unavailable: true} : {};
   }
   async start(target: ExecutionTarget) {
-    if (this.occupied() || (this.view.startUncertain && !this.owned(target))) return;
+    if (this.released || this.occupied() || (this.view.startUncertain && !this.owned(target))) return;
     const generation = ++this.generation;
     this.startedAt = Date.now();
     this.stream?.abort(); this.mutation?.abort(); this.submitted.clear();
@@ -127,7 +134,7 @@ export class ExecutionSession {
     finally {clearTimeout(timeout);}
   }
   close(target: ExecutionTarget) {
-    if (!this.owned(target)) return;
+    if (this.released || !this.owned(target)) return;
     const descriptor = this.view.descriptor, active = this.occupied();
     ++this.generation; this.stream?.abort(); this.mutation?.abort();
     if (isTerminal(this.view.phase) || this.view.phase === 'IDLE') {this.view = idleExecution; this.publish({}); return;}
