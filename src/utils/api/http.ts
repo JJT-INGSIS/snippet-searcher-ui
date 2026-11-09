@@ -1,6 +1,7 @@
 import {fromAutomaticTests} from './automaticTests';
 import axios, {AxiosInstance} from 'axios';
-import {RuntimeConfig, actorScope, identityHeaders} from './config';
+import {RuntimeConfig} from './config';
+import {RequestIdentity, isSameOriginApiPath, staticIdentity} from '../auth/requestIdentity';
 import {createExecutionHttp} from './executionHttp';
 import {ExecutionSession} from '../executionSession';
 import {ApiError, toApiError, unsupported} from './errors';
@@ -16,14 +17,20 @@ import {fromFormattedSnippetDto} from './formattedSnippet';
 import {fromLintingRulesDto, toLintingRulesBody} from './lintingRules';
 const rulesPath = (resource: 'formatting-rules' | 'linting-rules', language: string, version: string) =>
   '/' + resource + '/' + encodeURIComponent(language) + '/' + encodeURIComponent(version);
-export function createApiClient(config: RuntimeConfig): AxiosInstance {
-  const headers = identityHeaders(config);
+const PUBLIC_PATHS = ['/languages'];
+const UNAUTHORIZED = 401;
+
+export function createApiClient(config: RuntimeConfig, identity: RequestIdentity = staticIdentity(config)): AxiosInstance {
   const client = axios.create({baseURL: '/api', timeout: 15000});
-  client.interceptors.request.use(request => {
-    if (request.url !== '/languages') Object.entries(headers).forEach(([name, value]) => request.headers.set(name, value));
+  client.interceptors.request.use(async request => {
+    if (!isSameOriginApiPath(request.url) || PUBLIC_PATHS.includes(request.url)) return request;
+    Object.entries(await identity.headers()).forEach(([name, value]) => request.headers.set(name, value));
     return request;
   });
-  client.interceptors.response.use(response => response, (error: unknown) => Promise.reject(axios.isCancel(error) ? error : toApiError(error)));
+  client.interceptors.response.use(response => response, (error: unknown) => {
+    const replacement = axios.isAxiosError(error) && error.response?.status === UNAUTHORIZED ? identity.unauthorized() : null;
+    return Promise.reject(replacement ?? (axios.isCancel(error) ? error : toApiError(error)));
+  });
   return client;
 }
 export function createHttpSnippetOperations(client: AxiosInstance, actorId: string): SnippetOperations {
@@ -101,7 +108,7 @@ export function createHttpSnippetOperations(client: AxiosInstance, actorId: stri
     deleteSnippet: unsupported, testSnippet: unsupported,
   };
 }
-export function configuredApi(config: RuntimeConfig) {
-  const actor = actorScope(config);
-  return {actor, operations: createHttpSnippetOperations(createApiClient(config), actor), execution: new ExecutionSession(createExecutionHttp(config))};
+export function configuredApi(config: RuntimeConfig, identity: RequestIdentity = staticIdentity(config)) {
+  const operations = createHttpSnippetOperations(createApiClient(config, identity), identity.actor);
+  return {actor: identity.actor, operations, execution: new ExecutionSession(createExecutionHttp(config, undefined, identity))};
 }
