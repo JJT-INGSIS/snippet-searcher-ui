@@ -11,3 +11,12 @@ it('translates known problems and handles unknown failures without reporting suc
   expect(errorMessage(new ApiError('raw', {type: 'urn:snippets:problem:formatting-limit-exceeded', status: 422}))).toContain('tamaño');
   expect(lintLabels['not-implemented']).toBe('Sin evaluación');
 });
+
+it('distinguishes a directory outage from a search that needs refining without exposing provider details', () => {
+  const outage = new ApiError('private provider detail', {type: 'urn:snippets:problem:directory-unavailable', status: 502});
+  const broad = new ApiError('private provider detail', {type: 'urn:snippets:problem:directory-search-too-broad', status: 422});
+  expect(errorMessage(outage)).toContain('consultar los destinatarios');
+  expect(errorMessage(broad)).toContain('más específico');
+  expect(errorMessage(outage)).not.toContain('private provider detail');
+  expect(errorMessage(broad)).not.toContain('private provider detail');
+});

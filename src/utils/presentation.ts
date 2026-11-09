@@ -18,6 +18,8 @@ const problemMessages: Record<string, string> = {
   'modification-denied': 'Solo el propietario puede modificar este snippet.',
   'share-denied': 'No tenés permiso para compartir este snippet.',
   'invalid-recipient': 'Elegí un destinatario disponible.',
+  'directory-unavailable': 'No pudimos consultar los destinatarios. Volvé a intentarlo.',
+  'directory-search-too-broad': 'Hay demasiadas coincidencias. Escribí un comienzo de nombre más específico.',
   'dependency-failure': 'No pudimos comunicarnos con un servicio necesario. Volvé a intentarlo.',
   'metadata-unavailable': 'No pudimos acceder a los metadatos. Volvé a intentarlo.',
   'storage-unavailable': 'No pudimos acceder al contenido. Volvé a intentarlo.',
