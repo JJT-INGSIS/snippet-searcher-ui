@@ -1,16 +1,22 @@
-import {RuntimeConfig, identityHeaders} from './config';
+import {RuntimeConfig} from './config';
+import {RequestIdentity, staticIdentity} from '../auth/requestIdentity';
 import {ApiError} from './errors';
 import {ExecutionDescriptor, ExecutionEvent, ExecutionTarget, fromCancel, fromExecutionDescriptor, fromExecutionEvent, protocolError} from './executionDtos';
 
 export type ExecutionHttp = ReturnType<typeof createExecutionHttp>;
-export function createExecutionHttp(config: RuntimeConfig, fetcher: typeof fetch = (...args) => fetch(...args)) {
-  const identity = identityHeaders(config);
+const UNAUTHORIZED = 401;
+
+export function createExecutionHttp(config: RuntimeConfig, fetcher: typeof fetch = (...args) => fetch(...args),
+  identity: RequestIdentity = staticIdentity(config)) {
   async function request(path: string, signal: AbortSignal, body?: unknown, accept = 'application/json') {
+    const credentials = await identity.headers();
     const response = await fetcher('/api' + path, {
       method: body === undefined ? 'GET' : 'POST', credentials: 'same-origin', cache: 'no-store', signal,
-      headers: {...identity, Accept: accept, ...(body === undefined ? {} : {'Content-Type': 'application/json'})},
+      headers: {...credentials, Accept: accept, ...(body === undefined ? {} : {'Content-Type': 'application/json'})},
       ...(body === undefined ? {} : {body: JSON.stringify(body)}),
     });
+    const replacement = response.status === UNAUTHORIZED ? identity.unauthorized() : null;
+    if (replacement) throw replacement;
     if (!response.ok) {
       const problem = await response.json().catch(() => null);
       throw new ApiError('No se pudo completar la operación (HTTP ' + response.status + ').', {
