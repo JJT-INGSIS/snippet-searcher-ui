@@ -4,7 +4,7 @@ const FORMATTED = 'let saludo: string = "¡Hola, señor! 🚀";\nprintln(saludo)
 const DELAY_MS = 300;
 const descriptor = {
   id: snippetId, name: 'Saludo', description: null, language: 'printscript', version: '1.1', extension: 'prs',
-  ownerId: 'dev-thiago', relation: 'owned', lint: {status: 'not-implemented'},
+  ownerId: 'dev-thiago', relation: 'owned', lint: {status: 'pending', reason: 'NOT_EVALUATED', diagnostics: [], codeHash: null, rulesRevision: null, processorRevision: null},
 };
 const formatted = {
   snippetId, name: 'Saludo', language: 'printscript', version: '1.1', extension: 'prs', code: FORMATTED,

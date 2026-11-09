@@ -1,7 +1,7 @@
 // These are browser integration tests against the agreed contracts, NOT backend acceptance.
 const id = '0f8b3c1e-4a2d-4d3b-9b7a-2c6e5f1a9d40';
 const metadata = {id, name: 'Hello', description: null, language: 'printscript', version: '1.0'};
-const descriptor = {...metadata, extension: 'prs', ownerId: 'dev-juan', relation: 'owned', lint: {status: 'not-implemented'}};
+const descriptor = {...metadata, extension: 'prs', ownerId: 'dev-juan', relation: 'owned', lint: {status: 'pending', reason: 'NOT_EVALUATED', diagnostics: [], codeHash: null, rulesRevision: null, processorRevision: null}};
 const detail = {...descriptor, code: 'println(1);', capabilities: {modify: true, share: true}};
 function setup(readonly = false) {
   cy.intercept('GET', '/app-config.json', {environment: 'dev', identity: {mode: 'dev', actorId: 'dev-juan'}});
@@ -128,7 +128,7 @@ describe('SNI-34 UI / pending backend contracts', () => {
     cy.contains('button', 'Ejecutar snippet').should('be.enabled');
     cy.contains('button', 'Formatear').should('be.disabled');
     cy.contains('button', 'Eliminar').should('be.disabled');
-    cy.contains('Sin evaluación').should('be.visible');
+    cy.contains('Lint: Sin evaluar').should('be.visible');
   });
   it('keeps a confirmed save successful even if the independent detail refresh fails', () => {
     setup(); cy.get('[data-testid="snippet-row"] button').click(); cy.wait('@detail');

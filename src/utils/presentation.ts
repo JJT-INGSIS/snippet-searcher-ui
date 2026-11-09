@@ -1,11 +1,6 @@
-import {ComplianceEnum} from './snippet';
 import {ApiError} from './api/errors';
 import {emptyCodeMessage} from './codeValidation';
 
-export const lintLabels: Record<ComplianceEnum, string> = {
-  'not-implemented': 'Sin evaluación', pending: 'Pendiente', failed: 'No se pudo evaluar',
-  compliant: 'Sin infracciones', 'not-compliant': 'Con infracciones',
-};
 const problemMessages: Record<string, string> = {
   'invalid-request': 'Revisá los campos indicados y volvé a intentarlo.',
   'invalid-code': 'El código tiene errores. Revisá los diagnósticos antes de guardar.',
@@ -27,6 +22,7 @@ const problemMessages: Record<string, string> = {
   'formatting-stale': 'El snippet cambió mientras se preparaba la versión formateada. Volvé a intentarlo.',
   'unformattable-code': 'El código tiene errores que impiden formatearlo. Revisá los diagnósticos.',
   'formatting-limit-exceeded': 'El código o su versión formateada superan el tamaño permitido.',
+  'invalid-linting-rules': 'Algunas reglas no se pudieron guardar. Revisá las marcadas y volvé a intentarlo.',
   'technical-failure': 'Ocurrió un problema al procesar la solicitud. Volvé a intentarlo.',
 };
 export function errorMessage(error: Error): string {

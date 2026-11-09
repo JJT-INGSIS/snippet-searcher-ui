@@ -24,6 +24,10 @@ function setup() {
     req.reply(rules('1.0', false, null));
   }).as('rules-1.0');
   cy.intercept('GET', '/api/formatting-rules/printscript/1.1', rules('1.1', true, 1)).as('rules-1.1');
+  cy.intercept('GET', '/api/linting-rules/*/*', req => {
+    const [language, version] = new URL(req.url).pathname.split('/').slice(-2);
+    req.reply({language, version, revision: revision('d'), changed: false, jobId: null, rules: []});
+  });
 }
 function visit() {cy.visit('/rules'); cy.wait('@rules-1.0');}
 function toggle(id: string) {cy.contains('label', id).click();}
@@ -89,7 +93,7 @@ describe('SNI-65 formatting rules and reformatting progress', () => {
     setup(); visit();
     toggle('space-before-colon');
     cy.contains('[role="tab"]', 'Lint').click();
-    cy.contains('Las reglas de lint todavía no están disponibles.').should('be.visible');
+    cy.contains('Esta versión no tiene reglas de lint configurables.').should('be.visible');
     cy.contains('[role="tab"]', 'Formato').click();
     cy.contains('label', 'space-before-colon').find('input').should('be.checked');
     cy.get('#rules-version').click(); cy.contains('[role="option"]', '1.1').click();

@@ -1,7 +1,7 @@
 // UI regressions against controlled HTTP contracts, not full backend acceptance.
 const item = (name = 'Ejemplo', id = '0f8b3c1e-4a2d-4d3b-9b7a-2c6e5f1a9d40') => ({
   id, name, description: null, language: 'printscript', version: '1.1', extension: 'prs',
-  ownerId: 'dev-juan', relation: 'owned', lint: {status: 'not-implemented'},
+  ownerId: 'dev-juan', relation: 'owned', lint: {status: 'pending', reason: 'NOT_EVALUATED', diagnostics: [], codeHash: null, rulesRevision: null, processorRevision: null},
 });
 function config() {
   cy.intercept('GET', '/app-config.json', {environment: 'dev', identity: {mode: 'dev', actorId: 'dev-juan'}});

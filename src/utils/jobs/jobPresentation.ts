@@ -2,21 +2,33 @@ import {JobProgress} from './jobProgress';
 
 export type JobSummary = {severity: 'info' | 'success' | 'warning' | 'error'; title: string; detail: string};
 
+export type JobKind = 'format' | 'lint';
+
+type JobWords = {running: string; done: string; skipped: string; subject: string};
+
+const words: Record<JobKind, JobWords> = {
+  format: {running: 'Reformateando tus snippets', done: 'Reformateados', skipped: 'sin poder formatear', subject: 'del reformateo'},
+  lint: {running: 'Evaluando lint de tus snippets', done: 'Evaluados', skipped: 'sin poder evaluar', subject: 'de la evaluación de lint'},
+};
+
+export const jobSubject = (kind: JobKind) => words[kind].subject;
+
 const snippets = (count: number) => count === 1 ? '1 snippet' : count + ' snippets';
 
-export function describeJob(progress: JobProgress): JobSummary {
+export function describeJob(progress: JobProgress, kind: JobKind = 'format'): JobSummary {
+  const {running, done, skipped} = words[kind];
   switch (progress.status) {
   case 'COMPLETED':
-    return {severity: 'success', title: 'Listo', detail: 'Reformateados: ' + snippets(progress.processed) + '.'};
+    return {severity: 'success', title: 'Listo', detail: done + ': ' + snippets(progress.processed) + '.'};
   case 'PARTIAL':
     return {severity: 'warning', title: 'Terminó con fallos',
-      detail: 'Reformateados: ' + snippets(progress.processed) + '; sin poder formatear: ' + snippets(progress.failed) + '.'};
+      detail: done + ': ' + snippets(progress.processed) + '; ' + skipped + ': ' + snippets(progress.failed) + '.'};
   case 'FAILED':
     return {severity: 'error', title: 'No se pudo completar', detail: 'El reprocesamiento no terminó. Tus reglas siguen guardadas.'};
   case 'SUPERSEDED':
     return {severity: 'info', title: 'Reemplazado', detail: 'Un cambio de reglas más nuevo continúa el reprocesamiento.'};
   default:
-    return {severity: 'info', title: 'Reformateando tus snippets',
+    return {severity: 'info', title: running,
       detail: 'Listos: ' + snippets(progress.processed) + '; pendientes: ' + snippets(progress.pending) +
         (progress.selectionComplete ? '.' : '; todavía buscando snippets.')};
   }
