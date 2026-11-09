@@ -3,10 +3,10 @@ import {PaginatedSnippets, Share, Snippet, SnippetFilters, SnippetMetadata, Upda
 import {PaginatedUsers} from './users';
 import {TestCase} from '../types/TestCase';
 import {FileType} from '../types/FileType';
-import {Rule} from '../types/Rule';
 import {CreationIntent} from './api/creationIntent';
 import {TestDefinition, TestDefinitionDraft} from '../types/TestDefinition';
 import {FormattingRules, RuleValue} from './api/formattingRules';
+import {LintingRules, LintRuleValue} from './api/lintingRules';
 import {JobProgress} from './jobs/jobProgress';
 import {FormattedSnippet} from './api/formattedSnippet';
 // Boundary retained from the supplied UI. Unsupported operations reject explicitly.
@@ -22,7 +22,8 @@ export interface SnippetOperations {
   saveFormattingRules(language: string, version: string, draft: Record<string, RuleValue>): Promise<FormattingRules>;
   getJobProgress(jobId: string, signal?: AbortSignal): Promise<JobProgress>;
   getFormattedSnippet(snippetId: string): Promise<FormattedSnippet>;
-  getLintingRules(): Promise<Rule[]>;
+  getLintingRules(language: string, version: string, signal?: AbortSignal): Promise<LintingRules>;
+  saveLintingRules(language: string, version: string, draft: Record<string, LintRuleValue>): Promise<LintingRules>;
   getAutomaticTests(snippetId: string, signal?: AbortSignal): Promise<AutomaticTests>;
   listTestDefinitions(snippetId: string, signal?: AbortSignal): Promise<TestDefinition[]>;
   formatSnippet(snippet: string): Promise<string>;
@@ -30,5 +31,4 @@ export interface SnippetOperations {
   removeTestCase(id: string): Promise<string>;
   deleteSnippet(id: string): Promise<string>;
   testSnippet(testCase: Partial<TestCase>): Promise<'success' | 'fail'>;
-  modifyLintingRule(rules: Rule[]): Promise<Rule[]>;
 }

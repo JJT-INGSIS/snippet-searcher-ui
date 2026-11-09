@@ -1,6 +1,6 @@
 import {expect, it} from 'vitest';
 import {ApiError} from './api/errors';
-import {errorMessage, lintLabels} from './presentation';
+import {errorMessage} from './presentation';
 it('translates known problems and handles unknown failures without reporting success or emptiness', () => {
   expect(errorMessage(new ApiError('raw', {type: 'urn:snippets:problem:dependency-failure', status: 502}))).toContain('servicio');
   expect(errorMessage(new ApiError('unknown secret detail', undefined, true))).toContain('confirmación');
@@ -9,5 +9,5 @@ it('translates known problems and handles unknown failures without reporting suc
   expect(errorMessage(new ApiError('raw', {type: 'urn:snippets:problem:formatting-stale', status: 409}))).toContain('cambió');
   expect(errorMessage(new ApiError('raw', {type: 'urn:snippets:problem:unformattable-code', status: 422}))).toContain('errores');
   expect(errorMessage(new ApiError('raw', {type: 'urn:snippets:problem:formatting-limit-exceeded', status: 422}))).toContain('tamaño');
-  expect(lintLabels['not-implemented']).toBe('Sin evaluación');
+  expect(errorMessage(new ApiError('raw', {type: 'urn:snippets:problem:invalid-linting-rules', status: 422}))).toContain('marcadas');
 });
