@@ -8,6 +8,7 @@ export const useSnippetsOperations = () => useApi().operations;
 export const snippetKeys = {
   lists: (actor: string) => ['listSnippets', actor],
   list: (actor: string, page: number, size: number, filters: SnippetFilters) => ['listSnippets', actor, page, size, filters],
+  details: (actor: string) => ['snippet', actor],
   detail: (actor: string, id: string) => ['snippet', actor, id],
   users: (actor: string, name: string, page: number, size: number) => ['users', actor, name, page, size],
   automatic: (actor: string, id: string) => ['automaticTests', actor, id],
