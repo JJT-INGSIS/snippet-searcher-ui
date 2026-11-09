@@ -3,12 +3,12 @@ import {useMutation, useQuery, useQueryClient} from 'react-query';
 import {SnippetFilters, UpdateSnippet} from './snippet';
 import {useApi} from '../contexts/apiContext';
 import {CreationIntent} from './api/creationIntent';
-import {Rule} from '../types/Rule';
 import {TestDefinitionDraft} from '../types/TestDefinition';
 export const useSnippetsOperations = () => useApi().operations;
 export const snippetKeys = {
   lists: (actor: string) => ['listSnippets', actor],
   list: (actor: string, page: number, size: number, filters: SnippetFilters) => ['listSnippets', actor, page, size, filters],
+  details: (actor: string) => ['snippet', actor],
   detail: (actor: string, id: string) => ['snippet', actor, id],
   users: (actor: string, name: string, page: number, size: number) => ['users', actor, name, page, size],
   automatic: (actor: string, id: string) => ['automaticTests', actor, id],
@@ -67,11 +67,6 @@ export const useSnippetTests = (snippetId: string, enabled = true) => {
     enabled: enabled && !!snippetId, retry: false,
   });
 };
-// Supplied rule components stay unavailable until their own stories are implemented.
-export const useGetLintingRules = () => {
-  const op = useSnippetsOperations();
-  return useQuery(['unavailable', 'lintingRules'], () => op.getLintingRules(), {enabled: false});
-};
 export const useCreateSnippetTest = (snippetId: string) => {
   const {actor, operations} = useApi();
   const cache = useQueryClient();
@@ -79,10 +74,6 @@ export const useCreateSnippetTest = (snippetId: string) => {
     retry: false,
     onSuccess: () => {void cache.invalidateQueries(snippetKeys.tests(actor, snippetId)); void cache.invalidateQueries(snippetKeys.automatic(actor, snippetId));},
   });
-};
-export const useModifyLintingRules = ({onSuccess}: {onSuccess: () => void}) => {
-  const op = useSnippetsOperations();
-  return useMutation((rules: Rule[]) => op.modifyLintingRule(rules), {onSuccess, retry: false});
 };
 export const useFormatSnippet = () => {
   const op = useSnippetsOperations();

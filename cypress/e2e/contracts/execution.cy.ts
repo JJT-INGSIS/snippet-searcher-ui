@@ -6,7 +6,7 @@ const testId = '880e8400-e29b-41d4-a716-446655440000';
 const executionId = '550e8400-e29b-41d4-a716-446655440000';
 const requestId = '660e8400-e29b-41d4-a716-446655440000';
 const metadata = (id: string, name: string) => ({id, name, description: null, language: 'printscript', version: '1.1',
-  extension: 'prs', ownerId: 'dev-thiago', relation: 'owned', lint: {status: 'not-implemented'}});
+  extension: 'prs', ownerId: 'dev-thiago', relation: 'owned', lint: {status: 'pending', reason: 'NOT_EVALUATED', diagnostics: [], codeHash: null, rulesRevision: null, processorRevision: null}});
 const descriptor = (test = false) => ({executionId, snippetId, ...(test ? {testId} : {}), mode: test ? 'TEST' : 'INTERACTIVE',
   state: 'STARTING', lastSeq: 0, snapshot: {language: 'printscript', version: '1.1', codeHash: 'sha256-v1:' + 'a'.repeat(64), ...(test ? {testHash: 'sha256-v1:' + 'b'.repeat(64)} : {})},
   limits: {totalSeconds: 120, inputWaitSeconds: 30, reconnectSeconds: 15, codeBytes: 1048576, inputBytes: 8192, outputBytes: 1048576, bufferEvents: 256, bufferBytes: 262144, terminalRetentionSeconds: 60}});

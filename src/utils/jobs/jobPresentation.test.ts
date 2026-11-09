@@ -21,4 +21,11 @@ describe('job presentation', () => {
     expect(describeJob(progress('FAILED')).detail).toContain('Tus reglas siguen guardadas');
     expect(describeJob(progress('SUPERSEDED')).severity).toBe('info');
   });
+
+  it('uses the words of a lint batch when the job evaluates lint', () => {
+    expect(describeJob(progress('RUNNING', 1, 0, 2), 'lint').title).toBe('Evaluando lint de tus snippets');
+    expect(describeJob(progress('COMPLETED'), 'lint').detail).toBe('Evaluados: 3 snippets.');
+    expect(describeJob(progress('PARTIAL', 2, 1), 'lint').detail).toBe('Evaluados: 2 snippets; sin poder evaluar: 1 snippet.');
+    expect(describeJob(progress('COMPLETED'), 'format').detail).toBe('Reformateados: 3 snippets.');
+  });
 });

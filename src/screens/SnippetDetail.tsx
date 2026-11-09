@@ -7,13 +7,14 @@ import {ShareSnippetModal} from '../components/snippet-detail/ShareSnippetModal'
 import {Snippet} from '../utils/snippet';
 import {ApiErrorAlert} from '../components/common/ApiErrorAlert';
 import {CodeEditor} from '../components/common/CodeEditor';
-import {lintLabels} from '../utils/presentation';
+import {lintLabel} from '../utils/lintPresentation';
 import {useSnippetEditor} from '../hooks/useSnippetEditor';
 import {TestSnippetModal} from '../components/snippet-test/TestSnippetModal';
 import {useApi} from '../contexts/apiContext';
 import {SnippetExecution} from './SnippetExecution';
 import {FormattedDownloadButton} from '../components/snippet-detail/FormattedDownloadButton';
 import {useFormattedDownload} from '../hooks/useFormattedDownload';
+import {LintSection} from '../components/snippet-detail/LintSection';
 
 function DownloadButton({snippet}: {snippet: Snippet}) {
   const [url, setUrl] = useState<string>();
@@ -47,7 +48,7 @@ export function SnippetDetail({id, handleCloseModal}: {id: string; handleCloseMo
       <Stack direction="row" flexWrap="wrap" gap={1}>
         <Chip size="small" variant="outlined" label={snippet.language + ' ' + snippet.version}/>
         <Chip size="small" label={snippet.relation === 'owned' ? 'Propio' : 'Compartido'}/>
-        <Chip size="small" label={'Lint: ' + lintLabels[snippet.compliance]}/>
+        <Chip size="small" label={'Lint: ' + lintLabel(snippet.lint)}/>
       </Stack>
       {readonly && <Alert severity="info">Solo lectura. El propietario conserva los permisos de edición.</Alert>}
       <TextField id="detail-name" label="Nombre" value={editor.draft.name} disabled={readonly || editor.saving}
@@ -68,6 +69,7 @@ export function SnippetDetail({id, handleCloseModal}: {id: string; handleCloseMo
       {editor.dirty && <Typography variant="body2" color="text.secondary">
         Las descargas usan la versión guardada: tus cambios sin guardar no se incluyen.
       </Typography>}
+      <LintSection lint={snippet.lint} shared={snippet.relation === 'shared'} dirty={editor.dirty}/>
       <Stack direction="row" flexWrap="wrap" gap={1}>
         <Button onClick={() => setTestsOpen(true)} disabled={!!error}>Ver tests</Button>
         <Button disabled>Formatear</Button><Button disabled>Eliminar</Button>
