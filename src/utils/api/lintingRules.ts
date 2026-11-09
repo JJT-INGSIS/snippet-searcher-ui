@@ -31,7 +31,7 @@ function fromLintRuleDto(value: unknown): LintRule {
     throw invalidResponse();
   }
   const type = dto.type as LintRuleType;
-  const allowed = dto.value === null ? dto.acceptsNull : fitsType(type, dto.choices, dto.value);
+  const allowed = dto.value === null || fitsType(type, dto.choices, dto.value);
   if (!allowed || (type === 'choice' && dto.choices.length === 0)) throw invalidResponse();
   return {
     id: dto.id, type, acceptsNull: dto.acceptsNull, choices: [...dto.choices],
@@ -52,5 +52,6 @@ export function fromLintingRulesDto(value: unknown, language: string, version: s
 }
 
 export function toLintingRulesBody(draft: Record<string, LintRuleValue>): {rules: Record<string, LintRuleValue>} {
-  return {rules: {...draft}};
+  const selected = Object.entries(draft).filter(([, value]) => value !== null);
+  return {rules: Object.fromEntries(selected)};
 }

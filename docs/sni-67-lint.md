@@ -5,7 +5,7 @@ listado y detalle). Reutiliza lo que dejaron SNI-65 y SNI-66: selector de ámbit
 confirmación de cambios sin guardar, polling de trabajos, panel de progreso,
 `violations` en los errores y parseo estricto de las respuestas.
 
-Estado: **en desarrollo.**
+Estado: **implementado y verificado (08/11/2026).**
 
 ## Contratos que consume
 
@@ -21,14 +21,16 @@ Todos con el `X-Dev-Actor-Id` de la configuración, como el resto de la app.
 | `revision`, `changed`, `jobId` | Igual que formato: `jobId` se sigue con el panel de progreso |
 | `rules[].id` | Nombre visible de la regla (el catálogo no trae descripción) |
 | `rules[].type` | `boolean`, `integer` o `choice`; elige el control |
-| `rules[].acceptsNull` | Si es `true`, la regla admite "Sin valor" |
+| `rules[].acceptsNull` | Si es `true`, la UI ofrece "Sin valor" |
 | `rules[].choices` | Opciones de una regla `choice` |
 | `rules[].conflictsWith` | Reglas con las que no se combina |
-| `rules[].value` | Valor actual; sin configuración guardada son los defaults del proveedor |
+| `rules[].value` | Valor actual; sin configuración guardada son los defaults del proveedor. `null` significa "no seleccionada", aunque la regla no acepte `null` como valor |
 
-`PUT` manda la selección completa en `{"rules":{id: valor}}`. Una selección vacía
-`{}` es válida y apaga todas las reglas: no vuelve a los defaults. Los errores son
-los de formato, con `422 invalid-linting-rules` y sus `violations`.
+`PUT` manda la selección completa en `{"rules":{id: valor}}`, sin las reglas en
+`null`: para el backend una regla ausente y una en `null` significan lo mismo, y así
+nunca se manda `null` a una regla que no lo acepta. Una selección vacía `{}` es válida
+y apaga todas las reglas: no vuelve a los defaults. Los errores son los de formato,
+con `422 invalid-linting-rules` y sus `violations`.
 
 ### Cumplimiento en listado y detalle (SNI-64)
 
@@ -152,6 +154,37 @@ tiene que dejar disponibles: catálogo real, guardado, no-op y progreso; filtro 
 `lint` con los cuatro estados; motivo y diagnósticos vigentes en el detalle; y errores
 de dependencia visibles como error.
 
+## Piezas compartidas con formato
+
+| Pieza | Para qué |
+| --- | --- |
+| `utils/api/contractFormats.ts` | Validaciones de revisión, UUID y listas de texto usadas por formato, lint y la descarga formateada |
+| `utils/ruleScopeHooks.ts` | Leer, guardar y seguir el lote de reglas por actor + lenguaje + versión |
+| `components/rule-settings/useRuleScopeEditor.ts` | Ámbito, borrador, confirmación al cambiar de ámbito, violaciones y guardado |
+| `components/rule-settings/RuleScopeSettings.tsx` | Armado de la pestaña: selector, progreso, reglas, errores y botones |
+| `utils/formattingDraft.ts` | `draftOf`, `isDirty` y `withValue` genéricos |
+| `JobProgressPanel` + `describeJob` | Progreso con textos según el tipo de lote |
+
+Cada pestaña solo aporta su fuente de datos, el campo de cada regla y sus textos.
+
 ## Verificación
 
-Pendiente.
+| Qué | Resultado |
+| --- | --- |
+| Vitest | 200 pruebas: contratos estrictos de reglas y de resultados de lint, textos y motivos, borrador, textos de lotes, servidor HTTP de contrato para reglas y filtros del listado |
+| Cypress (contratos) | 7 casos nuevos en `lint.cy.ts`: edición por tipo de regla y guardado completo, progreso del lote, 422 por regla con reintento manual, ámbitos de formato y lint separados, los cuatro estados y el superado en el listado, filtro y orden con vuelta a la página 0, 502 como error, diagnósticos y avisos en el detalle. Los fixtures existentes pasan al `lint` real. Suite completa 47/47 |
+| Lint y build | Verdes |
+| Navegador contra el backend real | Stack aislado de Compose con `dev` de snippets-service, permissions-service y printscript-service, Redis, worker y operaciones durables de PrintScript. `dev-thiago` ve "Sin infracciones" y "Con infracciones" reales, filtra y lee `identifier_format: El identificador no cumple la convención configurada. (1:5)`; `dev-ana` ve el resultado del snippet compartido con "Evaluado con las reglas del propietario"; cambiar `identifier_format` a `snake case` desde la pestaña Lint crea un lote real que termina `COMPLETED` en unos 2,5 s y el listado pasa a mostrar el snippet antes limpio con infracciones |
+
+Hallazgos de la prueba en vivo:
+
+- El catálogo real trae `mandatory-variable-or-literal-in-readInput` con `acceptsNull: false`
+  y `value: null` (no seleccionada). La primera versión del parser lo rechazaba; se corrigió
+  y quedó cubierto en Vitest.
+- Los lotes de lint necesitan las operaciones durables de PrintScript
+  (`PRINTSCRIPT_OPERATIONS_ENABLED=true` en el overlay de Redis). Con el valor por defecto
+  el lote queda `UNKNOWN` con `REMOTE_OPERATION_UNAVAILABLE` y la UI sigue mostrando
+  "Evaluando…" hasta el corte de 10 minutos.
+
+Límites: la vista mobile no tiene contrato propio; el refresco del listado al terminar un lote
+se verificó en vivo, no con Cypress.

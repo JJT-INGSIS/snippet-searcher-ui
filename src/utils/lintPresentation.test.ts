@@ -1,5 +1,5 @@
 import {describe, expect, it} from 'vitest';
-import {diagnosticText, lintExplanation, lintLabel} from './lintPresentation';
+import {diagnosticText, lintExplanation, lintFilterOptions, lintLabel, lintSeverity} from './lintPresentation';
 import {LintResult} from './api/lintResult';
 
 const result = (status: LintResult['status'], reason: string | null = null): LintResult =>
@@ -26,6 +26,17 @@ describe('lint presentation', () => {
     expect(lintExplanation(result('failed', 'SOMETHING_NEW'))).toContain('problema técnico');
     expect(lintExplanation(result('compliant'))).toBeNull();
     expect(lintExplanation(result('not-compliant'))).toBeNull();
+  });
+
+  it('marks a technical failure as an error and a violation as a warning', () => {
+    expect(lintSeverity(result('failed', 'LINT_UNAVAILABLE'))).toBe('error');
+    expect(lintSeverity(result('not-compliant'))).toBe('warning');
+    expect(lintSeverity(result('compliant'))).toBe('success');
+    expect(lintSeverity(result('pending', 'SUPERSEDED'))).toBe('info');
+  });
+
+  it('offers exactly the four states the listing accepts as filters', () => {
+    expect(lintFilterOptions.map(option => option.status)).toEqual(['compliant', 'not-compliant', 'pending', 'failed']);
   });
 
   it('writes each diagnostic with its rule and position', () => {

@@ -4,12 +4,14 @@ export type JobSummary = {severity: 'info' | 'success' | 'warning' | 'error'; ti
 
 export type JobKind = 'format' | 'lint';
 
-type JobWords = {running: string; done: string; skipped: string};
+type JobWords = {running: string; done: string; skipped: string; subject: string};
 
 const words: Record<JobKind, JobWords> = {
-  format: {running: 'Reformateando tus snippets', done: 'Reformateados', skipped: 'sin poder formatear'},
-  lint: {running: 'Evaluando lint de tus snippets', done: 'Evaluados', skipped: 'sin poder evaluar'},
+  format: {running: 'Reformateando tus snippets', done: 'Reformateados', skipped: 'sin poder formatear', subject: 'del reformateo'},
+  lint: {running: 'Evaluando lint de tus snippets', done: 'Evaluados', skipped: 'sin poder evaluar', subject: 'de la evaluación de lint'},
 };
+
+export const jobSubject = (kind: JobKind) => words[kind].subject;
 
 const snippets = (count: number) => count === 1 ? '1 snippet' : count + ' snippets';
 

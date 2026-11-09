@@ -17,7 +17,17 @@ const failureExplanations: Record<string, string> = {
   UNSUPPORTED_LANGUAGE: 'Este lenguaje o esta versión no tienen lint.',
   UNSUPPORTED_VERSION: 'Este lenguaje o esta versión no tienen lint.',
 };
+const severities: Record<LintStatus, 'success' | 'warning' | 'info' | 'error'> = {
+  compliant: 'success', 'not-compliant': 'warning', pending: 'info', failed: 'error',
+};
 const technicalFailure = 'No se pudo evaluar por un problema técnico. Se vuelve a evaluar al guardar el snippet o con el próximo cambio de reglas.';
+
+export const lintFilterOptions: {status: LintStatus; label: string}[] = [
+  {status: 'compliant', label: labels.compliant},
+  {status: 'not-compliant', label: labels['not-compliant']},
+  {status: 'pending', label: labels.pending},
+  {status: 'failed', label: labels.failed},
+];
 
 export function lintLabel(lint: LintResult): string {
   if (lint.status === 'pending' && lint.reason) return pendingLabels[lint.reason] ?? labels.pending;
@@ -28,6 +38,10 @@ export function lintExplanation(lint: LintResult): string | null {
   if (lint.status === 'pending') return pendingExplanations[lint.reason ?? ''] ?? pendingExplanations.NOT_EVALUATED;
   if (lint.status === 'failed') return failureExplanations[lint.reason ?? ''] ?? technicalFailure;
   return null;
+}
+
+export function lintSeverity(lint: LintResult): 'success' | 'warning' | 'info' | 'error' {
+  return severities[lint.status];
 }
 
 export function diagnosticText(diagnostic: Diagnostic): string {

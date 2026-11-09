@@ -14,6 +14,7 @@ import {useApi} from '../contexts/apiContext';
 import {SnippetExecution} from './SnippetExecution';
 import {FormattedDownloadButton} from '../components/snippet-detail/FormattedDownloadButton';
 import {useFormattedDownload} from '../hooks/useFormattedDownload';
+import {LintSection} from '../components/snippet-detail/LintSection';
 
 function DownloadButton({snippet}: {snippet: Snippet}) {
   const [url, setUrl] = useState<string>();
@@ -68,6 +69,7 @@ export function SnippetDetail({id, handleCloseModal}: {id: string; handleCloseMo
       {editor.dirty && <Typography variant="body2" color="text.secondary">
         Las descargas usan la versión guardada: tus cambios sin guardar no se incluyen.
       </Typography>}
+      <LintSection lint={snippet.lint} shared={snippet.relation === 'shared'} dirty={editor.dirty}/>
       <Stack direction="row" flexWrap="wrap" gap={1}>
         <Button onClick={() => setTestsOpen(true)} disabled={!!error}>Ver tests</Button>
         <Button disabled>Formatear</Button><Button disabled>Eliminar</Button>
