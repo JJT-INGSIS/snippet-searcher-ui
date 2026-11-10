@@ -96,6 +96,13 @@ class Proxy(BaseHTTPRequestHandler):
         ):
             self.reject()
             return
+        linting = (self.command == "POST" and self.path == "/linting") or (
+            operation and command.get("kind") == "LINT"
+        )
+        if linting:
+            time.sleep(settings.get("lintDelay", 0))
+            if settings.get("lintGate") and settings["lintGate"] in code:
+                hold("lintGate", settings["lintGate"], self.path, code, settings)
         if formatting:
             if settings.get("failure") and settings["failure"] in code:
                 self.reject()

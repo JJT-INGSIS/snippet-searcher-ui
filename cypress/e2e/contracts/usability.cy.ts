@@ -104,6 +104,7 @@ describe('SNI-35 search, pagination and feedback', () => {
   });
   it('closes queued upload messages after their timeout', () => {
     listing();
+    cy.get('[data-testid="upload-file-input"]').should('have.attr', 'accept', '.prs').and('be.enabled');
     cy.get('[data-testid="upload-file-input"]').selectFile({contents: Cypress.Buffer.from('x'), fileName: 'unknown.xyz'}, {force: true});
     cy.contains('La extensión del archivo').should('be.visible');
     cy.contains('La extensión del archivo', {timeout: 9000}).should('not.exist');
