@@ -77,6 +77,8 @@ describe('SNI-34 UI / pending backend contracts', () => {
   });
   it('rejects an empty upload and permits choosing the same filename again', () => {
     setup(); cy.wait('@catalog');
+    // A completed HTTP response does not mean React has applied its catalog yet.
+    cy.get('[data-testid="upload-file-input"]').should('have.attr', 'accept', '.prs').and('be.enabled');
     cy.intercept('POST', '/api/snippets', {statusCode: 500}).as('empty-upload');
     cy.get('[data-testid="upload-file-input"]').selectFile({contents: Cypress.Buffer.from(' \t\r\n'), fileName: 'empty.prs'}, {force: true});
     cy.contains('El código no puede estar vacío.').should('be.visible');
