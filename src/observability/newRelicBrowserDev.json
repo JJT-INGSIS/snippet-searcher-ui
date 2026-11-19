@@ -1,0 +1,15 @@
+{
+  "info": {
+    "beacon": "bam.nr-data.net",
+    "errorBeacon": "bam.nr-data.net",
+    "licenseKey": "NRJS-4eb91df8838c89f7345",
+    "applicationID": "1103564597"
+  },
+  "loader_config": {
+    "accountID": "8718557",
+    "trustKey": "8718557",
+    "agentID": "1103564597",
+    "licenseKey": "NRJS-4eb91df8838c89f7345",
+    "applicationID": "1103564597"
+  }
+}

@@ -24,6 +24,7 @@
     "@emotion/styled": "^11.11.0",
     "@mui/icons-material": "^5.15.12",
     "@mui/material": "^5.15.12",
+    "@newrelic/browser-agent": "1.324.1",
     "@types/prismjs": "^1.26.3",
     "auto-bind": "^5.0.1",
     "axios": "^1.6.7",
