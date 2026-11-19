@@ -202,6 +202,20 @@ Ver [evidencia y límites](docs/sni-34-validation.md). No declarar US5–7 compl
 
 Ver [cambios, comandos, evidencia real y límites](docs/sni-35-validation.md).
 
+## New Relic Browser en DEV
+
+La UI pública de DEV carga el agente Browser en las rutas `/` y `/rules` con
+Auth0 activo. El inicio omite el callback de Auth0 y las URLs con query o
+fragmento. Se incluyen vistas, tiempos de carga y errores de JavaScript.
+El agente se configura con los datos públicos de la entidad Browser de DEV.
+Session Replay, Session Trace, AJAX y cookies del agente quedan desactivados.
+
+Para validarlo después de desplegar, abrir una de las rutas públicas de DEV,
+confirmar eventos `PageView` y `PageViewTiming` en la entidad
+`snippet-searcher-dev-ui` y verificar un error de JavaScript de prueba sin
+datos de usuarios. La prueba de Cypress en `usability.cy.ts` cubre por separado
+el listado HTTP 200 con el snippet esperado y el HTTP 200 que lo omite.
+
 ## Próximas extensiones
 
 El CI frontend y el CD usan los workflows centrales `v0.6.2`. La versión fija

@@ -17,6 +17,58 @@ function listing() {
   cy.visit('/'); cy.wait('@list');
 }
 function search(value: string) {cy.get('input[placeholder="Nombre del snippet…"]').clear().type(value);}
+
+describe('SNI-85 functional check for the snippet listing', () => {
+  const expected = item('SNI-85 Synthetic');
+  const other = item('SNI-85 Synthetic Archive', 'd9046ad9-52b1-4cbc-9643-91c02b23b88a');
+  const code = 'println("SNI-85 OK");';
+  const snippetRows = '[data-testid="snippet-row"]';
+  const missingSnippet = 'Expected snippet is missing from the listing';
+
+  function visitListing(snippets: ReturnType<typeof item>[]) {
+    config();
+    cy.intercept({method: 'GET', pathname: '/api/snippets'}, {
+      statusCode: 200,
+      body: {page: 0, page_size: 10, count: snippets.length, snippets},
+    }).as('functionalList');
+    cy.visit('/');
+    cy.wait('@functionalList').its('response.statusCode').should('eq', 200);
+  }
+
+  function requireExpectedSnippet(rows: JQuery<HTMLElement>) {
+    const button = rows.find('button')
+      .filter((_index, candidate) => candidate.textContent?.trim() === expected.name);
+    if (button.length === 0) throw new Error(missingSnippet);
+    return button;
+  }
+
+  it('finds the expected snippet in a 200 response and verifies its content', () => {
+    cy.intercept('GET', '/api/snippets/' + expected.id, {
+      ...expected,
+      code,
+      capabilities: {modify: true, share: true},
+    }).as('functionalDetail');
+    cy.intercept('GET', '/api/snippets/' + expected.id + '/automatic-tests', {
+      revision: null, validity: 'CURRENT', progress: null, tests: [],
+    });
+
+    visitListing([other, expected]);
+    cy.get(snippetRows).should('have.length', 2).then(rows => {
+      cy.wrap(requireExpectedSnippet(rows)).should('be.visible').click();
+    });
+    cy.wait('@functionalDetail').its('response.statusCode').should('eq', 200);
+    cy.get('#detail-code').should('be.visible').and('have.value', code);
+  });
+
+  it('detects the missing expected snippet even when a 200 response renders another row', () => {
+    visitListing([other]);
+    cy.contains(snippetRows + ' button', other.name).should('be.visible');
+    cy.get(snippetRows).should('have.length', 1).then(rows => {
+      expect(() => requireExpectedSnippet(rows)).to.throw(missingSnippet);
+    });
+  });
+});
+
 describe('SNI-35 search, pagination and feedback', () => {
   it('resets an advanced page on search and handles zero results without keeping the old total', () => {
     listing();
