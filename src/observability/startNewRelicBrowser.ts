@@ -2,10 +2,11 @@ import {Agent} from '@newrelic/browser-agent/loaders/agent';
 import {JSErrors} from '@newrelic/browser-agent/features/jserrors';
 import {PageViewEvent} from '@newrelic/browser-agent/features/page_view_event';
 import {PageViewTiming} from '@newrelic/browser-agent/features/page_view_timing';
-import config from './newRelicBrowserDev.json';
+import dev from './newRelicBrowserDev.json';
+import prod from './newRelicBrowserProd.json';
 
-export function startNewRelicBrowserDev() {
-  const {info, loader_config} = config;
+export function startNewRelicBrowser(environment: 'dev' | 'prod') {
+  const {info, loader_config} = environment === 'prod' ? prod : dev;
 
   new Agent({
     info,
