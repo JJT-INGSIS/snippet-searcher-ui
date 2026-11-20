@@ -1,3 +1,4 @@
+import {AutomaticTestsPanel} from '../components/automatic-tests/AutomaticTestsPanel';
 import {useEffect, useState} from 'react';
 import {Alert, Box, Button, Chip, CircularProgress, IconButton, Skeleton, Stack, TextField, Typography} from '@mui/material';
 import {CloseRounded, DownloadRounded, SaveRounded, ShareRounded} from '@mui/icons-material';
@@ -6,8 +7,14 @@ import {ShareSnippetModal} from '../components/snippet-detail/ShareSnippetModal'
 import {Snippet} from '../utils/snippet';
 import {ApiErrorAlert} from '../components/common/ApiErrorAlert';
 import {CodeEditor} from '../components/common/CodeEditor';
-import {lintLabels} from '../utils/presentation';
+import {lintLabel} from '../utils/lintPresentation';
 import {useSnippetEditor} from '../hooks/useSnippetEditor';
+import {TestSnippetModal} from '../components/snippet-test/TestSnippetModal';
+import {useApi} from '../contexts/apiContext';
+import {SnippetExecution} from './SnippetExecution';
+import {FormattedDownloadButton} from '../components/snippet-detail/FormattedDownloadButton';
+import {useFormattedDownload} from '../hooks/useFormattedDownload';
+import {LintSection} from '../components/snippet-detail/LintSection';
 
 function DownloadButton({snippet}: {snippet: Snippet}) {
   const [url, setUrl] = useState<string>();
@@ -22,7 +29,10 @@ export function SnippetDetail({id, handleCloseModal}: {id: string; handleCloseMo
   const {data: snippet, isLoading, error, refetch} = useGetSnippetById(id);
   const editor = useSnippetEditor(id, snippet);
   const [shareOpen, setShareOpen] = useState(false);
+  const [testsOpen, setTestsOpen] = useState(false);
+  const {actor} = useApi();
   const share = useShareSnippet();
+  const formatted = useFormattedDownload(id);
   const readonly = !snippet?.capabilities.modify;
   return <Box role="region" aria-label="Detalle del snippet" sx={{p: {xs: 2, sm: 4}, minWidth: 0}}>
     <Stack direction="row" alignItems="center" justifyContent="space-between" mb={2}>
@@ -38,7 +48,7 @@ export function SnippetDetail({id, handleCloseModal}: {id: string; handleCloseMo
       <Stack direction="row" flexWrap="wrap" gap={1}>
         <Chip size="small" variant="outlined" label={snippet.language + ' ' + snippet.version}/>
         <Chip size="small" label={snippet.relation === 'owned' ? 'Propio' : 'Compartido'}/>
-        <Chip size="small" label={'Lint: ' + lintLabels[snippet.compliance]}/>
+        <Chip size="small" label={'Lint: ' + lintLabel(snippet.lint)}/>
       </Stack>
       {readonly && <Alert severity="info">Solo lectura. El propietario conserva los permisos de edición.</Alert>}
       <TextField id="detail-name" label="Nombre" value={editor.draft.name} disabled={readonly || editor.saving}
@@ -53,11 +63,24 @@ export function SnippetDetail({id, handleCloseModal}: {id: string; handleCloseMo
           disabled={readonly || editor.saving || !editor.draft.name.trim()} onClick={editor.save}>{editor.saving ? 'Guardando…' : 'Guardar cambios'}</Button>
         <Button startIcon={<ShareRounded/>} disabled={!snippet.capabilities.share || share.isLoading} onClick={() => setShareOpen(true)}>Compartir</Button>
         <DownloadButton snippet={snippet}/>
+        <FormattedDownloadButton preparing={formatted.isLoading} onDownload={() => formatted.mutate()}/>
       </Stack>
-      <Stack direction="row" flexWrap="wrap" gap={1}><Button disabled>Ejecutar tests</Button><Button disabled>Formatear</Button><Button disabled>Eliminar</Button></Stack>
-      <Typography variant="body2" color="text.secondary">Tests, formato, ejecución y eliminación todavía no están disponibles.</Typography>
+      <ApiErrorAlert error={formatted.error}/>
+      {editor.dirty && <Typography variant="body2" color="text.secondary">
+        Las descargas usan la versión guardada: tus cambios sin guardar no se incluyen.
+      </Typography>}
+      <LintSection lint={snippet.lint} shared={snippet.relation === 'shared'} dirty={editor.dirty}/>
+      <Stack direction="row" flexWrap="wrap" gap={1}>
+        <Button onClick={() => setTestsOpen(true)} disabled={!!error}>Ver tests</Button>
+        <Button disabled>Formatear</Button><Button disabled>Eliminar</Button>
+      </Stack>
+      {!error && <AutomaticTestsPanel key={actor + ":automatic:" + id} snippetId={id}/>}
+      {!error && <SnippetExecution key={actor + ':' + id} snippetId={id}/>}
+      <Typography variant="body2" color="text.secondary">El formato y la eliminación todavía no están disponibles.</Typography>
     </Stack>}
     <ShareSnippetModal open={shareOpen} loading={share.isLoading} onClose={() => setShareOpen(false)}
       onShare={async userId => {await share.mutateAsync({snippetId: id, userId});}}/>
+    {testsOpen && snippet && !error && <TestSnippetModal key={actor + ':' + id} snippetId={id}
+      canCreate={snippet.relation === 'owned' && snippet.capabilities.modify} onClose={() => setTestsOpen(false)}/>}
   </Box>;
 }

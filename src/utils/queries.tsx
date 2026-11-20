@@ -1,15 +1,18 @@
+import {automaticPending} from './api/automaticTests';
 import {useMutation, useQuery, useQueryClient} from 'react-query';
 import {SnippetFilters, UpdateSnippet} from './snippet';
 import {useApi} from '../contexts/apiContext';
 import {CreationIntent} from './api/creationIntent';
-import {TestCase} from '../types/TestCase';
-import {Rule} from '../types/Rule';
+import {TestDefinitionDraft} from '../types/TestDefinition';
 export const useSnippetsOperations = () => useApi().operations;
 export const snippetKeys = {
   lists: (actor: string) => ['listSnippets', actor],
   list: (actor: string, page: number, size: number, filters: SnippetFilters) => ['listSnippets', actor, page, size, filters],
+  details: (actor: string) => ['snippet', actor],
   detail: (actor: string, id: string) => ['snippet', actor, id],
   users: (actor: string, name: string, page: number, size: number) => ['users', actor, name, page, size],
+  automatic: (actor: string, id: string) => ['automaticTests', actor, id],
+  tests: (actor: string, snippetId: string) => ['testCases', actor, snippetId],
 };
 export function useGetSnippets(page = 0, size = 10, filters: SnippetFilters = {}, enabled = true) {
   const {actor, operations} = useApi();
@@ -35,6 +38,7 @@ export function useUpdateSnippetById() {
     onSuccess: (_, {id}) => {
       void cache.invalidateQueries(snippetKeys.lists(actor));
       void cache.invalidateQueries(snippetKeys.detail(actor, id));
+      void cache.invalidateQueries(snippetKeys.automatic(actor, id));
     },
   });
 }
@@ -57,39 +61,19 @@ export function useGetFileTypes() {
   const operations = useSnippetsOperations();
   return useQuery(['languages'], () => operations.getFileTypes(), {retry: false});
 }
-// Supplied components are retained for later stories, but never query a Fake or run unavailable operations.
-export const useGetTestCases = () => {
-  const op = useSnippetsOperations();
-  return useQuery(['unavailable', 'testCases'], () => op.getTestCases(), {enabled: false});
+export const useSnippetTests = (snippetId: string, enabled = true) => {
+  const {actor, operations} = useApi();
+  return useQuery(snippetKeys.tests(actor, snippetId), ({signal}) => operations.listTestDefinitions(snippetId, signal), {
+    enabled: enabled && !!snippetId, retry: false,
+  });
 };
-export const useGetFormatRules = () => {
-  const op = useSnippetsOperations();
-  return useQuery(['unavailable', 'formatRules'], () => op.getFormatRules(), {enabled: false});
-};
-export const useGetLintingRules = () => {
-  const op = useSnippetsOperations();
-  return useQuery(['unavailable', 'lintingRules'], () => op.getLintingRules(), {enabled: false});
-};
-export const usePostTestCase = () => {
-  const op = useSnippetsOperations();
-  return useMutation((tc: Partial<TestCase>) => op.postTestCase(tc), {retry: false});
-};
-export const useRemoveTestCase = ({onSuccess}: {onSuccess: () => void}) => {
-  const op = useSnippetsOperations();
-  return useMutation((id: string) => op.removeTestCase(id), {onSuccess, retry: false});
-};
-export type TestCaseResult = 'success' | 'fail';
-export const useTestSnippet = () => {
-  const op = useSnippetsOperations();
-  return useMutation((tc: Partial<TestCase>) => op.testSnippet(tc), {retry: false});
-};
-export const useModifyFormatRules = ({onSuccess}: {onSuccess: () => void}) => {
-  const op = useSnippetsOperations();
-  return useMutation((rules: Rule[]) => op.modifyFormatRule(rules), {onSuccess, retry: false});
-};
-export const useModifyLintingRules = ({onSuccess}: {onSuccess: () => void}) => {
-  const op = useSnippetsOperations();
-  return useMutation((rules: Rule[]) => op.modifyLintingRule(rules), {onSuccess, retry: false});
+export const useCreateSnippetTest = (snippetId: string) => {
+  const {actor, operations} = useApi();
+  const cache = useQueryClient();
+  return useMutation((input: TestDefinitionDraft) => operations.createTestDefinition(snippetId, input), {
+    retry: false,
+    onSuccess: () => {void cache.invalidateQueries(snippetKeys.tests(actor, snippetId)); void cache.invalidateQueries(snippetKeys.automatic(actor, snippetId));},
+  });
 };
 export const useFormatSnippet = () => {
   const op = useSnippetsOperations();
@@ -99,3 +83,12 @@ export const useDeleteSnippet = ({onSuccess}: {onSuccess: () => void}) => {
   const op = useSnippetsOperations();
   return useMutation((id: string) => op.deleteSnippet(id), {onSuccess, retry: false});
 };
+
+// One actor-scoped query shared by observers; inactive tabs and closed details do not poll.
+export function useAutomaticTests(id: string) {
+  const {actor, operations} = useApi();
+  return useQuery(snippetKeys.automatic(actor, id), ({signal}) => operations.getAutomaticTests(id, signal), {
+    enabled: !!id, retry: false, refetchIntervalInBackground: false,
+    refetchInterval: (data, query) => query.state.error ? false : data && automaticPending(data) ? 2000 : false,
+  });
+}

@@ -1,102 +1,38 @@
-import {useState} from "react";
-import {TestCase} from "../../types/TestCase.ts";
-import {Autocomplete, Box, Button, Chip, TextField, Typography} from "@mui/material";
-import {BugReport, Delete, Save} from "@mui/icons-material";
-import {useTestSnippet} from "../../utils/queries.tsx";
+import {Box, Button, Stack, TextField, Typography} from '@mui/material';
+import {TestDefinitionDraft} from '../../types/TestDefinition';
 
-type TabPanelProps = {
-    index: number;
-    value: number;
-    test?: TestCase;
-    setTestCase: (test: Partial<TestCase>) => void;
-    removeTestCase?: (testIndex: string) => void;
+function OrderedValues({label, singular, values, onChange, disabled = false}: {
+  label: string; singular: string; values: string[];
+  onChange?: (values: string[]) => void; disabled?: boolean;
+}) {
+  return <Stack spacing={1.5} component="section" aria-label={label}>
+    <Typography variant="subtitle1">{label}</Typography>
+    {values.length === 0 && <Typography color="text.secondary">Sin valores: lista vacía.</Typography>}
+    {values.map((value, index) => <Stack key={index} direction="row" spacing={1} alignItems="flex-start">
+      <TextField fullWidth multiline size="small" label={singular + ' ' + (index + 1)} value={value}
+        disabled={disabled} inputProps={{readOnly: !onChange}}
+        helperText={value === '' ? 'Cadena vacía (es un valor)' : undefined}
+        onChange={event => onChange?.(values.map((current, at) => at === index ? event.target.value : current))}/>
+      {onChange && <Button disabled={disabled} aria-label={'Quitar ' + singular.toLowerCase() + ' ' + (index + 1)}
+        onClick={() => onChange(values.filter((_, at) => at !== index))}>Quitar</Button>}
+    </Stack>)}
+    {onChange && <Button disabled={disabled} onClick={() => onChange([...values, ''])} sx={{alignSelf: 'flex-start'}}>
+      Agregar {singular.toLowerCase()}
+    </Button>}
+  </Stack>;
 }
 
-export const TabPanel = ({value, index, test: initialTest, setTestCase, removeTestCase}: TabPanelProps) => {
-    const [testData, setTestData] = useState<Partial<TestCase> | undefined>(initialTest);
-
-    const {mutateAsync: testSnippet, data} = useTestSnippet();
-
-
-    return (
-        <div
-            role="tabpanel"
-            hidden={value !== index}
-            id={`vertical-tabpanel-${index}`}
-            aria-labelledby={`vertical-tab-${index}`}
-            style={{width: '100%', height: '100%'}}
-        >
-            {value === index && (
-                <Box sx={{px: 3}} display="flex" flexDirection="column" gap={2}>
-                    <Box display="flex" flexDirection="column" gap={1}>
-                        <Typography fontWeight="bold">Name</Typography>
-                        <TextField size="small" value={testData?.name}
-                                   onChange={(e) => setTestData({...testData, name: e.target.value})}/>
-                    </Box>
-                    <Box display="flex" flexDirection="column" gap={1}>
-                        <Typography fontWeight="bold">Input</Typography>
-                        <Autocomplete
-                            multiple
-                            size="small"
-                            id="tags-filled"
-                            freeSolo
-                            value={testData?.input ?? []}
-                            onChange={(_, value) => setTestData({...testData, input: value})}
-                            renderTags={(value: readonly string[], getTagProps) =>
-                                value.map((option: string, index: number) => (
-                                    <Chip variant="outlined" label={option} {...getTagProps({index})} />
-                                ))
-                            }
-                            renderInput={(params) => (
-                                <TextField
-                                    {...params}
-                                />
-                            )}
-                            options={[]}
-                        />
-                    </Box>
-                    <Box display="flex" flexDirection="column" gap={1}>
-                        <Typography fontWeight="bold">Output</Typography>
-                        <Autocomplete
-                            multiple
-                            size="small"
-                            id="tags-filled"
-                            freeSolo
-                            value={testData?.output ?? []}
-                            onChange={(_, value) => setTestData({...testData, output: value})}
-                            renderTags={(value: readonly string[], getTagProps) =>
-                                value.map((option: string, index: number) => (
-                                    <Chip variant="outlined" label={option} {...getTagProps({index})} />
-                                ))
-                            }
-                            renderInput={(params) => (
-                                <TextField
-                                    {...params}
-                                />
-                            )}
-                            options={[]}
-                        />
-                    </Box>
-                    <Box display="flex" flexDirection="row" gap={1}>
-                        {
-                            (testData?.id && removeTestCase) && (
-                            <Button onClick={() => removeTestCase(testData?.id ?? "")} variant={"outlined"} color={"error"}
-                                    startIcon={<Delete/>}>
-                                Remove
-                            </Button>)
-                        }
-                        <Button disabled={!testData?.name} onClick={() => setTestCase(testData ?? {})} variant={"outlined"} startIcon={<Save/>}>
-                            Save
-                        </Button>
-                        <Button onClick={() => testSnippet(testData ?? {})} variant={"contained"} startIcon={<BugReport/>}
-                                disableElevation>
-                            Test
-                        </Button>
-                        {data && (data === "success" ? <Chip label="Pass" color="success"/> :
-                            <Chip label="Fail" color="error"/>)}
-                    </Box>
-                </Box>
-            )}
-        </div>
-    );
+export function TabPanel({value, id, title, definition, onChange, disabled = false}: {
+  value: string; id: string; title: string; definition: TestDefinitionDraft;
+  onChange?: (draft: TestDefinitionDraft) => void; disabled?: boolean;
+}) {
+  return <Box role="tabpanel" hidden={value !== id} id={'test-panel-' + id} aria-labelledby={'test-tab-' + id} sx={{minWidth: 0, flex: 1}}>
+    {value === id && <Stack spacing={2.5}>
+      <Typography component="h3" variant="h6">{title}</Typography>
+      <OrderedValues label="Inputs" singular="Input" values={definition.inputs} disabled={disabled}
+        onChange={onChange ? inputs => onChange({...definition, inputs}) : undefined}/>
+      <OrderedValues label="Outputs esperados" singular="Output esperado" values={definition.expectedOutputs} disabled={disabled}
+        onChange={onChange ? expectedOutputs => onChange({...definition, expectedOutputs}) : undefined}/>
+    </Stack>}
+  </Box>;
 }

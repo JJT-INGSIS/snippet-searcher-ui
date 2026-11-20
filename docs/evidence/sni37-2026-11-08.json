@@ -1,0 +1,1571 @@
+{
+  "date": "2026-11-08",
+  "timezone": "America/Argentina/Buenos_Aires",
+  "kind": "local real-provider acceptance",
+  "environment": {
+    "project": "sni75-sni37-20261108-729f51",
+    "root": "/private/tmp/sni75-sni37-20261108-729f51",
+    "infra": "/private/tmp/sni75-sni37-20261108-729f51/snippet-searcher-infra",
+    "sources": {
+      "snippet-searcher-infra": "773e1aef98fe99ca1019b0a6d68be588ee890ced",
+      "snippets-service": "5ca5bf833e8f1ccd0f265ec434f6df268ce447f8"
+    },
+    "snippetsImage": "sni37-snippets:dev69",
+    "images": [
+      {
+        "tags": [
+          "sni37-snippets:dev69"
+        ],
+        "id": "sha256:b969661fa73a98fa394f67dc168e1f1438e98b05b28b5a1f6d4714892188d7d0",
+        "architecture": "arm64"
+      },
+      {
+        "tags": [
+          "sni78-printscript:qa"
+        ],
+        "id": "sha256:7e240d5f267a3417e362fb2d4181e3912b1126d4e3a40a98cd8c75770fecfcb4",
+        "architecture": "arm64"
+      },
+      {
+        "tags": [
+          "sni75-20261104-0d4c2d-permissions:current"
+        ],
+        "id": "sha256:c10beae41cb9bd3e88ca9f9292b1d0f75a6606d56cfd9d3d5e39429a8c97a6ec",
+        "architecture": "arm64"
+      }
+    ],
+    "jarSha256": "f1f92310f74cff7dd25050eb7c99be907334c45cdb4bd0bd99c61bcee1b2fb64",
+    "uiIntegratedSource": "77147861e6fe5f86741ce6333f48c7dfcc0bd1cd"
+  },
+  "providerSources": {
+    "permissions-service": "500331e2a97bbc61c29ae1a215589a1c57ba052d",
+    "printscript-service": "129c5f10e45b1bb6a28a4d8b39cec82107af4f36"
+  },
+  "queries": {
+    "prefix": "SNI64-d902ff20-df76-46f7-9d1a-62bd2a19b8f5-",
+    "ids": {
+      "compliant": [
+        "0120e22c-3858-4bdf-9974-c4bad4a7f982",
+        "063ebc95-a137-4386-96f7-effc0ae49ac6",
+        "2b1f4665-4a4c-4650-aa47-398f3879b086",
+        "97967e07-6c75-4a5d-9d4e-9d15e9e1a727",
+        "76fb277a-434b-473f-b1b6-b1744471e10e"
+      ],
+      "not-compliant": [
+        "2f9dadb9-f354-4f33-98e4-f85a025f4113"
+      ],
+      "pending": [
+        "61b29863-0daa-456f-a5d0-088633cf41c5"
+      ],
+      "failed": [
+        "efb1b201-b3e6-47d0-bbb1-c3ae1d936225"
+      ]
+    },
+    "outsider": "e0186923-53fe-4210-89f4-7467f893c5fa",
+    "expectedCount": 8,
+    "phases": [
+      "healthy",
+      "processor-down",
+      "storage-down",
+      "recovered"
+    ]
+  },
+  "functional": {
+    "fixtures": {
+      "details": {
+        "0120e22c-3858-4bdf-9974-c4bad4a7f982": {
+          "id": "0120e22c-3858-4bdf-9974-c4bad4a7f982",
+          "name": "SNI64-d902ff20-df76-46f7-9d1a-62bd2a19b8f5-good",
+          "description": null,
+          "language": "printscript",
+          "version": "1.1",
+          "extension": "prs",
+          "ownerId": "dev-thiago",
+          "relation": "shared",
+          "lint": {
+            "status": "compliant",
+            "reason": null,
+            "diagnostics": [],
+            "codeHash": "sha256-v1:d36f4e10154d0ba0e271496ff499add84339de6e586ad4b4088f343c1d796b58",
+            "rulesRevision": "sha256-v1:b35ec887fdfde6cb406875a24ef3b9008103b44be57e206f6898cbaefe880290",
+            "processorRevision": "sha256-v1:12479d3f7e54755a6f799ff0648cb582bf257911e434b255167f75302e14770a"
+          },
+          "code": "println(1);",
+          "capabilities": {
+            "modify": false,
+            "share": false
+          }
+        },
+        "063ebc95-a137-4386-96f7-effc0ae49ac6": {
+          "id": "063ebc95-a137-4386-96f7-effc0ae49ac6",
+          "name": "SNI64-d902ff20-df76-46f7-9d1a-62bd2a19b8f5-defaults",
+          "description": null,
+          "language": "printscript",
+          "version": "1.1",
+          "extension": "prs",
+          "ownerId": "dev-juan",
+          "relation": "shared",
+          "lint": {
+            "status": "compliant",
+            "reason": null,
+            "diagnostics": [],
+            "codeHash": "sha256-v1:d36f4e10154d0ba0e271496ff499add84339de6e586ad4b4088f343c1d796b58",
+            "rulesRevision": "sha256-v1:f67e39807f376aa76e2039978af9bdac80ccd0ab7ef609c2a5740b2e092ba274",
+            "processorRevision": "sha256-v1:12479d3f7e54755a6f799ff0648cb582bf257911e434b255167f75302e14770a"
+          },
+          "code": "println(1);",
+          "capabilities": {
+            "modify": false,
+            "share": false
+          }
+        },
+        "2b1f4665-4a4c-4650-aa47-398f3879b086": {
+          "id": "2b1f4665-4a4c-4650-aa47-398f3879b086",
+          "name": "SNI64-d902ff20-df76-46f7-9d1a-62bd2a19b8f5-page-0",
+          "description": null,
+          "language": "printscript",
+          "version": "1.1",
+          "extension": "prs",
+          "ownerId": "dev-ana",
+          "relation": "owned",
+          "lint": {
+            "status": "compliant",
+            "reason": null,
+            "diagnostics": [],
+            "codeHash": "sha256-v1:d36f4e10154d0ba0e271496ff499add84339de6e586ad4b4088f343c1d796b58",
+            "rulesRevision": "sha256-v1:b35ec887fdfde6cb406875a24ef3b9008103b44be57e206f6898cbaefe880290",
+            "processorRevision": "sha256-v1:12479d3f7e54755a6f799ff0648cb582bf257911e434b255167f75302e14770a"
+          },
+          "code": "println(1);",
+          "capabilities": {
+            "modify": true,
+            "share": true
+          }
+        },
+        "97967e07-6c75-4a5d-9d4e-9d15e9e1a727": {
+          "id": "97967e07-6c75-4a5d-9d4e-9d15e9e1a727",
+          "name": "SNI64-d902ff20-df76-46f7-9d1a-62bd2a19b8f5-page-1",
+          "description": null,
+          "language": "printscript",
+          "version": "1.1",
+          "extension": "prs",
+          "ownerId": "dev-ana",
+          "relation": "owned",
+          "lint": {
+            "status": "compliant",
+            "reason": null,
+            "diagnostics": [],
+            "codeHash": "sha256-v1:d36f4e10154d0ba0e271496ff499add84339de6e586ad4b4088f343c1d796b58",
+            "rulesRevision": "sha256-v1:b35ec887fdfde6cb406875a24ef3b9008103b44be57e206f6898cbaefe880290",
+            "processorRevision": "sha256-v1:12479d3f7e54755a6f799ff0648cb582bf257911e434b255167f75302e14770a"
+          },
+          "code": "println(1);",
+          "capabilities": {
+            "modify": true,
+            "share": true
+          }
+        },
+        "76fb277a-434b-473f-b1b6-b1744471e10e": {
+          "id": "76fb277a-434b-473f-b1b6-b1744471e10e",
+          "name": "SNI64-d902ff20-df76-46f7-9d1a-62bd2a19b8f5-page-2",
+          "description": null,
+          "language": "printscript",
+          "version": "1.1",
+          "extension": "prs",
+          "ownerId": "dev-ana",
+          "relation": "owned",
+          "lint": {
+            "status": "compliant",
+            "reason": null,
+            "diagnostics": [],
+            "codeHash": "sha256-v1:d36f4e10154d0ba0e271496ff499add84339de6e586ad4b4088f343c1d796b58",
+            "rulesRevision": "sha256-v1:b35ec887fdfde6cb406875a24ef3b9008103b44be57e206f6898cbaefe880290",
+            "processorRevision": "sha256-v1:12479d3f7e54755a6f799ff0648cb582bf257911e434b255167f75302e14770a"
+          },
+          "code": "println(1);",
+          "capabilities": {
+            "modify": true,
+            "share": true
+          }
+        },
+        "2f9dadb9-f354-4f33-98e4-f85a025f4113": {
+          "id": "2f9dadb9-f354-4f33-98e4-f85a025f4113",
+          "name": "SNI64-d902ff20-df76-46f7-9d1a-62bd2a19b8f5-bad",
+          "description": null,
+          "language": "printscript",
+          "version": "1.1",
+          "extension": "prs",
+          "ownerId": "dev-thiago",
+          "relation": "shared",
+          "lint": {
+            "status": "not-compliant",
+            "reason": null,
+            "diagnostics": [
+              {
+                "rule": "mandatory-variable-or-literal-in-println",
+                "message": "println requiere una variable o un literal.",
+                "line": 1,
+                "column": 9
+              }
+            ],
+            "codeHash": "sha256-v1:040066359ceb0037c35146a0c885997b38de784b4f054cda90dc1e995ee4759e",
+            "rulesRevision": "sha256-v1:b35ec887fdfde6cb406875a24ef3b9008103b44be57e206f6898cbaefe880290",
+            "processorRevision": "sha256-v1:12479d3f7e54755a6f799ff0648cb582bf257911e434b255167f75302e14770a"
+          },
+          "code": "println(1+2);",
+          "capabilities": {
+            "modify": false,
+            "share": false
+          }
+        },
+        "61b29863-0daa-456f-a5d0-088633cf41c5": {
+          "id": "61b29863-0daa-456f-a5d0-088633cf41c5",
+          "name": "SNI64-d902ff20-df76-46f7-9d1a-62bd2a19b8f5-superseded",
+          "description": null,
+          "language": "printscript",
+          "version": "1.1",
+          "extension": "prs",
+          "ownerId": "dev-ana",
+          "relation": "owned",
+          "lint": {
+            "status": "pending",
+            "reason": "SUPERSEDED",
+            "diagnostics": [],
+            "codeHash": null,
+            "rulesRevision": null,
+            "processorRevision": null
+          },
+          "code": "println(1+2);",
+          "capabilities": {
+            "modify": true,
+            "share": true
+          }
+        },
+        "efb1b201-b3e6-47d0-bbb1-c3ae1d936225": {
+          "id": "efb1b201-b3e6-47d0-bbb1-c3ae1d936225",
+          "name": "SNI64-d902ff20-df76-46f7-9d1a-62bd2a19b8f5-failed",
+          "description": null,
+          "language": "printscript",
+          "version": "1.1",
+          "extension": "prs",
+          "ownerId": "dev-juan",
+          "relation": "shared",
+          "lint": {
+            "status": "failed",
+            "reason": "PROCESSOR_UNVERIFIABLE",
+            "diagnostics": [],
+            "codeHash": "sha256-v1:22dbfa6bc8d25d192164d1696a022b205504cef857355c272aba5482aa95adc2",
+            "rulesRevision": "sha256-v1:f67e39807f376aa76e2039978af9bdac80ccd0ab7ef609c2a5740b2e092ba274",
+            "processorRevision": null
+          },
+          "code": "println(\"SNI64-d902ff20-df76-46f7-9d1a-62bd2a19b8f5-lint-only-failure\");",
+          "capabilities": {
+            "modify": false,
+            "share": false
+          }
+        }
+      },
+      "queries": [
+        {
+          "actor": "dev-thiago",
+          "relation": "owned",
+          "direction": "asc",
+          "size": 1,
+          "count": 2,
+          "ids": [
+            "0120e22c-3858-4bdf-9974-c4bad4a7f982",
+            "2f9dadb9-f354-4f33-98e4-f85a025f4113"
+          ]
+        },
+        {
+          "actor": "dev-thiago",
+          "relation": "owned",
+          "direction": "asc",
+          "size": 2,
+          "count": 2,
+          "ids": [
+            "0120e22c-3858-4bdf-9974-c4bad4a7f982",
+            "2f9dadb9-f354-4f33-98e4-f85a025f4113"
+          ]
+        },
+        {
+          "actor": "dev-thiago",
+          "relation": "owned",
+          "direction": "desc",
+          "size": 1,
+          "count": 2,
+          "ids": [
+            "2f9dadb9-f354-4f33-98e4-f85a025f4113",
+            "0120e22c-3858-4bdf-9974-c4bad4a7f982"
+          ]
+        },
+        {
+          "actor": "dev-thiago",
+          "relation": "owned",
+          "direction": "desc",
+          "size": 2,
+          "count": 2,
+          "ids": [
+            "2f9dadb9-f354-4f33-98e4-f85a025f4113",
+            "0120e22c-3858-4bdf-9974-c4bad4a7f982"
+          ]
+        },
+        {
+          "actor": "dev-thiago",
+          "relation": "shared",
+          "direction": "asc",
+          "size": 1,
+          "count": 0,
+          "ids": []
+        },
+        {
+          "actor": "dev-thiago",
+          "relation": "shared",
+          "direction": "asc",
+          "size": 2,
+          "count": 0,
+          "ids": []
+        },
+        {
+          "actor": "dev-thiago",
+          "relation": "shared",
+          "direction": "desc",
+          "size": 1,
+          "count": 0,
+          "ids": []
+        },
+        {
+          "actor": "dev-thiago",
+          "relation": "shared",
+          "direction": "desc",
+          "size": 2,
+          "count": 0,
+          "ids": []
+        },
+        {
+          "actor": "dev-thiago",
+          "relation": "all",
+          "direction": "asc",
+          "size": 1,
+          "count": 2,
+          "ids": [
+            "0120e22c-3858-4bdf-9974-c4bad4a7f982",
+            "2f9dadb9-f354-4f33-98e4-f85a025f4113"
+          ]
+        },
+        {
+          "actor": "dev-thiago",
+          "relation": "all",
+          "direction": "asc",
+          "size": 2,
+          "count": 2,
+          "ids": [
+            "0120e22c-3858-4bdf-9974-c4bad4a7f982",
+            "2f9dadb9-f354-4f33-98e4-f85a025f4113"
+          ]
+        },
+        {
+          "actor": "dev-thiago",
+          "relation": "all",
+          "direction": "desc",
+          "size": 1,
+          "count": 2,
+          "ids": [
+            "2f9dadb9-f354-4f33-98e4-f85a025f4113",
+            "0120e22c-3858-4bdf-9974-c4bad4a7f982"
+          ]
+        },
+        {
+          "actor": "dev-thiago",
+          "relation": "all",
+          "direction": "desc",
+          "size": 2,
+          "count": 2,
+          "ids": [
+            "2f9dadb9-f354-4f33-98e4-f85a025f4113",
+            "0120e22c-3858-4bdf-9974-c4bad4a7f982"
+          ]
+        },
+        {
+          "actor": "dev-ana",
+          "relation": "owned",
+          "direction": "asc",
+          "size": 1,
+          "count": 4,
+          "ids": [
+            "2b1f4665-4a4c-4650-aa47-398f3879b086",
+            "76fb277a-434b-473f-b1b6-b1744471e10e",
+            "97967e07-6c75-4a5d-9d4e-9d15e9e1a727",
+            "61b29863-0daa-456f-a5d0-088633cf41c5"
+          ]
+        },
+        {
+          "actor": "dev-ana",
+          "relation": "owned",
+          "direction": "asc",
+          "size": 2,
+          "count": 4,
+          "ids": [
+            "2b1f4665-4a4c-4650-aa47-398f3879b086",
+            "76fb277a-434b-473f-b1b6-b1744471e10e",
+            "97967e07-6c75-4a5d-9d4e-9d15e9e1a727",
+            "61b29863-0daa-456f-a5d0-088633cf41c5"
+          ]
+        },
+        {
+          "actor": "dev-ana",
+          "relation": "owned",
+          "direction": "desc",
+          "size": 1,
+          "count": 4,
+          "ids": [
+            "61b29863-0daa-456f-a5d0-088633cf41c5",
+            "2b1f4665-4a4c-4650-aa47-398f3879b086",
+            "76fb277a-434b-473f-b1b6-b1744471e10e",
+            "97967e07-6c75-4a5d-9d4e-9d15e9e1a727"
+          ]
+        },
+        {
+          "actor": "dev-ana",
+          "relation": "owned",
+          "direction": "desc",
+          "size": 2,
+          "count": 4,
+          "ids": [
+            "61b29863-0daa-456f-a5d0-088633cf41c5",
+            "2b1f4665-4a4c-4650-aa47-398f3879b086",
+            "76fb277a-434b-473f-b1b6-b1744471e10e",
+            "97967e07-6c75-4a5d-9d4e-9d15e9e1a727"
+          ]
+        },
+        {
+          "actor": "dev-ana",
+          "relation": "shared",
+          "direction": "asc",
+          "size": 1,
+          "count": 4,
+          "ids": [
+            "0120e22c-3858-4bdf-9974-c4bad4a7f982",
+            "063ebc95-a137-4386-96f7-effc0ae49ac6",
+            "efb1b201-b3e6-47d0-bbb1-c3ae1d936225",
+            "2f9dadb9-f354-4f33-98e4-f85a025f4113"
+          ]
+        },
+        {
+          "actor": "dev-ana",
+          "relation": "shared",
+          "direction": "asc",
+          "size": 2,
+          "count": 4,
+          "ids": [
+            "0120e22c-3858-4bdf-9974-c4bad4a7f982",
+            "063ebc95-a137-4386-96f7-effc0ae49ac6",
+            "efb1b201-b3e6-47d0-bbb1-c3ae1d936225",
+            "2f9dadb9-f354-4f33-98e4-f85a025f4113"
+          ]
+        },
+        {
+          "actor": "dev-ana",
+          "relation": "shared",
+          "direction": "desc",
+          "size": 1,
+          "count": 4,
+          "ids": [
+            "2f9dadb9-f354-4f33-98e4-f85a025f4113",
+            "efb1b201-b3e6-47d0-bbb1-c3ae1d936225",
+            "0120e22c-3858-4bdf-9974-c4bad4a7f982",
+            "063ebc95-a137-4386-96f7-effc0ae49ac6"
+          ]
+        },
+        {
+          "actor": "dev-ana",
+          "relation": "shared",
+          "direction": "desc",
+          "size": 2,
+          "count": 4,
+          "ids": [
+            "2f9dadb9-f354-4f33-98e4-f85a025f4113",
+            "efb1b201-b3e6-47d0-bbb1-c3ae1d936225",
+            "0120e22c-3858-4bdf-9974-c4bad4a7f982",
+            "063ebc95-a137-4386-96f7-effc0ae49ac6"
+          ]
+        },
+        {
+          "actor": "dev-ana",
+          "relation": "all",
+          "direction": "asc",
+          "size": 1,
+          "count": 8,
+          "ids": [
+            "0120e22c-3858-4bdf-9974-c4bad4a7f982",
+            "063ebc95-a137-4386-96f7-effc0ae49ac6",
+            "2b1f4665-4a4c-4650-aa47-398f3879b086",
+            "76fb277a-434b-473f-b1b6-b1744471e10e",
+            "97967e07-6c75-4a5d-9d4e-9d15e9e1a727",
+            "efb1b201-b3e6-47d0-bbb1-c3ae1d936225",
+            "2f9dadb9-f354-4f33-98e4-f85a025f4113",
+            "61b29863-0daa-456f-a5d0-088633cf41c5"
+          ]
+        },
+        {
+          "actor": "dev-ana",
+          "relation": "all",
+          "direction": "asc",
+          "size": 2,
+          "count": 8,
+          "ids": [
+            "0120e22c-3858-4bdf-9974-c4bad4a7f982",
+            "063ebc95-a137-4386-96f7-effc0ae49ac6",
+            "2b1f4665-4a4c-4650-aa47-398f3879b086",
+            "76fb277a-434b-473f-b1b6-b1744471e10e",
+            "97967e07-6c75-4a5d-9d4e-9d15e9e1a727",
+            "efb1b201-b3e6-47d0-bbb1-c3ae1d936225",
+            "2f9dadb9-f354-4f33-98e4-f85a025f4113",
+            "61b29863-0daa-456f-a5d0-088633cf41c5"
+          ]
+        },
+        {
+          "actor": "dev-ana",
+          "relation": "all",
+          "direction": "desc",
+          "size": 1,
+          "count": 8,
+          "ids": [
+            "61b29863-0daa-456f-a5d0-088633cf41c5",
+            "2f9dadb9-f354-4f33-98e4-f85a025f4113",
+            "efb1b201-b3e6-47d0-bbb1-c3ae1d936225",
+            "0120e22c-3858-4bdf-9974-c4bad4a7f982",
+            "063ebc95-a137-4386-96f7-effc0ae49ac6",
+            "2b1f4665-4a4c-4650-aa47-398f3879b086",
+            "76fb277a-434b-473f-b1b6-b1744471e10e",
+            "97967e07-6c75-4a5d-9d4e-9d15e9e1a727"
+          ]
+        },
+        {
+          "actor": "dev-ana",
+          "relation": "all",
+          "direction": "desc",
+          "size": 2,
+          "count": 8,
+          "ids": [
+            "61b29863-0daa-456f-a5d0-088633cf41c5",
+            "2f9dadb9-f354-4f33-98e4-f85a025f4113",
+            "efb1b201-b3e6-47d0-bbb1-c3ae1d936225",
+            "0120e22c-3858-4bdf-9974-c4bad4a7f982",
+            "063ebc95-a137-4386-96f7-effc0ae49ac6",
+            "2b1f4665-4a4c-4650-aa47-398f3879b086",
+            "76fb277a-434b-473f-b1b6-b1744471e10e",
+            "97967e07-6c75-4a5d-9d4e-9d15e9e1a727"
+          ]
+        },
+        {
+          "actor": "dev-bruno",
+          "relation": "owned",
+          "direction": "asc",
+          "size": 1,
+          "count": 1,
+          "ids": [
+            "e0186923-53fe-4210-89f4-7467f893c5fa"
+          ]
+        },
+        {
+          "actor": "dev-bruno",
+          "relation": "owned",
+          "direction": "asc",
+          "size": 2,
+          "count": 1,
+          "ids": [
+            "e0186923-53fe-4210-89f4-7467f893c5fa"
+          ]
+        },
+        {
+          "actor": "dev-bruno",
+          "relation": "owned",
+          "direction": "desc",
+          "size": 1,
+          "count": 1,
+          "ids": [
+            "e0186923-53fe-4210-89f4-7467f893c5fa"
+          ]
+        },
+        {
+          "actor": "dev-bruno",
+          "relation": "owned",
+          "direction": "desc",
+          "size": 2,
+          "count": 1,
+          "ids": [
+            "e0186923-53fe-4210-89f4-7467f893c5fa"
+          ]
+        },
+        {
+          "actor": "dev-bruno",
+          "relation": "shared",
+          "direction": "asc",
+          "size": 1,
+          "count": 0,
+          "ids": []
+        },
+        {
+          "actor": "dev-bruno",
+          "relation": "shared",
+          "direction": "asc",
+          "size": 2,
+          "count": 0,
+          "ids": []
+        },
+        {
+          "actor": "dev-bruno",
+          "relation": "shared",
+          "direction": "desc",
+          "size": 1,
+          "count": 0,
+          "ids": []
+        },
+        {
+          "actor": "dev-bruno",
+          "relation": "shared",
+          "direction": "desc",
+          "size": 2,
+          "count": 0,
+          "ids": []
+        },
+        {
+          "actor": "dev-bruno",
+          "relation": "all",
+          "direction": "asc",
+          "size": 1,
+          "count": 1,
+          "ids": [
+            "e0186923-53fe-4210-89f4-7467f893c5fa"
+          ]
+        },
+        {
+          "actor": "dev-bruno",
+          "relation": "all",
+          "direction": "asc",
+          "size": 2,
+          "count": 1,
+          "ids": [
+            "e0186923-53fe-4210-89f4-7467f893c5fa"
+          ]
+        },
+        {
+          "actor": "dev-bruno",
+          "relation": "all",
+          "direction": "desc",
+          "size": 1,
+          "count": 1,
+          "ids": [
+            "e0186923-53fe-4210-89f4-7467f893c5fa"
+          ]
+        },
+        {
+          "actor": "dev-bruno",
+          "relation": "all",
+          "direction": "desc",
+          "size": 2,
+          "count": 1,
+          "ids": [
+            "e0186923-53fe-4210-89f4-7467f893c5fa"
+          ]
+        }
+      ],
+      "manualTests": [
+        {
+          "actor": "dev-thiago",
+          "test": {
+            "id": "609a23a5-7ed5-4f5a-b354-adfbd667c0fc",
+            "snippetId": "2f9dadb9-f354-4f33-98e4-f85a025f4113",
+            "inputs": [],
+            "expectedOutputs": [
+              "3"
+            ]
+          },
+          "execution": "9b3f5261-20f1-45b2-8b92-be839949a08b",
+          "terminal": {
+            "outcome": "COMPLETED",
+            "reason": "program-completed",
+            "diagnostics": [],
+            "unusedInputs": 0,
+            "comparison": "PASSED"
+          }
+        },
+        {
+          "actor": "dev-ana",
+          "test": {
+            "id": "609a23a5-7ed5-4f5a-b354-adfbd667c0fc",
+            "snippetId": "2f9dadb9-f354-4f33-98e4-f85a025f4113",
+            "inputs": [],
+            "expectedOutputs": [
+              "3"
+            ]
+          },
+          "execution": "e404c651-f9a7-46af-8e2e-f489035695ac",
+          "terminal": {
+            "outcome": "COMPLETED",
+            "reason": "program-completed",
+            "diagnostics": [],
+            "unusedInputs": 0,
+            "comparison": "PASSED"
+          }
+        },
+        {
+          "actor": "dev-thiago",
+          "test": {
+            "id": "b5ed23ed-9f83-4a19-8d8b-129b8f76ec14",
+            "snippetId": "2f9dadb9-f354-4f33-98e4-f85a025f4113",
+            "inputs": [],
+            "expectedOutputs": [
+              "4"
+            ]
+          },
+          "execution": "be01287a-8a48-448f-8be2-bd0e1dd94eee",
+          "terminal": {
+            "outcome": "COMPLETED",
+            "reason": "program-completed",
+            "diagnostics": [],
+            "unusedInputs": 0,
+            "comparison": "FAILED"
+          }
+        },
+        {
+          "actor": "dev-ana",
+          "test": {
+            "id": "b5ed23ed-9f83-4a19-8d8b-129b8f76ec14",
+            "snippetId": "2f9dadb9-f354-4f33-98e4-f85a025f4113",
+            "inputs": [],
+            "expectedOutputs": [
+              "4"
+            ]
+          },
+          "execution": "9daa3a6f-06ec-436c-8725-41c6077fb30e",
+          "terminal": {
+            "outcome": "COMPLETED",
+            "reason": "program-completed",
+            "diagnostics": [],
+            "unusedInputs": 0,
+            "comparison": "FAILED"
+          }
+        },
+        {
+          "actor": "dev-thiago",
+          "test": {
+            "id": "b0911a23-71ed-48e8-bb1d-e76b77f5b87c",
+            "snippetId": "2f9dadb9-f354-4f33-98e4-f85a025f4113",
+            "inputs": [],
+            "expectedOutputs": [
+              "3",
+              "3"
+            ]
+          },
+          "execution": "1af4c123-b240-4833-8267-554b62232cce",
+          "terminal": {
+            "outcome": "COMPLETED",
+            "reason": "program-completed",
+            "diagnostics": [],
+            "unusedInputs": 0,
+            "comparison": "FAILED"
+          }
+        },
+        {
+          "actor": "dev-ana",
+          "test": {
+            "id": "b0911a23-71ed-48e8-bb1d-e76b77f5b87c",
+            "snippetId": "2f9dadb9-f354-4f33-98e4-f85a025f4113",
+            "inputs": [],
+            "expectedOutputs": [
+              "3",
+              "3"
+            ]
+          },
+          "execution": "398d8ab7-8536-4a62-a336-441cb9912eb6",
+          "terminal": {
+            "outcome": "COMPLETED",
+            "reason": "program-completed",
+            "diagnostics": [],
+            "unusedInputs": 0,
+            "comparison": "FAILED"
+          }
+        }
+      ],
+      "noOp": {
+        "language": "printscript",
+        "version": "1.1",
+        "revision": "sha256-v1:b35ec887fdfde6cb406875a24ef3b9008103b44be57e206f6898cbaefe880290",
+        "changed": false,
+        "jobId": null,
+        "rules": [
+          {
+            "id": "identifier_format",
+            "type": "choice",
+            "acceptsNull": true,
+            "choices": [
+              "camel case",
+              "snake case"
+            ],
+            "conflictsWith": [],
+            "value": null
+          },
+          {
+            "id": "mandatory-variable-or-literal-in-println",
+            "type": "boolean",
+            "acceptsNull": false,
+            "choices": [],
+            "conflictsWith": [],
+            "value": true
+          },
+          {
+            "id": "mandatory-variable-or-literal-in-readInput",
+            "type": "boolean",
+            "acceptsNull": false,
+            "choices": [],
+            "conflictsWith": [],
+            "value": null
+          }
+        ]
+      }
+    },
+    "restartBefore": {
+      "0120e22c-3858-4bdf-9974-c4bad4a7f982": {
+        "id": "0120e22c-3858-4bdf-9974-c4bad4a7f982",
+        "name": "SNI64-d902ff20-df76-46f7-9d1a-62bd2a19b8f5-good",
+        "description": null,
+        "language": "printscript",
+        "version": "1.1",
+        "extension": "prs",
+        "ownerId": "dev-thiago",
+        "relation": "shared",
+        "lint": {
+          "status": "compliant",
+          "reason": null,
+          "diagnostics": [],
+          "codeHash": "sha256-v1:d36f4e10154d0ba0e271496ff499add84339de6e586ad4b4088f343c1d796b58",
+          "rulesRevision": "sha256-v1:b35ec887fdfde6cb406875a24ef3b9008103b44be57e206f6898cbaefe880290",
+          "processorRevision": "sha256-v1:12479d3f7e54755a6f799ff0648cb582bf257911e434b255167f75302e14770a"
+        },
+        "code": "println(1);",
+        "capabilities": {
+          "modify": false,
+          "share": false
+        }
+      },
+      "063ebc95-a137-4386-96f7-effc0ae49ac6": {
+        "id": "063ebc95-a137-4386-96f7-effc0ae49ac6",
+        "name": "SNI64-d902ff20-df76-46f7-9d1a-62bd2a19b8f5-defaults",
+        "description": null,
+        "language": "printscript",
+        "version": "1.1",
+        "extension": "prs",
+        "ownerId": "dev-juan",
+        "relation": "shared",
+        "lint": {
+          "status": "compliant",
+          "reason": null,
+          "diagnostics": [],
+          "codeHash": "sha256-v1:d36f4e10154d0ba0e271496ff499add84339de6e586ad4b4088f343c1d796b58",
+          "rulesRevision": "sha256-v1:f67e39807f376aa76e2039978af9bdac80ccd0ab7ef609c2a5740b2e092ba274",
+          "processorRevision": "sha256-v1:12479d3f7e54755a6f799ff0648cb582bf257911e434b255167f75302e14770a"
+        },
+        "code": "println(1);",
+        "capabilities": {
+          "modify": false,
+          "share": false
+        }
+      },
+      "2b1f4665-4a4c-4650-aa47-398f3879b086": {
+        "id": "2b1f4665-4a4c-4650-aa47-398f3879b086",
+        "name": "SNI64-d902ff20-df76-46f7-9d1a-62bd2a19b8f5-page-0",
+        "description": null,
+        "language": "printscript",
+        "version": "1.1",
+        "extension": "prs",
+        "ownerId": "dev-ana",
+        "relation": "owned",
+        "lint": {
+          "status": "compliant",
+          "reason": null,
+          "diagnostics": [],
+          "codeHash": "sha256-v1:d36f4e10154d0ba0e271496ff499add84339de6e586ad4b4088f343c1d796b58",
+          "rulesRevision": "sha256-v1:b35ec887fdfde6cb406875a24ef3b9008103b44be57e206f6898cbaefe880290",
+          "processorRevision": "sha256-v1:12479d3f7e54755a6f799ff0648cb582bf257911e434b255167f75302e14770a"
+        },
+        "code": "println(1);",
+        "capabilities": {
+          "modify": true,
+          "share": true
+        }
+      },
+      "97967e07-6c75-4a5d-9d4e-9d15e9e1a727": {
+        "id": "97967e07-6c75-4a5d-9d4e-9d15e9e1a727",
+        "name": "SNI64-d902ff20-df76-46f7-9d1a-62bd2a19b8f5-page-1",
+        "description": null,
+        "language": "printscript",
+        "version": "1.1",
+        "extension": "prs",
+        "ownerId": "dev-ana",
+        "relation": "owned",
+        "lint": {
+          "status": "compliant",
+          "reason": null,
+          "diagnostics": [],
+          "codeHash": "sha256-v1:d36f4e10154d0ba0e271496ff499add84339de6e586ad4b4088f343c1d796b58",
+          "rulesRevision": "sha256-v1:b35ec887fdfde6cb406875a24ef3b9008103b44be57e206f6898cbaefe880290",
+          "processorRevision": "sha256-v1:12479d3f7e54755a6f799ff0648cb582bf257911e434b255167f75302e14770a"
+        },
+        "code": "println(1);",
+        "capabilities": {
+          "modify": true,
+          "share": true
+        }
+      },
+      "76fb277a-434b-473f-b1b6-b1744471e10e": {
+        "id": "76fb277a-434b-473f-b1b6-b1744471e10e",
+        "name": "SNI64-d902ff20-df76-46f7-9d1a-62bd2a19b8f5-page-2",
+        "description": null,
+        "language": "printscript",
+        "version": "1.1",
+        "extension": "prs",
+        "ownerId": "dev-ana",
+        "relation": "owned",
+        "lint": {
+          "status": "compliant",
+          "reason": null,
+          "diagnostics": [],
+          "codeHash": "sha256-v1:d36f4e10154d0ba0e271496ff499add84339de6e586ad4b4088f343c1d796b58",
+          "rulesRevision": "sha256-v1:b35ec887fdfde6cb406875a24ef3b9008103b44be57e206f6898cbaefe880290",
+          "processorRevision": "sha256-v1:12479d3f7e54755a6f799ff0648cb582bf257911e434b255167f75302e14770a"
+        },
+        "code": "println(1);",
+        "capabilities": {
+          "modify": true,
+          "share": true
+        }
+      },
+      "2f9dadb9-f354-4f33-98e4-f85a025f4113": {
+        "id": "2f9dadb9-f354-4f33-98e4-f85a025f4113",
+        "name": "SNI64-d902ff20-df76-46f7-9d1a-62bd2a19b8f5-bad",
+        "description": null,
+        "language": "printscript",
+        "version": "1.1",
+        "extension": "prs",
+        "ownerId": "dev-thiago",
+        "relation": "shared",
+        "lint": {
+          "status": "not-compliant",
+          "reason": null,
+          "diagnostics": [
+            {
+              "rule": "mandatory-variable-or-literal-in-println",
+              "message": "println requiere una variable o un literal.",
+              "line": 1,
+              "column": 9
+            }
+          ],
+          "codeHash": "sha256-v1:040066359ceb0037c35146a0c885997b38de784b4f054cda90dc1e995ee4759e",
+          "rulesRevision": "sha256-v1:b35ec887fdfde6cb406875a24ef3b9008103b44be57e206f6898cbaefe880290",
+          "processorRevision": "sha256-v1:12479d3f7e54755a6f799ff0648cb582bf257911e434b255167f75302e14770a"
+        },
+        "code": "println(1+2);",
+        "capabilities": {
+          "modify": false,
+          "share": false
+        }
+      },
+      "61b29863-0daa-456f-a5d0-088633cf41c5": {
+        "id": "61b29863-0daa-456f-a5d0-088633cf41c5",
+        "name": "SNI64-d902ff20-df76-46f7-9d1a-62bd2a19b8f5-superseded",
+        "description": null,
+        "language": "printscript",
+        "version": "1.1",
+        "extension": "prs",
+        "ownerId": "dev-ana",
+        "relation": "owned",
+        "lint": {
+          "status": "pending",
+          "reason": "SUPERSEDED",
+          "diagnostics": [],
+          "codeHash": null,
+          "rulesRevision": null,
+          "processorRevision": null
+        },
+        "code": "println(1+2);",
+        "capabilities": {
+          "modify": true,
+          "share": true
+        }
+      },
+      "efb1b201-b3e6-47d0-bbb1-c3ae1d936225": {
+        "id": "efb1b201-b3e6-47d0-bbb1-c3ae1d936225",
+        "name": "SNI64-d902ff20-df76-46f7-9d1a-62bd2a19b8f5-failed",
+        "description": null,
+        "language": "printscript",
+        "version": "1.1",
+        "extension": "prs",
+        "ownerId": "dev-juan",
+        "relation": "shared",
+        "lint": {
+          "status": "failed",
+          "reason": "PROCESSOR_UNVERIFIABLE",
+          "diagnostics": [],
+          "codeHash": "sha256-v1:22dbfa6bc8d25d192164d1696a022b205504cef857355c272aba5482aa95adc2",
+          "rulesRevision": "sha256-v1:f67e39807f376aa76e2039978af9bdac80ccd0ab7ef609c2a5740b2e092ba274",
+          "processorRevision": null
+        },
+        "code": "println(\"SNI64-d902ff20-df76-46f7-9d1a-62bd2a19b8f5-lint-only-failure\");",
+        "capabilities": {
+          "modify": false,
+          "share": false
+        }
+      }
+    },
+    "restartAfter": {
+      "0120e22c-3858-4bdf-9974-c4bad4a7f982": {
+        "id": "0120e22c-3858-4bdf-9974-c4bad4a7f982",
+        "name": "SNI64-d902ff20-df76-46f7-9d1a-62bd2a19b8f5-good",
+        "description": null,
+        "language": "printscript",
+        "version": "1.1",
+        "extension": "prs",
+        "ownerId": "dev-thiago",
+        "relation": "shared",
+        "lint": {
+          "status": "compliant",
+          "reason": null,
+          "diagnostics": [],
+          "codeHash": "sha256-v1:d36f4e10154d0ba0e271496ff499add84339de6e586ad4b4088f343c1d796b58",
+          "rulesRevision": "sha256-v1:b35ec887fdfde6cb406875a24ef3b9008103b44be57e206f6898cbaefe880290",
+          "processorRevision": "sha256-v1:12479d3f7e54755a6f799ff0648cb582bf257911e434b255167f75302e14770a"
+        },
+        "code": "println(1);",
+        "capabilities": {
+          "modify": false,
+          "share": false
+        }
+      },
+      "063ebc95-a137-4386-96f7-effc0ae49ac6": {
+        "id": "063ebc95-a137-4386-96f7-effc0ae49ac6",
+        "name": "SNI64-d902ff20-df76-46f7-9d1a-62bd2a19b8f5-defaults",
+        "description": null,
+        "language": "printscript",
+        "version": "1.1",
+        "extension": "prs",
+        "ownerId": "dev-juan",
+        "relation": "shared",
+        "lint": {
+          "status": "compliant",
+          "reason": null,
+          "diagnostics": [],
+          "codeHash": "sha256-v1:d36f4e10154d0ba0e271496ff499add84339de6e586ad4b4088f343c1d796b58",
+          "rulesRevision": "sha256-v1:f67e39807f376aa76e2039978af9bdac80ccd0ab7ef609c2a5740b2e092ba274",
+          "processorRevision": "sha256-v1:12479d3f7e54755a6f799ff0648cb582bf257911e434b255167f75302e14770a"
+        },
+        "code": "println(1);",
+        "capabilities": {
+          "modify": false,
+          "share": false
+        }
+      },
+      "2b1f4665-4a4c-4650-aa47-398f3879b086": {
+        "id": "2b1f4665-4a4c-4650-aa47-398f3879b086",
+        "name": "SNI64-d902ff20-df76-46f7-9d1a-62bd2a19b8f5-page-0",
+        "description": null,
+        "language": "printscript",
+        "version": "1.1",
+        "extension": "prs",
+        "ownerId": "dev-ana",
+        "relation": "owned",
+        "lint": {
+          "status": "compliant",
+          "reason": null,
+          "diagnostics": [],
+          "codeHash": "sha256-v1:d36f4e10154d0ba0e271496ff499add84339de6e586ad4b4088f343c1d796b58",
+          "rulesRevision": "sha256-v1:b35ec887fdfde6cb406875a24ef3b9008103b44be57e206f6898cbaefe880290",
+          "processorRevision": "sha256-v1:12479d3f7e54755a6f799ff0648cb582bf257911e434b255167f75302e14770a"
+        },
+        "code": "println(1);",
+        "capabilities": {
+          "modify": true,
+          "share": true
+        }
+      },
+      "97967e07-6c75-4a5d-9d4e-9d15e9e1a727": {
+        "id": "97967e07-6c75-4a5d-9d4e-9d15e9e1a727",
+        "name": "SNI64-d902ff20-df76-46f7-9d1a-62bd2a19b8f5-page-1",
+        "description": null,
+        "language": "printscript",
+        "version": "1.1",
+        "extension": "prs",
+        "ownerId": "dev-ana",
+        "relation": "owned",
+        "lint": {
+          "status": "compliant",
+          "reason": null,
+          "diagnostics": [],
+          "codeHash": "sha256-v1:d36f4e10154d0ba0e271496ff499add84339de6e586ad4b4088f343c1d796b58",
+          "rulesRevision": "sha256-v1:b35ec887fdfde6cb406875a24ef3b9008103b44be57e206f6898cbaefe880290",
+          "processorRevision": "sha256-v1:12479d3f7e54755a6f799ff0648cb582bf257911e434b255167f75302e14770a"
+        },
+        "code": "println(1);",
+        "capabilities": {
+          "modify": true,
+          "share": true
+        }
+      },
+      "76fb277a-434b-473f-b1b6-b1744471e10e": {
+        "id": "76fb277a-434b-473f-b1b6-b1744471e10e",
+        "name": "SNI64-d902ff20-df76-46f7-9d1a-62bd2a19b8f5-page-2",
+        "description": null,
+        "language": "printscript",
+        "version": "1.1",
+        "extension": "prs",
+        "ownerId": "dev-ana",
+        "relation": "owned",
+        "lint": {
+          "status": "compliant",
+          "reason": null,
+          "diagnostics": [],
+          "codeHash": "sha256-v1:d36f4e10154d0ba0e271496ff499add84339de6e586ad4b4088f343c1d796b58",
+          "rulesRevision": "sha256-v1:b35ec887fdfde6cb406875a24ef3b9008103b44be57e206f6898cbaefe880290",
+          "processorRevision": "sha256-v1:12479d3f7e54755a6f799ff0648cb582bf257911e434b255167f75302e14770a"
+        },
+        "code": "println(1);",
+        "capabilities": {
+          "modify": true,
+          "share": true
+        }
+      },
+      "2f9dadb9-f354-4f33-98e4-f85a025f4113": {
+        "id": "2f9dadb9-f354-4f33-98e4-f85a025f4113",
+        "name": "SNI64-d902ff20-df76-46f7-9d1a-62bd2a19b8f5-bad",
+        "description": null,
+        "language": "printscript",
+        "version": "1.1",
+        "extension": "prs",
+        "ownerId": "dev-thiago",
+        "relation": "shared",
+        "lint": {
+          "status": "not-compliant",
+          "reason": null,
+          "diagnostics": [
+            {
+              "rule": "mandatory-variable-or-literal-in-println",
+              "message": "println requiere una variable o un literal.",
+              "line": 1,
+              "column": 9
+            }
+          ],
+          "codeHash": "sha256-v1:040066359ceb0037c35146a0c885997b38de784b4f054cda90dc1e995ee4759e",
+          "rulesRevision": "sha256-v1:b35ec887fdfde6cb406875a24ef3b9008103b44be57e206f6898cbaefe880290",
+          "processorRevision": "sha256-v1:12479d3f7e54755a6f799ff0648cb582bf257911e434b255167f75302e14770a"
+        },
+        "code": "println(1+2);",
+        "capabilities": {
+          "modify": false,
+          "share": false
+        }
+      },
+      "61b29863-0daa-456f-a5d0-088633cf41c5": {
+        "id": "61b29863-0daa-456f-a5d0-088633cf41c5",
+        "name": "SNI64-d902ff20-df76-46f7-9d1a-62bd2a19b8f5-superseded",
+        "description": null,
+        "language": "printscript",
+        "version": "1.1",
+        "extension": "prs",
+        "ownerId": "dev-ana",
+        "relation": "owned",
+        "lint": {
+          "status": "pending",
+          "reason": "SUPERSEDED",
+          "diagnostics": [],
+          "codeHash": null,
+          "rulesRevision": null,
+          "processorRevision": null
+        },
+        "code": "println(1+2);",
+        "capabilities": {
+          "modify": true,
+          "share": true
+        }
+      },
+      "efb1b201-b3e6-47d0-bbb1-c3ae1d936225": {
+        "id": "efb1b201-b3e6-47d0-bbb1-c3ae1d936225",
+        "name": "SNI64-d902ff20-df76-46f7-9d1a-62bd2a19b8f5-failed",
+        "description": null,
+        "language": "printscript",
+        "version": "1.1",
+        "extension": "prs",
+        "ownerId": "dev-juan",
+        "relation": "shared",
+        "lint": {
+          "status": "failed",
+          "reason": "PROCESSOR_UNVERIFIABLE",
+          "diagnostics": [],
+          "codeHash": "sha256-v1:22dbfa6bc8d25d192164d1696a022b205504cef857355c272aba5482aa95adc2",
+          "rulesRevision": "sha256-v1:f67e39807f376aa76e2039978af9bdac80ccd0ab7ef609c2a5740b2e092ba274",
+          "processorRevision": null
+        },
+        "code": "println(\"SNI64-d902ff20-df76-46f7-9d1a-62bd2a19b8f5-lint-only-failure\");",
+        "capabilities": {
+          "modify": false,
+          "share": false
+        }
+      }
+    }
+  },
+  "browser": {
+    "healthy": {
+      "passed": 2,
+      "failed": 0
+    },
+    "processor-down": {
+      "passed": 1,
+      "failed": 0
+    },
+    "storage-down": {
+      "passed": 1,
+      "failed": 0
+    },
+    "permissions-down": {
+      "passed": 1,
+      "failed": 0
+    },
+    "batch": {
+      "passed": 1,
+      "failed": 0
+    }
+  },
+  "checks": {
+    "vitest": {
+      "passed": 200,
+      "failed": 0
+    },
+    "eslint": "PASS",
+    "build": "PASS",
+    "cypressTypecheck": "PASS",
+    "ruff": "PASS"
+  },
+  "limits": [
+    "Local dev identity; OAuth and live Auth0 tenant are outside SNI-37",
+    "Local arm64 QA images; no Azure/CD/production certification",
+    "The proxy supplies only explicit faults or delays; successful provider responses are real",
+    "Test comparison acceptance is not a recertification of all US10 interactive cases"
+  ],
+  "scripts": {
+    "scripts/verify_sni37.py": "26cf4d49fbc6bc2efa3a2a84c741e9ee9e141b746f0c515076a243d8169bd53f",
+    "scripts/verify_sni37_recovery.py": "8504c7cff218d322604f81b1ef8ae1337030be021a19f1be3bae25308bbb6b4c",
+    "scripts/sni75_fault_proxy.py": "a056ce900cea7ed3fb1dca913f82d80325d93607245a2f231e1f970adf56ab44",
+    "cypress/e2e/backend/lint.cy.ts": "809b1f24e92dac992e19061f9d95e2a083b754689eac7d2e06f469dc746e41bb"
+  },
+  "screenshots": {
+    "evidence/sni37-2026-11-08/sni37-real-rules-batch.png": "bbed5cff6434fee6cc7436f96c252bd520cd8d2a79057fcfad2ad5ba6831e079",
+    "evidence/sni37-2026-11-08/sni37-processor-down.png": "db1ccfb2fcf63f84d9d29ea3963467d1b60c260be2e1f2c928204ce01061686a",
+    "evidence/sni37-2026-11-08/sni37-reader-pages-and-states.png": "55f3fc0d6fe894b697b9f767e987ad64c7060334d420796cc3c2b7f01950f5ac",
+    "evidence/sni37-2026-11-08/sni37-owner-edited-lint.png": "1f4f1020e1f835a8b0782f532f4c83758fee2af5d32d030f4340b3ea995f3c32",
+    "evidence/sni37-2026-11-08/sni37-storage-down.png": "dfd910e5f9bc7ab1c1ec34d050f8c5433b569e2702463b5f97a755f0617d812d",
+    "evidence/sni37-2026-11-08/sni37-permissions-down.png": "db1ccfb2fcf63f84d9d29ea3963467d1b60c260be2e1f2c928204ce01061686a"
+  },
+  "recovery": {
+    "prepare": {
+      "prefix": "SNI37-batch-832cb96a",
+      "ids": [
+        "c1dcb88e-6b25-476c-8c8e-45ae0271767b",
+        "87f5c0e3-1fb8-4777-aa82-6f3ff76c1cb9",
+        "14151715-b85e-4434-8d72-f7d56aa5ed42",
+        "c440cbb1-05a2-4826-83e7-0a8e02fec95b",
+        "6e500c8d-dfef-4e58-9d4f-aa578b310989",
+        "aa7dccbe-7dd6-4746-9d14-e29173d4bec5",
+        "6b97b3ef-962e-41cd-9efd-6600511cd75b",
+        "65e821d6-54be-43e7-a96c-4558cb6518c4",
+        "5c58b498-2845-4817-b835-a82a73818c63",
+        "6dcd3b46-32ff-4eee-b737-3f61e54a6a4e",
+        "b2bbbc69-2396-4fef-a8c3-a85ca2361391",
+        "f855191d-1be5-49de-b712-072b96dafd17"
+      ],
+      "owner": "dev-juanfran"
+    },
+    "code-race": {
+      "snippet": "0714b9e0-7bde-4e84-b6ee-038a2370079c",
+      "held": {
+        "stage": "lintGate",
+        "id": "cf18cdd0-fba9-444e-839b-ade150307498",
+        "code": "println(\"SNI37-race-caeb4a1b\");println(1+2);",
+        "at": 1794187660.6971378
+      },
+      "changeConfirmedAt": 1794187660.820905,
+      "first": {
+        "language": "printscript",
+        "version": "1.1",
+        "revision": "sha256-v1:b35ec887fdfde6cb406875a24ef3b9008103b44be57e206f6898cbaefe880290",
+        "changed": true,
+        "jobId": "ea0fc422-48c2-4898-88ea-76c0facdcc5a",
+        "rules": [
+          {
+            "id": "identifier_format",
+            "type": "choice",
+            "acceptsNull": true,
+            "choices": [
+              "camel case",
+              "snake case"
+            ],
+            "conflictsWith": [],
+            "value": null
+          },
+          {
+            "id": "mandatory-variable-or-literal-in-println",
+            "type": "boolean",
+            "acceptsNull": false,
+            "choices": [],
+            "conflictsWith": [],
+            "value": true
+          },
+          {
+            "id": "mandatory-variable-or-literal-in-readInput",
+            "type": "boolean",
+            "acceptsNull": false,
+            "choices": [],
+            "conflictsWith": [],
+            "value": null
+          }
+        ]
+      },
+      "winning": {
+        "language": "printscript",
+        "version": "1.1",
+        "revision": "sha256-v1:b35ec887fdfde6cb406875a24ef3b9008103b44be57e206f6898cbaefe880290",
+        "changed": true,
+        "jobId": "ea0fc422-48c2-4898-88ea-76c0facdcc5a",
+        "rules": [
+          {
+            "id": "identifier_format",
+            "type": "choice",
+            "acceptsNull": true,
+            "choices": [
+              "camel case",
+              "snake case"
+            ],
+            "conflictsWith": [],
+            "value": null
+          },
+          {
+            "id": "mandatory-variable-or-literal-in-println",
+            "type": "boolean",
+            "acceptsNull": false,
+            "choices": [],
+            "conflictsWith": [],
+            "value": true
+          },
+          {
+            "id": "mandatory-variable-or-literal-in-readInput",
+            "type": "boolean",
+            "acceptsNull": false,
+            "choices": [],
+            "conflictsWith": [],
+            "value": null
+          }
+        ]
+      },
+      "previous": {
+        "id": "ea0fc422-48c2-4898-88ea-76c0facdcc5a",
+        "status": "COMPLETED",
+        "processed": 16,
+        "failed": 0,
+        "pending": 0,
+        "selectionComplete": true
+      },
+      "terminal": {
+        "id": "ea0fc422-48c2-4898-88ea-76c0facdcc5a",
+        "status": "COMPLETED",
+        "processed": 16,
+        "failed": 0,
+        "pending": 0,
+        "selectionComplete": true
+      },
+      "oldItemState": "SUPERSEDED",
+      "published": {
+        "rules": "sha256-v1:b35ec887fdfde6cb406875a24ef3b9008103b44be57e206f6898cbaefe880290",
+        "codeHash": "sha256-v1:d36f4e10154d0ba0e271496ff499add84339de6e586ad4b4088f343c1d796b58"
+      },
+      "detail": {
+        "id": "0714b9e0-7bde-4e84-b6ee-038a2370079c",
+        "name": "SNI37-race-caeb4a1b",
+        "description": null,
+        "language": "printscript",
+        "version": "1.1",
+        "extension": "prs",
+        "ownerId": "dev-juanfran",
+        "relation": "owned",
+        "lint": {
+          "status": "compliant",
+          "reason": null,
+          "diagnostics": [],
+          "codeHash": "sha256-v1:d36f4e10154d0ba0e271496ff499add84339de6e586ad4b4088f343c1d796b58",
+          "rulesRevision": "sha256-v1:b35ec887fdfde6cb406875a24ef3b9008103b44be57e206f6898cbaefe880290",
+          "processorRevision": "sha256-v1:12479d3f7e54755a6f799ff0648cb582bf257911e434b255167f75302e14770a"
+        },
+        "code": "println(1);",
+        "capabilities": {
+          "modify": true,
+          "share": true
+        }
+      }
+    },
+    "rules-race": {
+      "snippet": "9568c291-1b0b-498a-90a9-2e1e4b0a9d3c",
+      "held": {
+        "stage": "lintGate",
+        "id": "f7969f68-e608-4399-8031-93ff6e68372a",
+        "code": "println(\"SNI37-race-778dda6c\");println(1+2);",
+        "at": 1794187558.105792
+      },
+      "changeConfirmedAt": 1794187558.2096,
+      "first": {
+        "language": "printscript",
+        "version": "1.1",
+        "revision": "sha256-v1:b35ec887fdfde6cb406875a24ef3b9008103b44be57e206f6898cbaefe880290",
+        "changed": true,
+        "jobId": "258800d3-8de2-4e99-9bf9-0847cc47ff21",
+        "rules": [
+          {
+            "id": "identifier_format",
+            "type": "choice",
+            "acceptsNull": true,
+            "choices": [
+              "camel case",
+              "snake case"
+            ],
+            "conflictsWith": [],
+            "value": null
+          },
+          {
+            "id": "mandatory-variable-or-literal-in-println",
+            "type": "boolean",
+            "acceptsNull": false,
+            "choices": [],
+            "conflictsWith": [],
+            "value": true
+          },
+          {
+            "id": "mandatory-variable-or-literal-in-readInput",
+            "type": "boolean",
+            "acceptsNull": false,
+            "choices": [],
+            "conflictsWith": [],
+            "value": null
+          }
+        ]
+      },
+      "winning": {
+        "language": "printscript",
+        "version": "1.1",
+        "revision": "sha256-v1:44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+        "changed": true,
+        "jobId": "fbc91f9f-a5fa-443f-95ec-476c74d6bfd5",
+        "rules": [
+          {
+            "id": "identifier_format",
+            "type": "choice",
+            "acceptsNull": true,
+            "choices": [
+              "camel case",
+              "snake case"
+            ],
+            "conflictsWith": [],
+            "value": null
+          },
+          {
+            "id": "mandatory-variable-or-literal-in-println",
+            "type": "boolean",
+            "acceptsNull": false,
+            "choices": [],
+            "conflictsWith": [],
+            "value": null
+          },
+          {
+            "id": "mandatory-variable-or-literal-in-readInput",
+            "type": "boolean",
+            "acceptsNull": false,
+            "choices": [],
+            "conflictsWith": [],
+            "value": null
+          }
+        ]
+      },
+      "previous": {
+        "id": "258800d3-8de2-4e99-9bf9-0847cc47ff21",
+        "status": "SUPERSEDED",
+        "processed": 15,
+        "failed": 0,
+        "pending": 0,
+        "selectionComplete": true
+      },
+      "terminal": {
+        "id": "fbc91f9f-a5fa-443f-95ec-476c74d6bfd5",
+        "status": "COMPLETED",
+        "processed": 15,
+        "failed": 0,
+        "pending": 0,
+        "selectionComplete": true
+      },
+      "oldItemState": "COMPLETED",
+      "published": {
+        "rules": "sha256-v1:44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+        "codeHash": "sha256-v1:d5d13a25623c1f11be47524cdd89db93099cdb0adcd511bc1bed0b8f95f35df2"
+      },
+      "detail": {
+        "id": "9568c291-1b0b-498a-90a9-2e1e4b0a9d3c",
+        "name": "SNI37-race-778dda6c",
+        "description": null,
+        "language": "printscript",
+        "version": "1.1",
+        "extension": "prs",
+        "ownerId": "dev-juanfran",
+        "relation": "owned",
+        "lint": {
+          "status": "compliant",
+          "reason": null,
+          "diagnostics": [],
+          "codeHash": "sha256-v1:d5d13a25623c1f11be47524cdd89db93099cdb0adcd511bc1bed0b8f95f35df2",
+          "rulesRevision": "sha256-v1:44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+          "processorRevision": "sha256-v1:12479d3f7e54755a6f799ff0648cb582bf257911e434b255167f75302e14770a"
+        },
+        "code": "println(\"SNI37-race-778dda6c\");println(1+2);",
+        "capabilities": {
+          "modify": true,
+          "share": true
+        }
+      }
+    },
+    "recovery": {
+      "job": "a32650e5-e930-4d44-bb11-26cbfcd2b7eb",
+      "before": {
+        "id": "a32650e5-e930-4d44-bb11-26cbfcd2b7eb",
+        "status": "RUNNING",
+        "processed": 1,
+        "failed": 0,
+        "pending": 1,
+        "selectionComplete": false
+      },
+      "stoppedDurable": {
+        "state": "PENDING",
+        "completed": 2
+      },
+      "after": {
+        "id": "a32650e5-e930-4d44-bb11-26cbfcd2b7eb",
+        "status": "COMPLETED",
+        "processed": 16,
+        "failed": 0,
+        "pending": 0,
+        "selectionComplete": true
+      },
+      "redeliveryRecord": "1794187736729-0",
+      "redeliveryAcknowledged": true,
+      "unchangedLogicalItems": 16,
+      "auditCountUnchanged": 185,
+      "activePermits": 0
+    }
+  },
+  "result": "PASS",
+  "status": "Acceptance executed; PR pending user merge",
+  "shutdown": "Only isolated QA project and its proxy/UI are stopped; volumes retained"
+}

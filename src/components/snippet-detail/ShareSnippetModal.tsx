@@ -38,6 +38,6 @@ export function ShareSnippetModal({open, onClose, onShare, loading}: Props) {
       disabled={loading} inputValue={name}
       onInputChange={(_, value, reason) => {setName(value); if (reason === 'input' || reason === 'clear') setSelected(null);}}
       onChange={(_, value) => setSelected(value)}
-      renderInput={params => <TextField {...params} label="Buscar destinatario" autoComplete="off"/>}/>
+      renderInput={params => <TextField {...params} label="Buscar destinatario" helperText="Escribí el comienzo del nombre para buscar." autoComplete="off"/>}/>
   </ModalWrapper>;
 }

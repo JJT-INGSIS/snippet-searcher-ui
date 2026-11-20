@@ -26,4 +26,12 @@ describe('Problem Details and uncertain results', () => {
     expect(error.problem).toMatchObject({status: 502, type: 'about:blank'});
     expect(error.message).not.toContain('<html>');
   });
+  it('keeps every rule violation and drops malformed ones', () => {
+    const violations = [{rule: 'indent-inside-if', reason: 'out-of-range'}, {rule: 'tabs', reason: 'unknown-rule'}];
+    const error = toApiError(httpError(422, {
+      type: 'urn:snippets:problem:invalid-formatting-rules', violations: [...violations, {rule: 1}, null],
+    }));
+    expect(error.problem?.violations).toEqual(violations);
+    expect(error.uncertain).toBe(false);
+  });
 });

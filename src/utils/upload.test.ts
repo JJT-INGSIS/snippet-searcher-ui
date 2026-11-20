@@ -8,8 +8,10 @@ describe('uploaded snippet drafts', () => {
     expect(draft).toEqual({name: 'mi.ejemplo', language: 'printscript', content: '\uFEFFprintln(1);\r\n'});
     expect(draft).not.toHaveProperty('version');
   });
-  it('accepts empty code but rejects extensions absent from the real catalog', async () => {
-    expect((await readSnippetFile(new File([''], 'empty.prs'), types)).content).toBe('');
+  it('rejects an empty file and extensions absent from the real catalog', async () => {
+    for (const code of ['', ' \t\r\n']) {
+      await expect(readSnippetFile(new File([code], 'empty.prs'), types)).rejects.toThrow('vacío');
+    }
     await expect(readSnippetFile(new File(['x'], 'example.js'), types)).rejects.toThrow('extensión');
     await expect(readSnippetFile(new File(['x'], 'example.prs'), [])).rejects.toThrow('extensión');
   });

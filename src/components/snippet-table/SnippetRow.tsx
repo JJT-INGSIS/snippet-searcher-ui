@@ -1,6 +1,6 @@
 import {Button, Chip, Skeleton, Stack, TableCell, TableRow} from '@mui/material';
 import {SnippetDescriptor} from '../../utils/snippet';
-import {lintLabels} from '../../utils/presentation';
+import {lintLabel} from '../../utils/lintPresentation';
 
 export function SnippetRow({snippet, onClick}: {snippet: SnippetDescriptor; onClick: () => void}) {
   return <TableRow data-testid="snippet-row" hover>
@@ -13,7 +13,7 @@ export function SnippetRow({snippet, onClick}: {snippet: SnippetDescriptor; onCl
     <TableCell><Chip size="small" label={snippet.language} variant="outlined"/><span> {snippet.version}</span></TableCell>
     <TableCell sx={{maxWidth: 220, overflowWrap: 'anywhere'}}>{snippet.author}</TableCell>
     <TableCell><Chip size="small" label={snippet.relation === 'owned' ? 'Propio' : 'Compartido'} color={snippet.relation === 'owned' ? 'primary' : 'default'} variant="outlined"/></TableCell>
-    <TableCell sx={{whiteSpace: 'nowrap', color: 'text.secondary'}}>{lintLabels[snippet.compliance]}</TableCell>
+    <TableCell sx={{whiteSpace: 'nowrap', color: 'text.secondary'}}>{lintLabel(snippet.lint)}</TableCell>
   </TableRow>;
 }
 export function LoadingSnippetRow() {

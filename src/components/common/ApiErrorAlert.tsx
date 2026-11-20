@@ -15,6 +15,9 @@ export function ApiErrorAlert({error, creation = false, focusOnError = false}: {
       {error.problem?.diagnostics?.map((diagnostic, index) => <Typography key={index} variant="body2">
         {diagnostic.rule}: {diagnostic.message} ({diagnostic.line}:{diagnostic.column})
       </Typography>)}
+      {!!error.problem?.violations?.length && <Typography variant="body2">
+        Reglas rechazadas: {[...new Set(error.problem.violations.map(violation => violation.rule))].join(', ')}
+      </Typography>}
       {creation && error.uncertain && <Typography variant="body2">Reintentá esta misma creación para evitar duplicados.</Typography>}
     </>}
   </Stack></Alert>;

@@ -1,6 +1,6 @@
 # Snippet Searcher UI
 
-UI de la cátedra basada en React, MUI, Vite y React Query 3, integrada mediante Axios con la API pública de Snippets.
+UI de la cátedra basada en React, MUI, Vite y React Query 3, integrada mediante Axios y fetch streaming con la API pública de Snippets.
 
 ## Origen y ramas
 
@@ -26,6 +26,8 @@ Dejar la terminal abierta. **Ctrl+C en esa terminal detiene la UI**; cerrar la p
 La UI y el backend son procesos separados. No hace falta encender las VMs de Azure.
 
 **[Paso a paso completo para el equipo: preparación, backend, UI, pruebas y apagado](docs/local-development.md).**
+
+[Aceptación US5–7 con UI, Permissions y Asset reales — SNI-36](docs/sni-36-real-backend.md): pruebas opt-in con tres actores, fallos reales y recreación conservando datos.
 
 ## Preparación inicial de la UI
 
@@ -123,7 +125,12 @@ Elegir la versión es obligatorio. No se deduce de la extensión ni se escoge au
 - Un refresco de detalle no pisa el borrador que se está editando. Cerrar y reabrir carga el detalle nuevamente.
 - El backend sigue autorizando cada operación. La UI utiliza capabilities para bloquear edición/sharing de solo lectura.
 
-Tests, ejecución, reglas, formateo y borrado permanecen deshabilitados; el adaptador rechaza explícitamente esas operaciones.
+SNI-50 conecta creación/listado de definiciones de tests por snippet mediante HTTP.
+Ver [contrato, decisiones y verificación](docs/sni-50-test-definitions.md).
+SNI-51 conecta la ejecución incremental de un test guardado y la ejecución interactiva
+en los paneles existentes. Ver [comportamiento, decisiones y pruebas](docs/sni-51-execution.md).
+Edición/borrado de tests, reglas, formateo y borrado de snippets permanecen
+deshabilitados; no se fabrican resultados ni éxitos.
 El Fake fue retirado. Se conservan los componentes provistos para esas historias futuras, pero no se montan sus flujos simulados.
 La descarga original existente utiliza el código leído; no implementa descarga de código formateado ni US13.
 
@@ -195,14 +202,34 @@ Ver [evidencia y límites](docs/sni-34-validation.md). No declarar US5–7 compl
 
 Ver [cambios, comandos, evidencia real y límites](docs/sni-35-validation.md).
 
+## New Relic Browser en DEV
+
+La UI pública de DEV carga el agente Browser en las rutas `/` y `/rules` con
+Auth0 activo. El inicio omite el callback de Auth0 y las URLs con query o
+fragmento. Se incluyen vistas, tiempos de carga y errores de JavaScript.
+El agente se configura con los datos públicos de la entidad Browser de DEV.
+Session Replay, Session Trace, AJAX y cookies del agente quedan desactivados.
+
+Para validarlo después de desplegar, abrir una de las rutas públicas de DEV,
+confirmar eventos `PageView` y `PageViewTiming` en la entidad
+`snippet-searcher-dev-ui` y verificar un error de JavaScript de prueba sin
+datos de usuarios. La prueba de Cypress en `usability.cy.ts` cubre por separado
+el listado HTTP 200 con el snippet esperado y el HTTP 200 que lo omite.
+
 ## Próximas extensiones
+
+El CI frontend y el CD usan los workflows centrales `v0.6.2`. La versión fija
+las herramientas corregidas de infra para recuperación/reapply (SNI-44), sin
+cambiar el build frontend ni el despliegue independiente por digest. Actualizar
+todos los callers del ambiente y esperar ejecuciones activas antes de reaplicar
+infraestructura; no reejecutar herramientas antiguas sobre el stack ampliado.
 
 - SNI-54 ya verifica el catálogo GET /languages; SNI-35 lo consume sin datos inventados.
 - Listado, destinatarios, detalle y edición ya fueron verificados localmente con Permissions. Sharing público sigue pendiente de aceptación real.
 - SNI-36 completa la aceptación con los endpoints pendientes y storage oficial; el éxito de los contratos no sustituye esa prueba.
-- Auth0, lint, tests y ejecución se incorporan en sus tickets; no agregar fake success para avanzar.
+- Auth0, lint y ejecución se incorporan en sus tickets; no agregar fake success para avanzar.
+  Las definiciones de tests de SNI-50 requieren los endpoints reales de SNI-46;
+  las pruebas de contrato de UI no acreditan esa integración backend.
 - Revisar las dependencias heredadas del upstream antes del despliegue de la UI. Este cambio no hace una migración general de framework ni un audit fix forzado.
 
-## Herramientas de CD — SNI-44
-
-El caller usa workflows centrales `v0.6.2`, con la revisión fija de infra que corrige el doble escape de healthchecks. Este mantenimiento cambia sólo herramientas y documentación: no promueve funcionalidades nuevas de dev ni cambia la imagen en producción. Antes de reaplicar infraestructura, actualizar los cuatro callers del ambiente y esperar ejecuciones activas; no reejecutar herramientas antiguas sobre el stack ampliado.
+Validación de código vacío: [SNI-55](docs/empty-code.md).

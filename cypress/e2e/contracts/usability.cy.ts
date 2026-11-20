@@ -1,7 +1,7 @@
 // UI regressions against controlled HTTP contracts, not full backend acceptance.
 const item = (name = 'Ejemplo', id = '0f8b3c1e-4a2d-4d3b-9b7a-2c6e5f1a9d40') => ({
   id, name, description: null, language: 'printscript', version: '1.1', extension: 'prs',
-  ownerId: 'dev-juan', relation: 'owned', lint: {status: 'not-implemented'},
+  ownerId: 'dev-juan', relation: 'owned', lint: {status: 'pending', reason: 'NOT_EVALUATED', diagnostics: [], codeHash: null, rulesRevision: null, processorRevision: null},
 });
 function config() {
   cy.intercept('GET', '/app-config.json', {environment: 'dev', identity: {mode: 'dev', actorId: 'dev-juan'}});
@@ -17,6 +17,58 @@ function listing() {
   cy.visit('/'); cy.wait('@list');
 }
 function search(value: string) {cy.get('input[placeholder="Nombre del snippet…"]').clear().type(value);}
+
+describe('SNI-85 functional check for the snippet listing', () => {
+  const expected = item('SNI-85 Synthetic');
+  const other = item('SNI-85 Synthetic Archive', 'd9046ad9-52b1-4cbc-9643-91c02b23b88a');
+  const code = 'println("SNI-85 OK");';
+  const snippetRows = '[data-testid="snippet-row"]';
+  const missingSnippet = 'Expected snippet is missing from the listing';
+
+  function visitListing(snippets: ReturnType<typeof item>[]) {
+    config();
+    cy.intercept({method: 'GET', pathname: '/api/snippets'}, {
+      statusCode: 200,
+      body: {page: 0, page_size: 10, count: snippets.length, snippets},
+    }).as('functionalList');
+    cy.visit('/');
+    cy.wait('@functionalList').its('response.statusCode').should('eq', 200);
+  }
+
+  function requireExpectedSnippet(rows: JQuery<HTMLElement>) {
+    const button = rows.find('button')
+      .filter((_index, candidate) => candidate.textContent?.trim() === expected.name);
+    if (button.length === 0) throw new Error(missingSnippet);
+    return button;
+  }
+
+  it('finds the expected snippet in a 200 response and verifies its content', () => {
+    cy.intercept('GET', '/api/snippets/' + expected.id, {
+      ...expected,
+      code,
+      capabilities: {modify: true, share: true},
+    }).as('functionalDetail');
+    cy.intercept('GET', '/api/snippets/' + expected.id + '/automatic-tests', {
+      revision: null, validity: 'CURRENT', progress: null, tests: [],
+    });
+
+    visitListing([other, expected]);
+    cy.get(snippetRows).should('have.length', 2).then(rows => {
+      cy.wrap(requireExpectedSnippet(rows)).should('be.visible').click();
+    });
+    cy.wait('@functionalDetail').its('response.statusCode').should('eq', 200);
+    cy.get('#detail-code').should('be.visible').and('have.value', code);
+  });
+
+  it('detects the missing expected snippet even when a 200 response renders another row', () => {
+    visitListing([other]);
+    cy.contains(snippetRows + ' button', other.name).should('be.visible');
+    cy.get(snippetRows).should('have.length', 1).then(rows => {
+      expect(() => requireExpectedSnippet(rows)).to.throw(missingSnippet);
+    });
+  });
+});
+
 describe('SNI-35 search, pagination and feedback', () => {
   it('resets an advanced page on search and handles zero results without keeping the old total', () => {
     listing();
@@ -104,6 +156,7 @@ describe('SNI-35 search, pagination and feedback', () => {
   });
   it('closes queued upload messages after their timeout', () => {
     listing();
+    cy.get('[data-testid="upload-file-input"]').should('have.attr', 'accept', '.prs').and('be.enabled');
     cy.get('[data-testid="upload-file-input"]').selectFile({contents: Cypress.Buffer.from('x'), fileName: 'unknown.xyz'}, {force: true});
     cy.contains('La extensión del archivo').should('be.visible');
     cy.contains('La extensión del archivo', {timeout: 9000}).should('not.exist');

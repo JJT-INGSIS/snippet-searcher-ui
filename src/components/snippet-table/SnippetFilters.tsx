@@ -1,6 +1,9 @@
 import {Button, InputAdornment, MenuItem, Stack, TextField} from '@mui/material';
 import {RestartAltRounded, SearchRounded} from '@mui/icons-material';
 import {SnippetFilters as Filters} from '../../utils/snippet';
+import {lintFilterOptions} from '../../utils/lintPresentation';
+
+const ALL_LINT = '';
 
 type Props = {name: string; onName: (name: string) => void; filters: Filters; onFilters: (change: Filters) => void; onClear: () => void};
 export function SnippetFilters({name, onName, filters, onFilters, onClear}: Props) {
@@ -16,8 +19,13 @@ export function SnippetFilters({name, onName, filters, onFilters, onClear}: Prop
       </TextField>
       <TextField label="Filtrar por lenguaje" placeholder="Por ejemplo, printscript…" value={filters.language ?? ''}
         onChange={event => onFilters({language: event.target.value})}/>
+      <TextField select id="lint-filter" label="Lint" value={filters.lint ?? ALL_LINT}
+        onChange={event => onFilters({lint: (event.target.value || undefined) as Filters['lint']})}>
+        <MenuItem value={ALL_LINT}>Todos</MenuItem>
+        {lintFilterOptions.map(option => <MenuItem key={option.status} value={option.status}>{option.label}</MenuItem>)}
+      </TextField>
       <TextField select label="Ordenar por" value={filters.sort} onChange={event => onFilters({sort: event.target.value as Filters['sort']})}>
-        <MenuItem value="name">Nombre</MenuItem><MenuItem value="language">Lenguaje</MenuItem>
+        <MenuItem value="name">Nombre</MenuItem><MenuItem value="language">Lenguaje</MenuItem><MenuItem value="lint">Lint</MenuItem>
       </TextField>
       <TextField select label="Orden" value={filters.direction} onChange={event => onFilters({direction: event.target.value as Filters['direction']})}>
         <MenuItem value="asc">Ascendente</MenuItem><MenuItem value="desc">Descendente</MenuItem>

@@ -28,5 +28,9 @@ next-env.d.ts
 .next
 cypress/screenshots/
 cypress/videos/
+cypress/downloads/
 *.tsbuildinfo
 !.env.example
+
+# Local acceptance scripts
+__pycache__/

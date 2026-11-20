@@ -1,13 +1,22 @@
 import {describe, expect, it} from 'vitest';
 import {fromDetailDto, fromMetadataDto, fromPageDto, toWriteDto} from './dto';
 const metadata = {id: 'id', name: 'Name', description: null, language: 'printscript', version: '1.1'};
-const descriptor = {...metadata, extension: 'prs', ownerId: 'dev-ana', relation: 'shared' as const, lint: {status: 'not-implemented' as const}};
+const lint = {status: 'pending', reason: 'NOT_EVALUATED', diagnostics: [], codeHash: null, rulesRevision: null, processorRevision: null};
+const descriptor = {...metadata, extension: 'prs', ownerId: 'dev-ana', relation: 'shared' as const, lint};
 describe('SNI-26 mappings', () => {
-  it('sends only permitted fields, preserves whitespace, empty code and description semantics', () => {
-    const input = {...metadata, content: '', author: 'not-an-owner', extension: 'ps'};
-    expect(toWriteDto(input)).toEqual({name: 'Name', description: null, language: 'printscript', version: '1.1', code: ''});
+  it('sends only permitted fields, preserves exact nonempty code and description semantics', () => {
+    const input = {...metadata, content: 'println(1);', author: 'not-an-owner', extension: 'ps'};
+    expect(toWriteDto(input)).toEqual({name: 'Name', description: null, language: 'printscript', version: '1.1', code: 'println(1);'});
     expect(toWriteDto({...input, description: '', content: '  println(1);\r\n'}).code).toBe('  println(1);\r\n');
     expect(toWriteDto({...input, description: ''}).description).toBe('');
+  });
+  it('rejects empty write code with a known field error before transport', () => {
+    expect(() => toWriteDto({...metadata, content: ''})).toThrow('vacío');
+    try {toWriteDto({...metadata, content: ''});}
+    catch (error) {expect(error).toMatchObject({uncertain: false, problem: {status: 400, field: 'code'}});}
+  });
+  it('keeps legacy empty content readable without allowing it as a new write', () => {
+    expect(fromDetailDto({...descriptor, code: '', capabilities: {modify: false, share: false}}).content).toBe('');
   });
   it('does not fabricate content, capabilities or owner on a write acknowledgment', () => {
     expect(fromMetadataDto(metadata)).toEqual(metadata);
@@ -16,9 +25,13 @@ describe('SNI-26 mappings', () => {
   });
   it('maps a descriptor without loading content, including an empty page', () => {
     const result = fromPageDto({page: 0, page_size: 10, count: 1, snippets: [descriptor]});
-    expect(result.snippets[0]).toMatchObject({author: 'dev-ana', relation: 'shared', compliance: 'not-implemented'});
+    expect(result.snippets[0]).toMatchObject({author: 'dev-ana', relation: 'shared', lint});
     expect(result.snippets[0]).not.toHaveProperty('content');
     expect(fromPageDto({page: 2, page_size: 10, count: 0, snippets: []})).toEqual({page: 2, page_size: 10, count: 0, snippets: []});
+  });
+  it('never shows the old placeholder or a malformed lint as a result', () => {
+    expect(() => fromPageDto({page: 0, page_size: 10, count: 1, snippets: [{...descriptor, lint: {status: 'not-implemented'}}]})).toThrow();
+    expect(() => fromPageDto({page: 0, page_size: 10, count: 1, snippets: [{...descriptor, lint: undefined}]})).toThrow();
   });
   it('keeps backend read-only capabilities and code exactly', () => {
     expect(fromDetailDto({...descriptor, code: '\n println(1);', capabilities: {modify: false, share: false}}))

@@ -1,19 +1,23 @@
-import {ComplianceEnum, CreateSnippet, PaginatedSnippets, Snippet, SnippetDescriptor, SnippetMetadata} from '../snippet';
+import {CreateSnippet, PaginatedSnippets, Snippet, SnippetDescriptor, SnippetMetadata} from '../snippet';
 import {ApiError} from './errors';
 import {PaginatedUsers} from '../users';
 import {FileType} from '../../types/FileType';
+import {snippetCodeError} from '../codeValidation';
+import {fromLintDto} from './lintResult';
 export type WriteSnippetDto = Omit<CreateSnippet, 'content'> & {code: string};
 export type MetadataDto = Omit<WriteSnippetDto, 'code'> & {id: string};
 export type DescriptorDto = MetadataDto & {
-  extension: string; ownerId: string; relation: 'owned' | 'shared'; lint: {status: ComplianceEnum};
+  extension: string; ownerId: string; relation: 'owned' | 'shared'; lint: unknown;
 };
 export type DetailDto = DescriptorDto & {code: string; capabilities: Snippet['capabilities']};
 export type SnippetPageDto = {page: number; page_size: number; count: number; snippets: DescriptorDto[]};
 export const invalidResponse = () => new ApiError('Unexpected API response. The operation was not confirmed.', undefined, true);
 const nonblank = (value: unknown) => typeof value === 'string' && value.trim().length > 0;
-export const toWriteDto = (input: CreateSnippet): WriteSnippetDto => ({
-  name: input.name, description: input.description, language: input.language, version: input.version, code: input.content,
-});
+export function toWriteDto(input: CreateSnippet): WriteSnippetDto {
+  const error = snippetCodeError(input.content);
+  if (error) throw new ApiError(error, {type: 'urn:snippets:problem:invalid-request', status: 400, field: 'code'});
+  return {name: input.name, description: input.description, language: input.language, version: input.version, code: input.content};
+}
 export function fromMetadataDto(dto: MetadataDto): SnippetMetadata {
   if (!dto || ![dto.id, dto.name, dto.language, dto.version].every(nonblank) ||
       !(dto.description === null || typeof dto.description === 'string')) throw invalidResponse();
@@ -21,9 +25,8 @@ export function fromMetadataDto(dto: MetadataDto): SnippetMetadata {
 }
 export function fromDescriptorDto(dto: DescriptorDto): SnippetDescriptor {
   const metadata = fromMetadataDto(dto);
-  if (!nonblank(dto.ownerId) || !nonblank(dto.extension) || !['owned', 'shared'].includes(dto.relation) ||
-      !['not-implemented', 'pending', 'failed', 'not-compliant', 'compliant'].includes(dto.lint?.status)) throw invalidResponse();
-  return {...metadata, extension: dto.extension, author: dto.ownerId, relation: dto.relation, compliance: dto.lint.status};
+  if (!nonblank(dto.ownerId) || !nonblank(dto.extension) || !['owned', 'shared'].includes(dto.relation)) throw invalidResponse();
+  return {...metadata, extension: dto.extension, author: dto.ownerId, relation: dto.relation, lint: fromLintDto(dto.lint)};
 }
 export function fromDetailDto(dto: DetailDto): Snippet {
   const descriptor = fromDescriptorDto(dto);

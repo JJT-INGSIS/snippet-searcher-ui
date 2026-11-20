@@ -6,7 +6,7 @@ import {createApiClient, createHttpSnippetOperations} from './http';
 import {createCreationIntent} from './creationIntent';
 import {ApiError} from './errors';
 const metadata = {id: '0f8b3c1e-4a2d-4d3b-9b7a-2c6e5f1a9d40', name: 'Hello', description: null, language: 'printscript', version: '1.0'};
-const descriptor = {...metadata, ownerId: 'dev-juan', extension: 'prs', relation: 'owned', lint: {status: 'not-implemented'}};
+const descriptor = {...metadata, ownerId: 'dev-juan', extension: 'prs', relation: 'owned', lint: {status: 'pending', reason: 'NOT_EVALUATED', diagnostics: [], codeHash: null, rulesRevision: null, processorRevision: null}};
 const input = {...metadata, content: 'println(1);'};
 type Request = {url: URL; method?: string; headers: IncomingMessage['headers']; body: string};
 let requests: Request[] = [];
@@ -48,6 +48,11 @@ describe('HTTP adapter against a contract server (not the real backend)', () => 
     expect(requests[0].headers['x-dev-actor-id']).toBe('dev-juan');
     expect(requests[0].method).toBe('POST');
   });
+  it('does not send a create or replacement with empty code', async () => {
+    await expect(api.createSnippet(createCreationIntent({...input, content: ''}, 'dev-juan'))).rejects.toMatchObject({problem: {field: 'code'}, uncertain: false});
+    await expect(api.updateSnippetById(metadata.id, {...input, content: ''})).rejects.toMatchObject({problem: {field: 'code'}, uncertain: false});
+    expect(requests).toHaveLength(0);
+  });
   it('returns only metadata for a new 201 creation', async () => {
     respond = (_, res) => {res.statusCode = 201; res.end(JSON.stringify(metadata));};
     expect(await api.createSnippet(createCreationIntent(input, 'dev-juan'))).not.toHaveProperty('content');
@@ -70,6 +75,14 @@ describe('HTTP adapter against a contract server (not the real backend)', () => 
     expect(Object.fromEntries(requests[0].url.searchParams)).toEqual({page: '0', page_size: '5', name: ' x ', language: 'printscript', relation: 'shared', sort: 'language', direction: 'desc'});
     expect(result.snippets[0]).not.toHaveProperty('content'); expect(requests).toHaveLength(1);
   });
+  it('filters and sorts by the current lint status only when it is chosen', async () => {
+    respond = (_, res) => res.end(JSON.stringify({page: 0, page_size: 10, count: 0, snippets: []}));
+    await api.listSnippetDescriptors(0, 10, {relation: 'all', lint: 'not-compliant', sort: 'lint', direction: 'asc'});
+    await api.listSnippetDescriptors(0, 10, {relation: 'all', lint: undefined, sort: 'name', direction: 'asc'});
+    expect(requests[0].url.searchParams.get('lint')).toBe('not-compliant');
+    expect(requests[0].url.searchParams.get('sort')).toBe('lint');
+    expect(requests[1].url.searchParams.has('lint')).toBe(false);
+  });
   it('gets detail, recipients and share acknowledgments without pretending a share is a snippet', async () => {
     respond = (req, res) => res.end(JSON.stringify(req.url.pathname.endsWith('/users') ? {page: 0, page_size: 5, count: 1, users: [{id: 'dev-ana', name: 'Ana'}]}
       : req.method === 'PUT' ? {snippetId: metadata.id, userId: 'user/a b'} : {...descriptor, code: 'println(1);', capabilities: {modify: false, share: false}}));
@@ -88,7 +101,7 @@ describe('HTTP adapter against a contract server (not the real backend)', () => 
   it('disables unavailable operations without a request', async () => {
     await expect(api.deleteSnippet('id')).rejects.toThrow('not available');
     await expect(api.formatSnippet('code')).rejects.toThrow('not available');
-    await expect(api.getTestCases()).rejects.toThrow('not available'); expect(requests).toHaveLength(0);
+    await expect(api.removeTestCase('id')).rejects.toThrow('not available'); expect(requests).toHaveLength(0);
   });
   it('does not inject a dev identity in prod', async () => {
     const prod = createApiClient({environment: 'prod', identity: {mode: 'disabled'}});

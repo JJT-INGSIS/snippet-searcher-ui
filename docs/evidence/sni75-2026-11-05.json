@@ -1,0 +1,381 @@
+{
+  "date": "2026-11-05",
+  "project": "sni75-20261104-0d4c2d",
+  "scope": "isolated local synthetic fixtures, no Azure or CD changes",
+  "commits": {
+    "printscript": "129c5f10e45b1bb6a28a4d8b39cec82107af4f36",
+    "snippets": "99aece69ba81f9815389e364f3352f19e242b52f",
+    "permissions": "500331e2a97bbc61c29ae1a215589a1c57ba052d",
+    "infraRedisOverlay": "3eca546",
+    "uiProductBase": "42f870e2d0f3de0fe1a968c046b916a1429db250"
+  },
+  "jars": {
+    "printscript": "c869439d9d47c28765f3fd68d1997fb6edfc828487088607528663ff637d5468",
+    "snippets": "667d366cfaf5c933c28e4134427648e2c0e99b4e857bcfceba8c31c427fbfc0b"
+  },
+  "dockerImages": {
+    "printscript": "sha256:7e240d5f267a3417e362fb2d4181e3912b1126d4e3a40a98cd8c75770fecfcb4",
+    "snippets": "sha256:cca04e2ee2a79575b1f5bb110e3dfc12ab859e03091c3495620206d9e14856e5"
+  },
+  "durable": {
+    "lost_ack": {
+      "snippet": "c01eec97-9c58-44aa-8ee9-fc99472ff0db",
+      "operation": "ba4e7201-3440-404e-aeee-f1cb5dc49028",
+      "job": "0d6030bf-514f-4c36-ad85-735c10596b66",
+      "before": [
+        {
+          "id": "ba4e7201-3440-404e-aeee-f1cb5dc49028",
+          "state": "RESERVED",
+          "remote": "ba4e7201-3440-404e-aeee-f1cb5dc49028",
+          "proof": null
+        }
+      ],
+      "after": [
+        {
+          "id": "ba4e7201-3440-404e-aeee-f1cb5dc49028",
+          "state": "RELEASED",
+          "remote": "ba4e7201-3440-404e-aeee-f1cb5dc49028",
+          "proof": "REMOTE_RESULT_PERSISTED"
+        }
+      ],
+      "terminal": {
+        "id": "0d6030bf-514f-4c36-ad85-735c10596b66",
+        "status": "COMPLETED",
+        "processed": 6,
+        "failed": 0,
+        "pending": 0,
+        "selectionComplete": true
+      },
+      "fault": "actual accepted response withheld; Snippets killed and restarted"
+    },
+    "delayed_start": {
+      "snippet": "a310eb45-b375-431f-b789-f6a5c704d728",
+      "operation": "8b37ba6c-8511-4e30-9411-ee87a4fec5e0",
+      "job": "643731fc-18c7-45f2-adf5-3273b62194dd",
+      "terminal": {
+        "id": "643731fc-18c7-45f2-adf5-3273b62194dd",
+        "status": "COMPLETED",
+        "processed": 7,
+        "failed": 0,
+        "pending": 0,
+        "selectionComplete": true
+      },
+      "permits": [
+        {
+          "id": "8b37ba6c-8511-4e30-9411-ee87a4fec5e0",
+          "state": "RELEASED",
+          "remote": "8b37ba6c-8511-4e30-9411-ee87a4fec5e0",
+          "proof": "OPERATION_CANCELLED:8b37ba6c-8511-4e30-9411-ee87a4fec5e0"
+        },
+        {
+          "id": "b4be9974-3749-4380-b54c-6138d8902392",
+          "state": "RELEASED",
+          "remote": "b4be9974-3749-4380-b54c-6138d8902392",
+          "proof": "REMOTE_RESULT_PERSISTED"
+        }
+      ],
+      "delayedPutStayedFenced": true
+    },
+    "retained_result": {
+      "snippet": "6fa00733-800c-4e09-b865-4ce076d50593",
+      "operation": "fe38e4ce-cfcf-47bb-8b41-973b04bb185f",
+      "job": "dfb8a4e9-0369-4e35-a742-cce5fc0af170",
+      "terminal": {
+        "id": "dfb8a4e9-0369-4e35-a742-cce5fc0af170",
+        "status": "COMPLETED",
+        "processed": 8,
+        "failed": 0,
+        "pending": 0,
+        "selectionComplete": true
+      },
+      "resultSurvivedBothRestarts": true
+    },
+    "lint_batch": {
+      "ids": [
+        "c20c70d6-3a8b-44b3-ac89-dab338cfe1be",
+        "a5448935-a4b5-44d3-84f3-5e2e8fca5254"
+      ],
+      "job": "3ef1b291-08d7-4b4b-9798-990388158243",
+      "terminal": {
+        "id": "3ef1b291-08d7-4b4b-9798-990388158243",
+        "status": "COMPLETED",
+        "processed": 4,
+        "failed": 0,
+        "pending": 0,
+        "selectionComplete": true
+      },
+      "auditCounts": {
+        "a5448935-a4b5-44d3-84f3-5e2e8fca5254": 3,
+        "c20c70d6-3a8b-44b3-ac89-dab338cfe1be": 3
+      },
+      "readerFilterCount": 1,
+      "originalIntact": true
+    }
+  },
+  "healthy": {
+    "prefix": "SNI75-0c96ad8ae1",
+    "ids": [
+      "172f7ac1-1420-4433-8d0a-fa639467cb24",
+      "24522dd4-ade8-401f-b8f2-cca48c887928",
+      "8a21fe65-9a76-4e9c-8561-a4ef3fc1a77d",
+      "e56077d0-03e3-457b-9c1c-04231618c349",
+      "765f3b6d-6f20-4d92-bc92-7180a8aec907",
+      "a092b1be-7e18-4cf4-a2fa-eb02ad6bdd44",
+      "075a6e7e-1688-444e-8c19-051e1fb6f4bc",
+      "7ece2b2a-a5b6-45a7-8d1e-f103ad7dc344"
+    ],
+    "original": "let saludo:string=\"¡Hola, señor! 🚀\";println(saludo);",
+    "name": "SNI75-0c96ad8ae1-0",
+    "job": "d553cef7-a351-4390-9dfb-d2355e1106ac",
+    "rulesRevision": "sha256-v1:3bd65402d9f80e593664439f85f24a98d2d8d0f9348a00cacbf5995643b5ed10",
+    "processorRevision": "sha256-v1:aa6aa20b73e9839a0798ed92e392fc861fc6c2f997a56306b28baa45e796364b",
+    "formatted": "let saludo :string=\"¡Hola, señor! 🚀\";println(saludo);",
+    "putSeconds": 0.02079987502656877,
+    "firstProgress": {
+      "id": "d553cef7-a351-4390-9dfb-d2355e1106ac",
+      "status": "PENDING",
+      "processed": 0,
+      "failed": 0,
+      "pending": 0,
+      "selectionComplete": false
+    },
+    "terminal": {
+      "id": "d553cef7-a351-4390-9dfb-d2355e1106ac",
+      "status": "COMPLETED",
+      "processed": 48,
+      "failed": 0,
+      "pending": 0,
+      "selectionComplete": true
+    },
+    "targetCount": 48,
+    "otherVersion": "37c8342f-ec02-4b9f-b9df-3b636fab5567",
+    "otherOwner": "2628d9a0-0279-4a2e-9367-68f76e1a2890",
+    "phases": [
+      "healthy"
+    ]
+  },
+  "browser": {
+    "spec": "cypress/e2e/backend/formatting.cy.ts",
+    "passed": 1,
+    "failed": 0,
+    "durationSeconds": 81,
+    "identityOnlyStub": true,
+    "assertions": [
+      "catalog save",
+      "terminal progress",
+      "owner and reader original/formatted UTF-8 downloads",
+      "stored variant",
+      "Blob URLs released",
+      "third actor 404"
+    ]
+  },
+  "builds": {
+    "printscript": {
+      "tests": 149,
+      "skipped": 0,
+      "failures": 0
+    },
+    "snippets": {
+      "tests": 658,
+      "skipped": 18,
+      "failures": 0
+    },
+    "ui": {
+      "tests": 144,
+      "failures": 0,
+      "lint": "PASS",
+      "build": "PASS"
+    }
+  },
+  "observations": [
+    "Initial healthy replay correctly returned changed=false because selection already matched; prepared different selection before rerun.",
+    "Existing synthetic data preserved; healthy corpus contains 48 snippets.",
+    "Snippets JAR source is d224758; 99aece6 changes documentation only.",
+    "AOF everysec respected before Redis restart; no fsync-always or physical exactly-once claim."
+  ],
+  "advanced": {
+    "recovery": {
+      "job": "a02c0072-1a5a-414d-b1c1-dcbacecefe36",
+      "before": {
+        "id": "a02c0072-1a5a-414d-b1c1-dcbacecefe36",
+        "status": "PENDING",
+        "processed": 1,
+        "failed": 0,
+        "pending": 1,
+        "selectionComplete": false
+      },
+      "stoppedDurable": {
+        "state": "PENDING",
+        "completed": 1
+      },
+      "after": {
+        "id": "a02c0072-1a5a-414d-b1c1-dcbacecefe36",
+        "status": "COMPLETED",
+        "processed": 48,
+        "failed": 0,
+        "pending": 0,
+        "selectionComplete": true
+      },
+      "redeliveryRecord": "1793920248356-0",
+      "redeliveryAcknowledged": true,
+      "unchangedLogicalItems": 48
+    },
+    "failure": {
+      "snippet": "7f34567a-82c2-4099-85b2-5bb356405681",
+      "job": "5460b69e-fc9b-4aec-bb5c-d74e67ee610b",
+      "terminal": {
+        "id": "5460b69e-fc9b-4aec-bb5c-d74e67ee610b",
+        "status": "PARTIAL",
+        "processed": 48,
+        "failed": 1,
+        "pending": 0,
+        "selectionComplete": true
+      },
+      "item": {
+        "state": "FAILED",
+        "reason": "REMOTE_OPERATION_CANCELLED",
+        "attempts": 3
+      },
+      "originalIntact": true,
+      "fault": "proxy returns HTTP 503 only for this fixture; other calls go to real provider"
+    },
+    "code_race": {
+      "snippet": "93c34859-0f0b-4a89-bb1e-585ece06caa1",
+      "job": "0626df81-51b3-4287-a11c-62cd52ce3ced",
+      "terminal": {
+        "id": "0626df81-51b3-4287-a11c-62cd52ce3ced",
+        "status": "COMPLETED",
+        "processed": 50,
+        "failed": 0,
+        "pending": 0,
+        "selectionComplete": true
+      },
+      "formattedRevision": "sha256-v1:f88bfc0e7b092e0b82fc25473e761b665cceecb783631341cbe40e6fd6ed5ce0",
+      "newOriginalIntact": true
+    },
+    "rules_race": {
+      "snippet": "4126fa1c-ffc5-4a49-8c04-ae54721a5d2d",
+      "first": {
+        "id": "d656a0b3-7716-41ad-8330-6689de9a35b1",
+        "status": "SUPERSEDED",
+        "processed": 42,
+        "failed": 0,
+        "pending": 0,
+        "selectionComplete": false
+      },
+      "second": {
+        "id": "ab71769e-d90a-48c4-a175-f57f5fdc1f9b",
+        "status": "COMPLETED",
+        "processed": 51,
+        "failed": 0,
+        "pending": 0,
+        "selectionComplete": true
+      },
+      "winningRevision": "sha256-v1:3bd65402d9f80e593664439f85f24a98d2d8d0f9348a00cacbf5995643b5ed10",
+      "oldTargetItem": "SUPERSEDED"
+    },
+    "interactive": {
+      "snippet": "e1f95081-2682-4649-82a8-61f87c220f8e",
+      "execution": "5d948b7a-0467-4802-9ed3-aa547de0b2fd",
+      "job": "a5b619ad-5f50-417b-ae4d-4b0506dd79e2",
+      "terminal": {
+        "id": "a5b619ad-5f50-417b-ae4d-4b0506dd79e2",
+        "status": "COMPLETED",
+        "processed": 52,
+        "failed": 0,
+        "pending": 0,
+        "selectionComplete": true
+      },
+      "manualPermitsDuringBatch": 1,
+      "events": [
+        {
+          "executionId": "5d948b7a-0467-4802-9ed3-aa547de0b2fd",
+          "seq": 1,
+          "type": "started",
+          "data": {
+            "mode": "INTERACTIVE"
+          }
+        },
+        {
+          "executionId": "5d948b7a-0467-4802-9ed3-aa547de0b2fd",
+          "seq": 2,
+          "type": "input-required",
+          "data": {
+            "requestId": "3d66ebdd-53dc-444f-898b-cac7329830a9",
+            "prompt": "Nombre?"
+          }
+        },
+        {
+          "executionId": "5d948b7a-0467-4802-9ed3-aa547de0b2fd",
+          "seq": 3,
+          "type": "input-accepted",
+          "data": {
+            "requestId": "3d66ebdd-53dc-444f-898b-cac7329830a9"
+          }
+        },
+        {
+          "executionId": "5d948b7a-0467-4802-9ed3-aa547de0b2fd",
+          "seq": 4,
+          "type": "output",
+          "data": {
+            "text": "Hola, Ana"
+          }
+        },
+        {
+          "executionId": "5d948b7a-0467-4802-9ed3-aa547de0b2fd",
+          "seq": 5,
+          "type": "terminal",
+          "data": {
+            "outcome": "COMPLETED",
+            "reason": "program-completed",
+            "diagnostics": [],
+            "unusedInputs": 0
+          }
+        }
+      ]
+    }
+  },
+  "runtime": [
+    {
+      "container": "sni75-20261104-0d4c2d-snippets-service-1",
+      "image": "sha256:cca04e2ee2a79575b1f5bb110e3dfc12ab859e03091c3495620206d9e14856e5",
+      "reference": "sni78-snippets:qa"
+    },
+    {
+      "container": "sni75-20261104-0d4c2d-printscript-service-1",
+      "image": "sha256:7e240d5f267a3417e362fb2d4181e3912b1126d4e3a40a98cd8c75770fecfcb4",
+      "reference": "sni78-printscript:qa"
+    },
+    {
+      "container": "sni75-20261104-0d4c2d-redis-1",
+      "image": "sha256:02f2cc4882f8bf87c79a220ac958f58c700bdec0dfb9b9ea61b62fb0e8f1bfcf",
+      "reference": "redis:7.4.7-alpine@sha256:02f2cc4882f8bf87c79a220ac958f58c700bdec0dfb9b9ea61b62fb0e8f1bfcf"
+    },
+    {
+      "container": "sni75-20261104-0d4c2d-permissions-service-1",
+      "image": "sha256:c10beae41cb9bd3e88ca9f9292b1d0f75a6606d56cfd9d3d5e39429a8c97a6ec",
+      "reference": "sni75-20261104-0d4c2d-permissions:current"
+    },
+    {
+      "container": "sni75-20261104-0d4c2d-snippets-db-1",
+      "image": "sha256:3725f4e2499eef5134592b3b4ab79a543ed7f8e533b05b5b637af926630f6650",
+      "reference": "postgres:18.6-bookworm"
+    },
+    {
+      "container": "sni75-20261104-0d4c2d-permissions-db-1",
+      "image": "sha256:3725f4e2499eef5134592b3b4ab79a543ed7f8e533b05b5b637af926630f6650",
+      "reference": "postgres:18.6-bookworm"
+    },
+    {
+      "container": "sni75-20261104-0d4c2d-asset-service-1",
+      "image": "sha256:eacad54bf95717c5483619ad1fe45a9b4a0012a37b451c37baf13e6f43200656",
+      "reference": "ghcr.io/austral-ingsis/snippet-asset-service@sha256:eacad54bf95717c5483619ad1fe45a9b4a0012a37b451c37baf13e6f43200656"
+    },
+    {
+      "container": "sni75-20261104-0d4c2d-azurite-1",
+      "image": "sha256:647c63a91102a9d8e8000aab803436e1fc85fbb285e7ce830a82ee5d6661cf37",
+      "reference": "mcr.microsoft.com/azure-storage/azurite:3.35.0@sha256:647c63a91102a9d8e8000aab803436e1fc85fbb285e7ce830a82ee5d6661cf37"
+    }
+  ],
+  "status": "All local acceptance phases passed; pending user merges and separate activation"
+}

@@ -1,6 +1,7 @@
 import axios from 'axios';
 export type Diagnostic = {rule: string; message: string; line: number; column: number};
-export type ApiProblem = {type: string; status: number; detail?: string; field?: string; parameter?: string; diagnostics?: Diagnostic[]};
+export type RuleViolation = {rule: string; reason: string};
+export type ApiProblem = {type: string; status: number; detail?: string; field?: string; parameter?: string; diagnostics?: Diagnostic[]; violations?: RuleViolation[]};
 export class ApiError extends Error {
   constructor(message: string, readonly problem?: ApiProblem, readonly uncertain = false) {
     super(message);
@@ -20,6 +21,8 @@ export function toApiError(error: unknown): ApiError {
     parameter: typeof body.parameter === 'string' ? body.parameter : undefined,
     diagnostics: Array.isArray(body.diagnostics) ? body.diagnostics.filter((d: Diagnostic) =>
       d && typeof d.rule === 'string' && typeof d.message === 'string' && typeof d.line === 'number' && typeof d.column === 'number') : undefined,
+    violations: Array.isArray(body.violations) ? body.violations.filter((v: RuleViolation) =>
+      v && typeof v.rule === 'string' && typeof v.reason === 'string') : undefined,
   };
   const category = problem.type.replace('urn:snippets:problem:', '');
   return new ApiError(category + ' (HTTP ' + status + ')' + (problem.detail ? ': ' + problem.detail : ''), problem,

@@ -1,7 +1,18 @@
 import {defineConfig, loadEnv} from 'vite';
 import react from '@vitejs/plugin-react';
+
+function localIdentity(env: Record<string, string>) {
+  const auth0 = [env.UI_AUTH_DOMAIN, env.UI_AUTH_CLIENT_ID, env.UI_AUTH_AUDIENCE];
+  if (auth0.some(Boolean)) {
+    if (env.UI_DEV_ACTOR) throw new Error('UI_DEV_ACTOR cannot be combined with the Auth0 variables');
+    return {mode: 'auth0', domain: env.UI_AUTH_DOMAIN, clientId: env.UI_AUTH_CLIENT_ID, audience: env.UI_AUTH_AUDIENCE};
+  }
+  return env.UI_DEV_ACTOR ? {mode: 'dev', actorId: env.UI_DEV_ACTOR} : {mode: 'disabled'};
+}
+
 export default defineConfig(({mode}) => {
   const env = loadEnv(mode, process.cwd(), '');
+  const identity = localIdentity(env);
   return {
     plugins: [react(), {
       name: 'local-runtime-config',
@@ -9,8 +20,7 @@ export default defineConfig(({mode}) => {
         server.middlewares.use('/app-config.json', (_request, response) => {
           response.setHeader('Content-Type', 'application/json');
           response.setHeader('Cache-Control', 'no-store');
-          response.end(JSON.stringify({environment: 'dev', identity: env.UI_DEV_ACTOR
-            ? {mode: 'dev', actorId: env.UI_DEV_ACTOR} : {mode: 'disabled'}}));
+          response.end(JSON.stringify({environment: 'dev', identity}));
         });
       },
     }],

@@ -1,0 +1,98 @@
+{
+  "status": "NOT_EXECUTED",
+  "purpose": "Prepared request bodies and expectations; no evidence of successful acceptance",
+  "rules": {
+    "mandatory-variable-or-literal-in-println": true
+  },
+  "snippets": [
+    {
+      "alias": "owner-good",
+      "actor": "dev-thiago",
+      "create": {
+        "name": "SNI37-__RUN__-owner-good",
+        "description": null,
+        "language": "printscript",
+        "version": "1.1",
+        "code": "println(1);"
+      },
+      "expectedLint": "compliant",
+      "shareWith": [
+        "dev-ana"
+      ]
+    },
+    {
+      "alias": "owner-bad",
+      "actor": "dev-thiago",
+      "create": {
+        "name": "SNI37-__RUN__-owner-bad",
+        "description": null,
+        "language": "printscript",
+        "version": "1.1",
+        "code": "println(1+2);"
+      },
+      "expectedLint": "not-compliant",
+      "shareWith": [
+        "dev-ana"
+      ]
+    },
+    {
+      "alias": "reader-good",
+      "actor": "dev-ana",
+      "create": {
+        "name": "SNI37-__RUN__-reader-good",
+        "description": null,
+        "language": "printscript",
+        "version": "1.1",
+        "code": "println(2);"
+      },
+      "expectedLint": "compliant",
+      "shareWith": []
+    },
+    {
+      "alias": "outsider",
+      "actor": "dev-bruno",
+      "create": {
+        "name": "SNI37-__RUN__-outsider",
+        "description": null,
+        "language": "printscript",
+        "version": "1.1",
+        "code": "println(3);"
+      },
+      "expectedLint": "depends-on-effective-rules",
+      "shareWith": []
+    }
+  ],
+  "tests": [
+    {
+      "snippet": "owner-bad",
+      "create": {
+        "inputs": [],
+        "expectedOutputs": [
+          "3"
+        ]
+      },
+      "expectedComparison": "PASSED"
+    },
+    {
+      "snippet": "owner-bad",
+      "create": {
+        "inputs": [],
+        "expectedOutputs": [
+          "4"
+        ]
+      },
+      "expectedComparison": "FAILED"
+    },
+    {
+      "snippet": "owner-bad",
+      "create": {
+        "inputs": [],
+        "expectedOutputs": [
+          "3",
+          "3"
+        ]
+      },
+      "expectedComparison": "FAILED"
+    }
+  ]
+}

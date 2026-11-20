@@ -34,6 +34,6 @@ export function useSnippetList() {
     setPage: (page: number) => setRequest(previous => ({...previous, page})),
     setSize: (size: number) => setRequest(previous => ({...previous, page: 0, size})),
     clear: () => {setName(''); setRequest(previous => ({...previous, page: 0, filters: initialFilters}));},
-    filtered: !!name || !!request.filters.language || request.filters.relation !== 'all',
+    filtered: !!name || !!request.filters.language || !!request.filters.lint || request.filters.relation !== 'all',
   };
 }

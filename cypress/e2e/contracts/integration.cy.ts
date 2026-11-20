@@ -1,7 +1,7 @@
 // These are browser integration tests against the agreed contracts, NOT backend acceptance.
 const id = '0f8b3c1e-4a2d-4d3b-9b7a-2c6e5f1a9d40';
 const metadata = {id, name: 'Hello', description: null, language: 'printscript', version: '1.0'};
-const descriptor = {...metadata, extension: 'prs', ownerId: 'dev-juan', relation: 'owned', lint: {status: 'not-implemented'}};
+const descriptor = {...metadata, extension: 'prs', ownerId: 'dev-juan', relation: 'owned', lint: {status: 'pending', reason: 'NOT_EVALUATED', diagnostics: [], codeHash: null, rulesRevision: null, processorRevision: null}};
 const detail = {...descriptor, code: 'println(1);', capabilities: {modify: true, share: true}};
 function setup(readonly = false) {
   cy.intercept('GET', '/app-config.json', {environment: 'dev', identity: {mode: 'dev', actorId: 'dev-juan'}});
@@ -49,6 +49,44 @@ describe('SNI-34 UI / pending backend contracts', () => {
     cy.get('[data-testid="save-snippet"]').click(); cy.wait('@create'); cy.wait('@list');
     cy.contains('[role=dialog] h2', 'Nuevo snippet').should('not.exist');
   });
+  it('rejects an empty editor locally and permits correction without locking the creation', () => {
+    setup(); openCreate();
+    cy.intercept('POST', '/api/snippets', req => {
+      expect(req.body.code).to.eq('println(2);');
+      req.reply(201, {...metadata, name: 'New snippet'});
+    }).as('nonempty-create');
+    cy.get('#create-code').clear();
+    cy.get('[data-testid="save-snippet"]').should('be.enabled').click();
+    cy.contains('El código no puede estar vacío.').should('be.visible');
+    cy.contains('Campo: code').should('be.visible');
+    cy.get('@nonempty-create.all').should('have.length', 0);
+    cy.get('#create-code').should('not.have.attr', 'readonly');
+    cy.get('#create-code').type('println(2);');
+    cy.get('[data-testid="save-snippet"]').click(); cy.wait('@nonempty-create');
+    cy.get('[role="dialog"]').should('not.exist');
+  });
+  it('keeps an empty replacement draft visible and sends no PUT', () => {
+    setup();
+    cy.intercept('PUT', '/api/snippets/' + id, {statusCode: 500}).as('empty-update');
+    cy.get('[data-testid="snippet-row"] button').click(); cy.wait('@detail');
+    cy.get('#detail-code').clear().type('   '); cy.get('[data-testid="save-changes"]').click();
+    cy.contains('El código no puede estar vacío.').scrollIntoView().should('be.visible');
+    cy.get('#detail-code').should('have.value', '   ').and('not.have.attr', 'readonly');
+    cy.get('@empty-update.all').should('have.length', 0);
+    cy.contains('Cambios guardados.').should('not.exist');
+  });
+  it('rejects an empty upload and permits choosing the same filename again', () => {
+    setup(); cy.wait('@catalog');
+    // A completed HTTP response does not mean React has applied its catalog yet.
+    cy.get('[data-testid="upload-file-input"]').should('have.attr', 'accept', '.prs').and('be.enabled');
+    cy.intercept('POST', '/api/snippets', {statusCode: 500}).as('empty-upload');
+    cy.get('[data-testid="upload-file-input"]').selectFile({contents: Cypress.Buffer.from(' \t\r\n'), fileName: 'empty.prs'}, {force: true});
+    cy.contains('El código no puede estar vacío.').should('be.visible');
+    cy.get('[role="dialog"]').should('not.exist');
+    cy.get('@empty-upload.all').should('have.length', 0);
+    cy.get('[data-testid="upload-file-input"]').selectFile({contents: Cypress.Buffer.from('println(1);'), fileName: 'empty.prs'}, {force: true});
+    cy.get('#create-code').should('have.value', 'println(1);');
+  });
   it('shows parser diagnostics and preserves the draft', () => {
     setup(); openCreate();
     cy.intercept('POST', '/api/snippets', {statusCode: 422, body: {
@@ -70,6 +108,7 @@ describe('SNI-34 UI / pending backend contracts', () => {
   });
   it('uploads text through the same JSON creation contract', () => {
     setup(); cy.wait('@catalog');
+    cy.get('[data-testid="upload-file-input"]').should('have.attr', 'accept', '.prs');
     cy.get('[data-testid="upload-file-input"]').selectFile({contents: Cypress.Buffer.from('println(2);\r\n'), fileName: 'uploaded.prs'}, {force: true});
     cy.get('#name').should('have.value', 'uploaded');
     cy.get('#create-code').should('have.value', 'println(2);\n');
@@ -88,10 +127,10 @@ describe('SNI-34 UI / pending backend contracts', () => {
     cy.get('#detail-code').should('have.attr', 'readonly');
     cy.get('[data-testid="save-changes"]').should('be.disabled');
     cy.contains('button', 'Compartir').should('be.disabled');
-    cy.contains('button', 'Ejecutar tests').should('be.disabled');
+    cy.contains('button', 'Ejecutar snippet').should('be.enabled');
     cy.contains('button', 'Formatear').should('be.disabled');
     cy.contains('button', 'Eliminar').should('be.disabled');
-    cy.contains('Sin evaluación').should('be.visible');
+    cy.contains('Lint: Sin evaluar').should('be.visible');
   });
   it('keeps a confirmed save successful even if the independent detail refresh fails', () => {
     setup(); cy.get('[data-testid="snippet-row"] button').click(); cy.wait('@detail');
