@@ -10,31 +10,31 @@ export function useSnippetEditor(id: string, snippet: Snippet | undefined) {
   const [savedSuccessfully, setSavedSuccessfully] = useState(false);
   const draftLoadedFromSnippet = useRef(false);
   const submissionInProgress = useRef(false);
-  const mutation = useUpdateSnippetById();
-  const {data: types} = useGetFileTypes();
+  const updateSnippetMutation = useUpdateSnippetById();
+  const {data: languageCatalog} = useGetFileTypes();
   useEffect(() => {
     if (snippet && !draftLoadedFromSnippet.current) {
       setDraft(editDraftFromSavedSnippet(snippet));
       draftLoadedFromSnippet.current = true;
     }
   }, [snippet]);
-  const canSave = !!snippet && canSaveEditDraft(draft, snippet, catalogVersionsForLanguage(types, draft.language));
+  const canSave = !!snippet && canSaveEditDraft(draft, snippet, catalogVersionsForLanguage(languageCatalog, draft.language));
   function save() {
     if (!snippet?.capabilities.modify || !canSave || submissionInProgress.current) return;
     submissionInProgress.current = true; setSavedSuccessfully(false);
-    mutation.mutate({id, updateSnippet: draft}, {
+    updateSnippetMutation.mutate({id, updateSnippet: draft}, {
       onSuccess: () => setSavedSuccessfully(true),
       onSettled: () => {submissionInProgress.current = false;},
     });
   }
   function updateDraft(transformDraft: (current: UpdateSnippet) => UpdateSnippet) {
     if (submissionInProgress.current) return;
-    setDraft(transformDraft); setSavedSuccessfully(false); mutation.reset();
+    setDraft(transformDraft); setSavedSuccessfully(false); updateSnippetMutation.reset();
   }
   return {
-    draft, savedSuccessfully, canSave, save, saving: mutation.isLoading,
+    draft, savedSuccessfully, canSave, save, isSaving: updateSnippetMutation.isLoading,
     hasUnsavedChanges: draftLoadedFromSnippet.current && !!snippet && hasUnsavedChanges(draft, snippet),
-    error: mutation.error instanceof Error ? mutation.error : null,
+    error: updateSnippetMutation.error instanceof Error ? updateSnippetMutation.error : null,
     changeFields: (changedFields: Partial<UpdateSnippet>) => updateDraft(current => ({...current, ...changedFields})),
     changeLanguage: (language: string) => updateDraft(current => withChangedLanguage(current, language)),
     loadCodeFromFile: (file: SnippetDraft) => updateDraft(current => withCodeFromUploadedFile(current, file)),
