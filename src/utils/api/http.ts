@@ -19,9 +19,10 @@ const rulesPath = (resource: 'formatting-rules' | 'linting-rules', language: str
   '/' + resource + '/' + encodeURIComponent(language) + '/' + encodeURIComponent(version);
 const PUBLIC_PATHS = ['/languages'];
 const UNAUTHORIZED = 401;
+const API_TIMEOUT_MILLISECONDS = 15000;
 
 export function createApiClient(config: RuntimeConfig, identity: RequestIdentity = staticIdentity(config)): AxiosInstance {
-  const client = axios.create({baseURL: '/api', timeout: 15000});
+  const client = axios.create({baseURL: '/api', timeout: API_TIMEOUT_MILLISECONDS});
   client.interceptors.request.use(async request => {
     if (!isSameOriginApiPath(request.url) || PUBLIC_PATHS.includes(request.url)) return request;
     Object.entries(await identity.headers()).forEach(([name, value]) => request.headers.set(name, value));
