@@ -1,12 +1,11 @@
 import {AutomaticTestsPanel} from '../components/automatic-tests/AutomaticTestsPanel';
 import {useEffect, useState} from 'react';
-import {Alert, Box, Button, Chip, CircularProgress, IconButton, Skeleton, Stack, TextField, Typography} from '@mui/material';
-import {CloseRounded, DownloadRounded, SaveRounded, ShareRounded} from '@mui/icons-material';
+import {Alert, Box, Button, Chip, IconButton, Skeleton, Stack, Typography} from '@mui/material';
+import {CloseRounded, DownloadRounded, ShareRounded} from '@mui/icons-material';
 import {useGetSnippetById, useShareSnippet} from '../utils/queries';
 import {ShareSnippetModal} from '../components/snippet-detail/ShareSnippetModal';
 import {Snippet} from '../utils/snippet';
 import {ApiErrorAlert} from '../components/common/ApiErrorAlert';
-import {CodeEditor} from '../components/common/CodeEditor';
 import {lintLabel} from '../utils/lintPresentation';
 import {useSnippetEditor} from '../hooks/useSnippetEditor';
 import {TestSnippetModal} from '../components/snippet-test/TestSnippetModal';
@@ -15,6 +14,7 @@ import {SnippetExecution} from './SnippetExecution';
 import {FormattedDownloadButton} from '../components/snippet-detail/FormattedDownloadButton';
 import {useFormattedDownload} from '../hooks/useFormattedDownload';
 import {LintSection} from '../components/snippet-detail/LintSection';
+import {SnippetEditForm} from '../components/snippet-detail/SnippetEditForm';
 
 function DownloadButton({snippet}: {snippet: Snippet}) {
   const [url, setUrl] = useState<string>();
@@ -51,16 +51,8 @@ export function SnippetDetail({id, handleCloseModal}: {id: string; handleCloseMo
         <Chip size="small" label={'Lint: ' + lintLabel(snippet.lint)}/>
       </Stack>
       {readonly && <Alert severity="info">Solo lectura. El propietario conserva los permisos de edición.</Alert>}
-      <TextField id="detail-name" label="Nombre" value={editor.draft.name} disabled={readonly || editor.saving}
-        onChange={event => editor.change({name: event.target.value})}/>
-      <TextField id="detail-description" label="Descripción" multiline minRows={2} value={editor.draft.description ?? ''}
-        disabled={readonly || editor.saving} onChange={event => editor.change({description: event.target.value})}/>
-      <CodeEditor id="detail-code" value={editor.draft.content} readOnly={readonly || editor.saving} onChange={content => editor.change({content})}/>
-      <ApiErrorAlert error={editor.error} focusOnError/>
-      {editor.saved && <Alert severity="success">Cambios guardados.</Alert>}
+      <SnippetEditForm editor={editor} readonly={readonly}/>
       <Stack direction="row" flexWrap="wrap" gap={1}>
-        <Button data-testid="save-changes" variant="contained" startIcon={editor.saving ? <CircularProgress size={18} color="inherit"/> : <SaveRounded/>}
-          disabled={readonly || editor.saving || !editor.draft.name.trim()} onClick={editor.save}>{editor.saving ? 'Guardando…' : 'Guardar cambios'}</Button>
         <Button startIcon={<ShareRounded/>} disabled={!snippet.capabilities.share || share.isLoading} onClick={() => setShareOpen(true)}>Compartir</Button>
         <DownloadButton snippet={snippet}/>
         <FormattedDownloadButton preparing={formatted.isLoading} onDownload={() => formatted.mutate()}/>

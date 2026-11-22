@@ -1,38 +1,42 @@
 import {useEffect, useRef, useState} from 'react';
-import {Snippet, UpdateSnippet} from '../utils/snippet';
-import {useUpdateSnippetById} from '../utils/queries';
+import {Snippet, SnippetDraft, UpdateSnippet, versionsOf} from '../utils/snippet';
+import {useGetFileTypes, useUpdateSnippetById} from '../utils/queries';
+import {editDraftOf, emptyEditDraft, hasChanges, isSavable, withLanguage, withUploadedFile} from '../utils/snippetEditDraft';
 
-type Draft = Pick<UpdateSnippet, 'name' | 'description' | 'content'>;
+export type SnippetEditor = ReturnType<typeof useSnippetEditor>;
+
 export function useSnippetEditor(id: string, snippet: Snippet | undefined) {
-  const [draft, setDraft] = useState<Draft>({name: '', description: null, content: ''});
+  const [draft, setDraft] = useState<UpdateSnippet>(emptyEditDraft);
   const [saved, setSaved] = useState(false);
   const hydrated = useRef(false);
   const submitting = useRef(false);
   const mutation = useUpdateSnippetById();
+  const {data: types} = useGetFileTypes();
   useEffect(() => {
     if (snippet && !hydrated.current) {
-      setDraft({name: snippet.name, description: snippet.description, content: snippet.content});
+      setDraft(editDraftOf(snippet));
       hydrated.current = true;
     }
   }, [snippet]);
-  async function save() {
-    if (!snippet?.capabilities.modify || !draft.name.trim() || submitting.current) return;
+  const savable = !!snippet && isSavable(draft, snippet, versionsOf(types, draft.language));
+  function save() {
+    if (!snippet?.capabilities.modify || !savable || submitting.current) return;
     submitting.current = true; setSaved(false);
-    try {
-      await mutation.mutateAsync({id, updateSnippet: {...draft, language: snippet.language, version: snippet.version}});
-      setSaved(true);
-    } catch { /* Keep the draft; the mutation exposes the failure to the view. */ }
-    finally {submitting.current = false;}
+    mutation.mutate({id, updateSnippet: draft}, {
+      onSuccess: () => setSaved(true),
+      onSettled: () => {submitting.current = false;},
+    });
   }
-  const dirty = hydrated.current && !!snippet && (draft.name !== snippet.name ||
-    draft.description !== snippet.description || draft.content !== snippet.content);
+  function update(next: (current: UpdateSnippet) => UpdateSnippet) {
+    if (submitting.current) return;
+    setDraft(next); setSaved(false); mutation.reset();
+  }
   return {
-    draft, saved, save, dirty, saving: mutation.isLoading,
+    draft, saved, savable, save, saving: mutation.isLoading,
+    dirty: hydrated.current && !!snippet && hasChanges(draft, snippet),
     error: mutation.error instanceof Error ? mutation.error : null,
-    change: (change: Partial<Draft>) => {
-      if (submitting.current) return;
-      setDraft(previous => ({...previous, ...change}));
-      setSaved(false); mutation.reset();
-    },
+    change: (change: Partial<UpdateSnippet>) => update(current => ({...current, ...change})),
+    chooseLanguage: (language: string) => update(current => withLanguage(current, language)),
+    loadFile: (file: SnippetDraft) => update(current => withUploadedFile(current, file)),
   };
 }
