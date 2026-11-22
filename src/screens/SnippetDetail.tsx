@@ -58,10 +58,10 @@ export function SnippetDetail({id, handleCloseModal}: {id: string; handleCloseMo
         <FormattedDownloadButton preparing={formatted.isLoading} onDownload={() => formatted.mutate()}/>
       </Stack>
       <ApiErrorAlert error={formatted.error}/>
-      {editor.dirty && <Typography variant="body2" color="text.secondary">
+      {editor.hasUnsavedChanges && <Typography variant="body2" color="text.secondary">
         Las descargas usan la versión guardada: tus cambios sin guardar no se incluyen.
       </Typography>}
-      <LintSection lint={snippet.lint} shared={snippet.relation === 'shared'} dirty={editor.dirty}/>
+      <LintSection lint={snippet.lint} shared={snippet.relation === 'shared'} dirty={editor.hasUnsavedChanges}/>
       <Stack direction="row" flexWrap="wrap" gap={1}>
         <Button onClick={() => setTestsOpen(true)} disabled={!!error}>Ver tests</Button>
         <Button disabled>Formatear</Button><Button disabled>Eliminar</Button>

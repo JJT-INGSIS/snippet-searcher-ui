@@ -1,6 +1,6 @@
 import {Alert, Button, CircularProgress, TextField} from '@mui/material';
 import {SaveRounded} from '@mui/icons-material';
-import {SnippetDraft, versionsOf} from '../../utils/snippet';
+import {SnippetDraft, catalogVersionsForLanguage} from '../../utils/snippet';
 import {ModalWrapper} from '../common/ModalWrapper';
 import {useGetFileTypes} from '../../utils/queries';
 import {ApiErrorAlert} from '../common/ApiErrorAlert';
@@ -11,13 +11,13 @@ import {useSnippetCreation} from '../../hooks/useSnippetCreation';
 export function AddSnippetModal({open, onClose, defaultSnippet}: {open: boolean; onClose: () => void; defaultSnippet?: SnippetDraft}) {
   const form = useSnippetCreation(open, defaultSnippet, onClose);
   const {data: types, error, refetch} = useGetFileTypes();
-  const versions = versionsOf(types, form.draft.language);
+  const availableVersions = catalogVersionsForLanguage(types, form.draft.language);
   return <ModalWrapper open={open} onClose={onClose} title="Nuevo snippet" pending={form.saving}
     description="Escribí tu código o revisá el archivo subido. Elegí el lenguaje y su versión antes de guardar."
     actions={<>
       <Button disabled={form.saving} onClick={onClose}>Cerrar</Button>
       <Button data-testid="save-snippet" variant="contained" startIcon={form.saving ? <CircularProgress size={18} color="inherit"/> : <SaveRounded/>}
-        onClick={form.save} disabled={form.saving || (!form.uncertain && (!form.draft.name.trim() || !versions.includes(form.draft.version)))}>
+        onClick={form.save} disabled={form.saving || (!form.uncertain && (!form.draft.name.trim() || !availableVersions.includes(form.draft.version)))}>
         {form.saving ? 'Guardando…' : form.uncertain ? 'Reintentar misma creación' : 'Guardar snippet'}
       </Button>
     </>}>

@@ -4,32 +4,32 @@ import {useSnackbarContext} from '../contexts/snackbarContext';
 import {SnippetDraft} from '../utils/snippet';
 import {readSnippetFile} from '../utils/upload';
 
-export type FileReadMessages = {catalogUnavailable: string; unreadable: string};
+export type FileReadErrorMessages = {catalogUnavailable: string; unreadable: string};
 
-export function useSnippetFileReader(onRead: (file: SnippetDraft) => void, messages: FileReadMessages) {
-  const [reading, setReading] = useState(false);
-  const busy = useRef(false);
-  const input = useRef<HTMLInputElement>(null);
+export function useSnippetFileReader(onFileRead: (file: SnippetDraft) => void, messages: FileReadErrorMessages) {
+  const [isReading, setIsReading] = useState(false);
+  const readInProgress = useRef(false);
+  const hiddenFileInput = useRef<HTMLInputElement>(null);
   const {data: types} = useGetFileTypes();
   const {createSnackbar} = useSnackbarContext();
-  async function read(element: HTMLInputElement) {
+  async function readSelectedFile(element: HTMLInputElement) {
     const file = element.files?.[0];
-    if (!file || busy.current) return;
-    busy.current = true; setReading(true);
+    if (!file || readInProgress.current) return;
+    readInProgress.current = true; setIsReading(true);
     try {
       if (!types?.length) throw new Error(messages.catalogUnavailable);
-      onRead(await readSnippetFile(file, types));
+      onFileRead(await readSnippetFile(file, types));
     } catch (error) {
       createSnackbar('error', error instanceof Error ? error.message : messages.unreadable);
-    } finally {element.value = ''; busy.current = false; setReading(false);}
+    } finally {element.value = ''; readInProgress.current = false; setIsReading(false);}
   }
   return {
-    reading,
-    choose: () => input.current?.click(),
-    input: {
-      ref: input, hidden: true, type: 'file', disabled: reading,
+    isReading,
+    openFileChooser: () => hiddenFileInput.current?.click(),
+    hiddenFileInputProps: {
+      ref: hiddenFileInput, hidden: true, type: 'file', disabled: isReading,
       accept: types?.map(type => '.' + type.extension).join(','),
-      onChange: (event: ChangeEvent<HTMLInputElement>) => void read(event.currentTarget),
+      onChange: (event: ChangeEvent<HTMLInputElement>) => void readSelectedFile(event.currentTarget),
     },
   };
 }
