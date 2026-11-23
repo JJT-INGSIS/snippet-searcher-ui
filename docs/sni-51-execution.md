@@ -79,3 +79,31 @@ Esta es una implementación de UI contra contrato. No acredita endpoints de
 SNI-48/SNI-49 ni ejecución integrada con el intérprete; esa aceptación corresponde
 a SNI-53. El historial durable decidido para SNI-48 no se implementa ni simula en
 el navegador. La advertencia de tamaño de bundle (>500 KiB) ya existía.
+
+## SNI-110 — corregir un input rechazado
+
+La revisión del flujo detectó que `ExecutionSession.input()` retenía el valor de
+cualquier envío fallido, incluso si el primer pedido recibía un rechazo HTTP
+confirmado. Corregir ese valor quedaba bloqueado por el mensaje de entrega
+incierta, aunque ese primer pedido hubiera sido rechazado.
+
+Se elimina la retención sólo cuando el **primer envío** recibe un `ApiError`
+clasificado como no incierto. El mismo prompt sigue abierto y el siguiente envío
+es explícito; no hay reintentos automáticos. Un timeout, pérdida de conexión,
+respuesta inválida o fallo técnico conserva el valor original. Si un intento
+anterior ya dejó incertidumbre, un rechazo posterior tampoco permite cambiarlo:
+ese rechazo no demuestra qué pasó con el primer envío.
+
+La alternativa de desbloquear ante cualquier error facilita corregir, pero puede
+permitir cambiar un input que el intérprete ya consumió. Mantener el bloqueo para
+todos los errores evita ese riesgo, pero impide corregir rechazos conocidos.
+La distinción utiliza la clasificación de error existente y conserva autoridad
+en el servidor, `requestId`, confirmación por eventos y coordinación de capacidad;
+no agrega estados ni cambia el contrato HTTP/NDJSON.
+
+Pruebas HTTP de regresión: primer rechazo 400/413 y corrección posterior; pérdida
+de confirmación seguida de rechazo, que debe conservar el valor original. Los
+dos casos de corrección fallaron antes del cambio. Después pasan los 18 casos del
+archivo de transporte, y la suite completa tiene 270 pruebas aprobadas junto con
+lint y build. Son pruebas contra servidor HTTP controlado, no nueva aceptación
+integrada de los tres servicios ni revisión cruzada del equipo.
