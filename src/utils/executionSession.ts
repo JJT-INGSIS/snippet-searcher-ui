@@ -112,6 +112,9 @@ export class ExecutionSession {
     this.submitted.set(prompt.requestId, value); this.publish({sending: true, message: undefined});
     try {await this.http.input(descriptor.executionId, prompt.requestId, value, controller.signal);}
     catch (error) {if (generation === this.generation && this.view.prompt?.requestId === prompt.requestId) {
+      // A first confirmed rejection did not consume the input. A rejected retry
+      // cannot resolve uncertainty left by an earlier submission.
+      if (previous === undefined && error instanceof ApiError && !error.uncertain) this.submitted.delete(prompt.requestId);
       const denied = this.lostAccess(error);
       this.publish({sending: false, ...denied, ...(denied.unavailable ? {phase: 'UNKNOWN'} : {}), message: 'No se confirmó el input. ' + message(error)});
     }}

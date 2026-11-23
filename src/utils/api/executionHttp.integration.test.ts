@@ -185,6 +185,56 @@ describe('SNI-51 fetch NDJSON against an HTTP contract server (not backend accep
     await session.input({snippetId}, 'original'); await running;
     expect(attempts.count).toBe(2); expect(session.getSnapshot().phase).toBe('COMPLETED');
   });
+  it.each([400, 413])('allows correcting an input after its first submission is rejected with HTTP %i', async status => {
+    const session = new ExecutionSession(api()), held: {response?: ServerResponse} = {};
+    const values: string[] = [];
+    respond = (req, res) => {
+      if (req.url.endsWith('/inputs')) {
+        values.push(JSON.parse(req.body).value);
+        if (values.length === 1) {
+          res.statusCode = status; res.end(JSON.stringify({type: 'urn:snippets:problem:invalid-request'}));
+        } else {
+          res.end(JSON.stringify({requestId, accepted: true}));
+          held.response!.end(line(3, 'input-accepted', {requestId}) + line(4, 'terminal', {outcome: 'COMPLETED', reason: 'program-completed'}));
+        }
+        return;
+      }
+      if (req.method === 'POST') {res.statusCode = 201; res.end(JSON.stringify(interactive)); return;}
+      held.response = res; res.setHeader('Content-Type', 'application/x-ndjson');
+      res.write(line(1, 'started', {mode: 'INTERACTIVE'}) + line(2, 'input-required', {requestId, prompt: 'Valor?'}));
+    };
+    const running = session.start({snippetId}); await waitFor(() => !!session.getSnapshot().prompt);
+    try {
+      await session.input({snippetId}, 'rejected');
+      await session.input({snippetId}, 'corrected');
+      expect(values).toEqual(['rejected', 'corrected']);
+      await running;
+      expect(session.getSnapshot().phase).toBe('COMPLETED');
+    } finally {held.response?.end(); await running;}
+  });
+  it('a rejected retry does not unlock a value whose first delivery remains uncertain', async () => {
+    const session = new ExecutionSession(api()), held: {response?: ServerResponse} = {};
+    const values: string[] = [];
+    respond = (req, res) => {
+      if (req.url.endsWith('/inputs')) {
+        values.push(JSON.parse(req.body).value);
+        if (values.length === 1) res.destroy();
+        else {res.statusCode = 400; res.end(JSON.stringify({type: 'urn:snippets:problem:invalid-request'}));}
+        return;
+      }
+      if (req.method === 'POST') {res.statusCode = 201; res.end(JSON.stringify(interactive)); return;}
+      held.response = res; res.setHeader('Content-Type', 'application/x-ndjson');
+      res.write(line(1, 'started', {mode: 'INTERACTIVE'}) + line(2, 'input-required', {requestId, prompt: 'Valor?'}));
+    };
+    const running = session.start({snippetId}); await waitFor(() => !!session.getSnapshot().prompt);
+    try {
+      await session.input({snippetId}, 'original');
+      await session.input({snippetId}, 'original');
+      await session.input({snippetId}, 'different');
+      expect(values).toEqual(['original', 'original']);
+      expect(session.getSnapshot().message).toContain('mismo valor');
+    } finally {held.response?.end(); await running;}
+  });
   it('ignores a late output after close and cancels using the known session ID', async () => {
     const callbacks: {receive?: (event: ExecutionEvent) => void} = {};
     const transport = api();
