@@ -1,0 +1,199 @@
+{
+  "at": "2026-11-23T21:34:57.458576+00:00",
+  "source": "/Users/thiagoserebrinsky/facultad/projects/ingsis/sni-24-infra/scripts/verify_us8_10.py",
+  "scope": "Existing acceptance functions, isolated local host jars, real PostgreSQL/Redis/Permissions/PrintScript/Asset/Azurite. Compose adapter points only to isolated dependencies for audit.",
+  "versions": {
+    "permissions": {
+      "port": 18081,
+      "commit": "45b2b34aeeacaea145983b65a1bb24338264a925",
+      "jarSha256": "3a122e6b9a598201bfcb7245028e8f5c89b501b14ec97c53ef26e32bfb193e65"
+    },
+    "printscript": {
+      "port": 18082,
+      "commit": "70533f7d3ba94d2dddb0faf221e07c802921d5d3",
+      "jarSha256": "f8c0090e660fcd7d6a3e57a7f94fedefe191e7ec0e68de206275089762475436"
+    },
+    "snippets": {
+      "port": 18080,
+      "commit": "42c736b2ff7eafed7e7dc19b5e85ae5027bad41d",
+      "jarSha256": "03b5d35a889d03e6f8dc35f491051cfad83016457b898619ee1d0e3759a3f631"
+    }
+  },
+  "results": [
+    {
+      "name": "definitions",
+      "status": "PASS",
+      "evidence": {
+        "tests": 4,
+        "exact": true
+      }
+    },
+    {
+      "name": "sharing",
+      "status": "PASS",
+      "evidence": {
+        "readerCreate": 403,
+        "readerRun": "PASSED",
+        "stranger": {
+          "listTests": 404,
+          "detail": 404,
+          "runTest": 404,
+          "runInteractive": 404
+        },
+        "foreignTest": 404
+      }
+    },
+    {
+      "name": "test_runs",
+      "status": "PASS",
+      "evidence": {
+        "pass": {
+          "events": [
+            "started",
+            "output",
+            "output",
+            "terminal"
+          ],
+          "outputs": [
+            "Ana",
+            "Ana"
+          ],
+          "comparison": "PASSED"
+        },
+        "fail": {
+          "events": [
+            "started",
+            "output",
+            "output",
+            "terminal"
+          ],
+          "outputs": [
+            "Ana",
+            "Bea"
+          ],
+          "comparison": "FAILED"
+        },
+        "edge": {
+          "events": [
+            "started",
+            "output",
+            "output",
+            "terminal"
+          ],
+          "outputs": [
+            "",
+            "ñ 🌎"
+          ],
+          "comparison": "PASSED"
+        },
+        "exhausted": {
+          "events": [
+            "started",
+            "output",
+            "terminal"
+          ],
+          "outputs": [
+            "Ana"
+          ],
+          "comparison": null
+        },
+        "programError": {
+          "outcome": "PROGRAM_ERROR",
+          "reason": "program-error"
+        }
+      }
+    },
+    {
+      "name": "interactive",
+      "status": "PASS",
+      "evidence": {
+        "events": [
+          "started",
+          "output",
+          "input-required",
+          "input-accepted",
+          "output",
+          "terminal"
+        ],
+        "intruder": {
+          "describe": 403,
+          "events": 403,
+          "input": 403,
+          "cancel": 403
+        },
+        "repeatedInput": 200,
+        "conflictingInput": 409,
+        "secondsBetweenFirstOutputAndTerminal": 5.643,
+        "audit": {
+          "mode": "INTERACTIVE",
+          "withoutTest": true,
+          "outcome": "COMPLETED",
+          "outputsKept": 0,
+          "reserved": false,
+          "failure": ""
+        }
+      }
+    },
+    {
+      "name": "update_during_run",
+      "status": "PASS",
+      "evidence": {
+        "outputs": [
+          "v1",
+          "v1 Ana"
+        ],
+        "snapshotKept": true,
+        "snippetNow": "v2"
+      }
+    },
+    {
+      "name": "actor_quota_and_stop",
+      "status": "PASS",
+      "evidence": {
+        "secondStart": 409,
+        "stop": "CANCELLED",
+        "restartAfterStop": true
+      }
+    }
+  ],
+  "uiCommit": "91575ffab449aedc77a447868dd53d759bc1b630",
+  "browser": {
+    "automaticTests": {
+      "passed": 1,
+      "cases": [
+        "real update, CURRENT result, PASSED/FAILED outputs, owner/reader access, third actor denied, changed definitions supersede result"
+      ],
+      "log": "browser-automatic-final.log"
+    },
+    "manualAndInteractive": {
+      "passed": 2,
+      "cases": [
+        "create definition in UI, exact payload, real test match and mismatch",
+        "output before input, real input completion, cancellation confirmed, subsequent start and cancellation"
+      ],
+      "log": "browser-execution-ready.log"
+    },
+    "initialFailures": [
+      "Initial save assertion waited only four seconds; fixture now waits for real detail/save HTTP 200 with bounded deadline.",
+      "One setup failed with storage-unavailable on Asset PUT timeout. No retry added to application; failure retained as evidence.",
+      "During test development an intercept used an ID before Cypress command evaluation; matcher corrected to detail path."
+    ],
+    "mocks": "Only app-config.json development identity; no API/provider result stubbed",
+    "scope": "Local source-built jars, not deployment or Auth0 acceptance"
+  },
+  "checks": {
+    "uiUnitTests": 270,
+    "lint": "PASS",
+    "build": "PASS",
+    "gitDiffCheck": "PASS",
+    "applicationChanges": false
+  },
+  "crossReview": {
+    "requestedReviewers": [
+      "juanfransiaba",
+      "JuanRudolph"
+    ],
+    "humanApprovalVerified": false,
+    "humanCanExplainFlowVerified": false
+  }
+}
