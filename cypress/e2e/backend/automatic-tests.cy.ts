@@ -14,13 +14,17 @@ describe('SNI-69 automatic tests with real providers', () => {
     });
     function openAs(actorId: string) {
       cy.intercept('GET', '/app-config.json', {environment: 'dev', identity: {mode: 'dev', actorId}});
+      cy.intercept('GET', /\/api\/snippets\/[0-9a-f-]+$/).as('readSnippet');
       cy.visit('/');
       cy.get('input[placeholder="Nombre del snippet…"]').type(name);
       cy.contains('[data-testid="snippet-row"] button', name).click();
+      cy.wait('@readSnippet', {responseTimeout: 20000}).its('response.statusCode').should('eq', 200);
     }
     openAs('dev-thiago');
     cy.get('#detail-code').clear(); cy.get('#detail-code').type('println(2);', {parseSpecialCharSequences: false});
+    cy.intercept('PUT', '/api/snippets/*').as('saveSnippet');
     cy.get('[data-testid="save-changes"]').click();
+    cy.wait('@saveSnippet', {responseTimeout: 20000}).its('response.statusCode').should('eq', 200);
     cy.contains('Cambios guardados.').should('be.visible');
     cy.get('[aria-label="Tests automáticos"]').within(() => {
       cy.contains('Test 1:', {timeout: 45000}).should('exist');

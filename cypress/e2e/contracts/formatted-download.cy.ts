@@ -100,6 +100,6 @@ describe('SNI-66 formatted download from the detail', () => {
 
     cy.get('#detail-name').type(' editado');
 
-    cy.contains('Las descargas usan la versión guardada: tus cambios sin guardar no se incluyen.').should('be.visible');
+    cy.contains('Las descargas usan la versión guardada: tus cambios sin guardar no se incluyen.').scrollIntoView().should('be.visible');
   });
 });

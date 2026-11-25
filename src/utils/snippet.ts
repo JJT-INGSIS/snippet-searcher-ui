@@ -17,3 +17,5 @@ export type SnippetFilters = {
   sort?: 'name' | 'language' | 'lint'; direction?: 'asc' | 'desc';
 };
 export const getFileLanguage = (types: FileType[], extension?: string) => types.find(t => t.extension === extension);
+export const catalogVersionsForLanguage = (types: FileType[] | undefined, language: string) =>
+  types?.find(type => type.language === language)?.versions ?? [];

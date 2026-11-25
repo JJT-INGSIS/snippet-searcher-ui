@@ -1,38 +1,42 @@
 import {useEffect, useRef, useState} from 'react';
-import {Snippet, UpdateSnippet} from '../utils/snippet';
-import {useUpdateSnippetById} from '../utils/queries';
+import {Snippet, SnippetDraft, UpdateSnippet, catalogVersionsForLanguage} from '../utils/snippet';
+import {useGetFileTypes, useUpdateSnippetById} from '../utils/queries';
+import {canSaveEditDraft, editDraftFromSavedSnippet, emptySnippetEditDraft, hasUnsavedChanges, withChangedLanguage, withCodeFromUploadedFile} from '../utils/snippetEditDraft';
 
-type Draft = Pick<UpdateSnippet, 'name' | 'description' | 'content'>;
+export type SnippetEditor = ReturnType<typeof useSnippetEditor>;
+
 export function useSnippetEditor(id: string, snippet: Snippet | undefined) {
-  const [draft, setDraft] = useState<Draft>({name: '', description: null, content: ''});
-  const [saved, setSaved] = useState(false);
-  const hydrated = useRef(false);
-  const submitting = useRef(false);
-  const mutation = useUpdateSnippetById();
+  const [draft, setDraft] = useState<UpdateSnippet>(emptySnippetEditDraft);
+  const [savedSuccessfully, setSavedSuccessfully] = useState(false);
+  const draftLoadedFromSnippet = useRef(false);
+  const submissionInProgress = useRef(false);
+  const updateSnippetMutation = useUpdateSnippetById();
+  const {data: languageCatalog} = useGetFileTypes();
   useEffect(() => {
-    if (snippet && !hydrated.current) {
-      setDraft({name: snippet.name, description: snippet.description, content: snippet.content});
-      hydrated.current = true;
+    if (snippet && !draftLoadedFromSnippet.current) {
+      setDraft(editDraftFromSavedSnippet(snippet));
+      draftLoadedFromSnippet.current = true;
     }
   }, [snippet]);
-  async function save() {
-    if (!snippet?.capabilities.modify || !draft.name.trim() || submitting.current) return;
-    submitting.current = true; setSaved(false);
-    try {
-      await mutation.mutateAsync({id, updateSnippet: {...draft, language: snippet.language, version: snippet.version}});
-      setSaved(true);
-    } catch { /* Keep the draft; the mutation exposes the failure to the view. */ }
-    finally {submitting.current = false;}
+  const canSave = !!snippet && canSaveEditDraft(draft, snippet, catalogVersionsForLanguage(languageCatalog, draft.language));
+  function save() {
+    if (!snippet?.capabilities.modify || !canSave || submissionInProgress.current) return;
+    submissionInProgress.current = true; setSavedSuccessfully(false);
+    updateSnippetMutation.mutate({id, updateSnippet: draft}, {
+      onSuccess: () => setSavedSuccessfully(true),
+      onSettled: () => {submissionInProgress.current = false;},
+    });
   }
-  const dirty = hydrated.current && !!snippet && (draft.name !== snippet.name ||
-    draft.description !== snippet.description || draft.content !== snippet.content);
+  function updateDraft(transformDraft: (current: UpdateSnippet) => UpdateSnippet) {
+    if (submissionInProgress.current) return;
+    setDraft(transformDraft); setSavedSuccessfully(false); updateSnippetMutation.reset();
+  }
   return {
-    draft, saved, save, dirty, saving: mutation.isLoading,
-    error: mutation.error instanceof Error ? mutation.error : null,
-    change: (change: Partial<Draft>) => {
-      if (submitting.current) return;
-      setDraft(previous => ({...previous, ...change}));
-      setSaved(false); mutation.reset();
-    },
+    draft, savedSuccessfully, canSave, save, isSaving: updateSnippetMutation.isLoading,
+    hasUnsavedChanges: draftLoadedFromSnippet.current && !!snippet && hasUnsavedChanges(draft, snippet),
+    error: updateSnippetMutation.error instanceof Error ? updateSnippetMutation.error : null,
+    changeFields: (changedFields: Partial<UpdateSnippet>) => updateDraft(current => ({...current, ...changedFields})),
+    changeLanguage: (language: string) => updateDraft(current => withChangedLanguage(current, language)),
+    loadCodeFromFile: (file: SnippetDraft) => updateDraft(current => withCodeFromUploadedFile(current, file)),
   };
 }
