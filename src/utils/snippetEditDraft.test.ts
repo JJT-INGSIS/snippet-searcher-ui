@@ -36,10 +36,28 @@ describe('snippet edit draft', () => {
   });
 
   it('requires a name and a catalog version unless language and version are the saved ones', () => {
-    expect(canSaveEditDraft(saved, saved, [])).toBe(true);
+    expect(canSaveEditDraft({...saved, name: 'Renamed'}, saved, [])).toBe(true);
     expect(canSaveEditDraft({...saved, name: '  '}, saved, catalogVersions)).toBe(false);
     expect(canSaveEditDraft({...saved, version: '1.1'}, saved, catalogVersions)).toBe(true);
     expect(canSaveEditDraft({...saved, version: '9.9'}, saved, catalogVersions)).toBe(false);
     expect(canSaveEditDraft(withChangedLanguage(saved, 'otherscript'), saved, ['2.0'])).toBe(false);
+  });
+
+  it('requires an actual difference and disables saving again after reverting or accepting the saved draft', () => {
+    expect(canSaveEditDraft(editDraftFromSavedSnippet(saved), saved, catalogVersions)).toBe(false);
+    const changed = {...saved, content: 'println(2);'};
+    expect(canSaveEditDraft(changed, saved, catalogVersions)).toBe(true);
+    expect(canSaveEditDraft({...changed, content: saved.content}, saved, catalogVersions)).toBe(false);
+    expect(canSaveEditDraft(changed, changed, catalogVersions)).toBe(false);
+  });
+
+  it('detects changes in each editable field without trimming or merging null and empty descriptions', () => {
+    const changes: Partial<UpdateSnippet>[] = [
+      {name: 'Hello '}, {description: ''}, {description: 'Description'},
+      {content: 'println(2);'}, {version: '1.1'}, {language: 'otherscript', version: '2.0'},
+    ];
+    for (const change of changes) {
+      expect(canSaveEditDraft({...saved, ...change}, saved, ['1.0', '1.1', '2.0'])).toBe(true);
+    }
   });
 });

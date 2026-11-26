@@ -28,6 +28,31 @@ function expectUpdate(body: Record<string, unknown>) {
 }
 
 describe('SNI-91 updating an existing snippet by file or editor', () => {
+  it('does not submit unchanged data, including a reverted edit or an identical uploaded file', () => {
+    openDetail();
+    cy.get('[data-testid="save-changes"]').should('be.disabled');
+    cy.get('#detail-name').clear().type('Changed');
+    cy.get('[data-testid="save-changes"]').should('be.enabled');
+    cy.get('#detail-name').clear().type('Hello');
+    cy.get('[data-testid="save-changes"]').should('be.disabled');
+    replaceWithFile('println(1);', 'identico.prs');
+    cy.get('[data-testid="save-changes"]').should('be.disabled');
+  });
+
+  it('disables saving after the server returns the newly saved version', () => {
+    openDetail();
+    const changed = {...detail, code: 'println(2);'};
+    cy.intercept('PUT', '/api/snippets/' + id, req => {
+      expect(req.body.code).to.eq(changed.code);
+      req.reply(200, metadata);
+    }).as('update');
+    cy.intercept('GET', '/api/snippets/' + id, changed).as('updatedDetail');
+    cy.get('#detail-code').clear().type(changed.code);
+    cy.get('[data-testid="save-changes"]').click();
+    cy.wait('@update'); cy.wait('@updatedDetail');
+    cy.get('[data-testid="save-changes"]').should('be.disabled');
+  });
+
   it('replaces only the code from a file and saves the same snippet', () => {
     openDetail();
     replaceWithFile('println(5);', 'otro-nombre.prs');

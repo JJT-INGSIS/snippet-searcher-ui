@@ -22,5 +22,6 @@ export function hasUnsavedChanges(draft: UpdateSnippet, saved: UpdateSnippet): b
 
 export function canSaveEditDraft(draft: UpdateSnippet, saved: UpdateSnippet, catalogVersions: string[]): boolean {
   const keepsSavedLanguageAndVersion = draft.language === saved.language && draft.version === saved.version;
-  return draft.name.trim().length > 0 && (keepsSavedLanguageAndVersion || catalogVersions.includes(draft.version));
+  return hasUnsavedChanges(draft, saved) && draft.name.trim().length > 0 &&
+    (keepsSavedLanguageAndVersion || catalogVersions.includes(draft.version));
 }
